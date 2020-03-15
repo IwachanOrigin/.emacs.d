@@ -3,8 +3,11 @@
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
 
-;; package管理
+;; package
+(require 'package)
 (package-initialize)
+
+;; package管理
 (setq package-archives
  '(("gnu" . "http://elpa.gnu.org/packages/")
    ("melpa" . "http://melpa.org/packages/")
@@ -17,7 +20,6 @@
 
 ;; diff コマンドもgitに依存するように変更
 (setq diff-command "\"C:\\Program Files\\Git\\usr\\bin\\diff.exe\"")
-
 
 ;; C-kで行全体を削除する
 (setq kill-whole-line t)
@@ -93,22 +95,22 @@
 ;; .orgファイルは自動的にorg-mode
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
-;; org-directory内のファイルすべてからagendaを作成する
-(setq my-org-agenda-dir "~/org/")
-(setq org-agenda-files (list my-org-agenda-dir))
-
-;; TODO状態
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w)" "NOTE(n)"  "|" "DONE(d)" "SOMEDAY(s)" "CANCEL(c)")))
-
-;; DONEの時刻を記録
-(setq org-log-done 'time)
-
 ;; ショートカットキー
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
+
+;; use ido-mode
+(ido-mode t)
+
+;; use ido-vertical-mode
+(use-package ido-vertical-mode
+    :config
+    (ido-vertical-mode 1)
+    (setq ido-vertical-define-keys 'C-n-and-C-p-only) ;; C-n/C-p で選択
+    (setq ido-vertical-show-count t)
+)
 
 ;; whitespaceを利用する。1行の最大長は200文字にする。
 (use-package whitespace)
@@ -164,16 +166,13 @@
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-dracula t)
-
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   (doom-themes-neotree-config)
   ;; or for treemacs users
   (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
   (doom-themes-treemacs-config)
-  
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -193,11 +192,10 @@
   (require 'server)
   (unless (eq (server-running-p) 't)
     (server-start)
-
     (defun iconify-emacs-when-server-is-done ()
       (unless server-clients (iconify-frame)))
 
-    ;; C-x C-cに割り当てる(好みに応じて)
+    ;; C-x C-cに割り当てる
     (global-set-key (kbd "C-x C-c") 'server-edit)
     ;; M-x exitでEmacsを終了できるようにする
     (defalias 'exit 'save-buffers-kill-emacs)
@@ -205,7 +203,7 @@
     (add-hook 'after-init-hook 'iconify-emacs-when-server-is-done)
 
     ;; 終了時にyes/noの問い合わせ
-    (setq confirm-kill-emacs 'yes-or-no-p)
+    (setq confirm-kill-emacs 'y-or-n-p)
   )
 )
 
@@ -218,7 +216,7 @@
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
