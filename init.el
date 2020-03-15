@@ -184,8 +184,8 @@
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
 
-;; emacs を起動時に最大化する
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; emacs を fullscreen mode で起動する
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
 
 ;; server start for emacs-client
 (when window-system ; GUI時
