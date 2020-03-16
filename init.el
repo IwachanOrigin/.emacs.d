@@ -1,4 +1,5 @@
 
+
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -207,6 +208,19 @@
   )
 )
 
+;; use markdown mode
+(use-package markdown-mode
+         :commands (markdown-mode gfm-mode)
+         :mode (("\\.md\\'" . gfm-mode)
+                ("\\.markdown\\'" . gfm-mode)
+))
+;; use markdown preview stylesheets
+(setq markdown-preview-stylesheets 
+      (list "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"))
+
+;; use markdown preview mode
+(autoload 'markdown-preview-mode "markdown-preview-mode.el" t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -216,7 +230,7 @@
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
