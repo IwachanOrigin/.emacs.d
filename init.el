@@ -1,5 +1,6 @@
 
 
+
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -182,6 +183,13 @@
   :ensure t
   :hook (after-init . doom-modeline-mode))
 
+;; use beacon
+(use-package beacon
+    :custom
+    (beacon-color "yellow")
+    :config
+    (beacon-mode 1))
+
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
 
@@ -214,12 +222,29 @@
          :mode (("\\.md\\'" . gfm-mode)
                 ("\\.markdown\\'" . gfm-mode)
 ))
-;; use markdown preview stylesheets
-(setq markdown-preview-stylesheets 
-      (list "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"))
 
 ;; use markdown preview mode
-(autoload 'markdown-preview-mode "markdown-preview-mode.el" t)
+(use-package markdown-preview-mode
+  :ensure t
+  :config
+  (setq markdown-preview-stylesheets (list "https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css"))
+  (setq markdown-command "multimarkdown")
+  (bind-key "C-c p" 'markdown-preview-mode markdown-mode-map)
+  )
+
+;; ===== astyle =====
+(defun astyle-this-buffer(pmin pmax opt)
+        (interactive "r
+sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
+        (message "pmin:%d pmax:%d str:%s" pmin pmax opt)
+        (setq cmd (concat "~\\.emacs.d\\software\\AStyle\\bin\\astyle.exe " opt))
+        (message "cmd:%s" cmd)
+        (shell-command-on-region pmin pmax
+        cmd
+        (current-buffer) t
+        (get-buffer-create "*Astyle Errors*") t
+        )
+)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -230,7 +255,7 @@
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
