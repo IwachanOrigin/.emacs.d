@@ -1,19 +1,20 @@
 
-
-
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
 
-;; package
+;;============================================================================
+;;                                 package                                  ;;   
+;;============================================================================
 (require 'package)
+;; MELPAを追加
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+;; MELPA-stableを追加
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+;; Orgを追加
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+;; 初期化
 (package-initialize)
-
-;; package管理
-(setq package-archives
- '(("gnu" . "http://elpa.gnu.org/packages/")
-   ("melpa" . "http://melpa.org/packages/")
-   ("org" . "http://orgmode.org/elpa/")))
 
 ;; find grep コマンドはgitに依存するように変更
 (setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
@@ -255,7 +256,7 @@ sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
