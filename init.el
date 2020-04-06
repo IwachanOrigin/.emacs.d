@@ -213,9 +213,6 @@
     (global-set-key (kbd "C-x C-c") 'server-edit)
     ;; M-x exitでEmacsを終了できるようにする
     (defalias 'exit 'save-buffers-kill-emacs)
-    ;; 起動時に最小化する
-    (add-hook 'after-init-hook 'iconify-emacs-when-server-is-done)
-
     ;; 終了時にyes/noの問い合わせ
     (setq confirm-kill-emacs 'y-or-n-p)
   )
@@ -236,6 +233,21 @@
   (setq markdown-command "multimarkdown")
   (bind-key "C-c p" 'markdown-preview-mode markdown-mode-map)
   )
+
+;; use dashboard
+(use-package dashboard
+    :diminish
+    (dashboard-mode page-break-lines-mode)
+    :custom
+    (dashboard-startup-banner "~/.emacs.d/dashboard/banner.txt")
+    (dashboard-items '((recents . 15)
+               (projects . 5)
+               (bookmarks . 5)
+               (agenda . 5)))
+    :hook
+    (after-init . dashboard-setup-startup-hook)
+    :config
+    (add-to-list 'dashboard-items '(agenda) t))
 
 ;; ===== astyle =====
 (defun astyle-this-buffer(pmin pmax opt)
@@ -260,7 +272,7 @@ sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
