@@ -24,6 +24,10 @@
 ;; diff コマンドもgitに依存するように変更
 (setq diff-command "\"C:\\Program Files\\Git\\usr\\bin\\diff.exe\"")
 
+;; use bash
+(setq shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe")
+(setq explicit-bash.exe-args '("--login" "-i"))
+
 ;; C-kで行全体を削除する
 (setq kill-whole-line t)
 
