@@ -1,5 +1,7 @@
 
 
+
+
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
