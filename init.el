@@ -1,4 +1,5 @@
 
+
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -13,6 +14,9 @@
 (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 ;; Orgを追加
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+;; ELPAを追加
+(add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/") t)
+
 ;; 初期化
 (package-initialize)
 
@@ -239,7 +243,7 @@
     :diminish
     (dashboard-mode page-break-lines-mode)
     :custom
-    (dashboard-startup-banner "~/.emacs.d/dashboard/banner.txt")
+    (dashboard-startup-banner 4)
     (dashboard-items '((recents . 15)
                (projects . 5)
                (bookmarks . 5)
@@ -268,8 +272,8 @@ sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(nyan-animate-nyancat t)
- '(nyan-cat-face-number 4)
+ '(nyan-animate-nyancat t t)
+ '(nyan-cat-face-number 4 t)
  '(package-selected-packages
    (quote
     (dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
