@@ -1,7 +1,4 @@
 
-
-
-
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -201,6 +198,16 @@
     :config
     (beacon-mode 1))
 
+;; use yaml-mode
+(use-package yaml-mode
+  :mode ("\\.yaml\\'" "\\.yml\\'")
+  :custom-face
+  (font-lock-variable-name-face ((t (:foreground "violet")))))
+
+;; use Dockerfile-mode
+(use-package dockerfile-mode
+  :mode "\\Dockerfile\\'")
+
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
 
@@ -274,11 +281,11 @@ sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(nyan-animate-nyancat t t)
- '(nyan-cat-face-number 4 t)
+ '(nyan-animate-nyancat t)
+ '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (dockerfile-mode yaml-mode dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
