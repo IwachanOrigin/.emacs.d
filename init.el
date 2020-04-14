@@ -208,6 +208,29 @@
 (use-package dockerfile-mode
   :mode "\\Dockerfile\\'")
 
+;; use magit
+(use-package magit
+  :custom
+  (magit-auto-revert-mode nil)
+  :bind
+  ("M-g s" . magit-status))
+
+;; c/c++ mode
+(use-package cc-mode
+  :bind (:map c-mode-base-map
+         ("C-c c" . compile))
+  :hook (c-mode-common . (lambda ()
+                            (c-set-style "bsd")
+                            (setq tab-width 4)
+                            (setq c-base-offset 4))))
+(use-package ccls
+  :custom
+  (ccls-executable "/usr/local/bin/ccls")
+  (ccls-sem-highlight-method 'font-lock)
+  :config
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
 
@@ -285,10 +308,10 @@ sInsert options (ex. --mode=c --indent=tab --indent-cases --brackets=linux): ")
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (dockerfile-mode yaml-mode dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (ccls magit dockerfile-mode yaml-mode dashboard ivy-rich ob-mermaid beacon uuidgen markdown-preview-mode markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(font-lock-variable-name-face ((t (:foreground "violet")))))
