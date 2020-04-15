@@ -1,4 +1,5 @@
 
+
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -230,6 +231,17 @@
   :config
   :hook ((c-mode c++-mode objc-mode) .
          (lambda () (require 'ccls) (lsp))))
+
+;; eshell setting
+(setq eshell-prompt-regexp "^[^#$\n]*[#$] "
+      eshell-prompt-function
+      (lambda nil
+        (concat
+	 "[" (user-login-name) "@" (system-name) " "
+	 (if (string= (eshell/pwd) (getenv "HOME"))
+	     "~" (eshell/basename (eshell/pwd)))
+	 "]"
+	 (if (= (user-uid) 0) "# " "$ "))))
 
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
