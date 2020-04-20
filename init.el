@@ -105,6 +105,16 @@
 ;; .orgファイルは自動的にorg-mode
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
+;; save file 
+(setq org-directory "~/OneDrive/Org")
+(setq org-default-notes-file "notes.org")
+
+; Org-captureのテンプレート（メニュー）の設定
+(setq org-capture-templates
+    '(("n" "Note" entry (file+headline "~/OneDrive/Org/notes.org" "Notes")
+    "* %?\nEntered on %U\n %i\n %a")
+    ))
+
 ;; ショートカットキー
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
