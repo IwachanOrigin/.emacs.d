@@ -233,9 +233,11 @@
   :bind (:map c-mode-base-map
          ("C-c c" . compile))
   :hook (c-mode-common . (lambda ()
-                            (c-set-style "bsd")
-                            (setq tab-width 4)
-                            (setq c-base-offset 4))))
+                           (c-set-style "stroustrup")
+                           (setq indent-tabs-mode nil)     ; インデントは空白文字で行う
+                           (c-set-offset 'arglist-close 0) ; 関数の引数リストの閉じ括弧はインデントしない
+                           (setq tab-width 4)
+                           (setq c-base-offset 4))))
 (use-package ccls
   :custom
   (ccls-executable "/usr/local/bin/ccls")
