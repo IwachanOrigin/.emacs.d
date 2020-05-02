@@ -1,5 +1,4 @@
 
-
 ;; Ignore split window horizontally
 (setq split-width-threshold nil)
 (setq split-width-threshold 160)
@@ -19,18 +18,6 @@
 
 ;; 初期化
 (package-initialize)
-
-;; find grep コマンドはgitに依存するように変更
-(setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
-      grep-program "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\""
-      null-device "/dev/null")
-
-;; diff コマンドもgitに依存するように変更
-(setq diff-command "\"C:\\Program Files\\Git\\usr\\bin\\diff.exe\"")
-
-;; use bash
-(setq shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe")
-(setq explicit-bash.exe-args '("--login" "-i"))
 
 ;; C-kで行全体を削除する
 (setq kill-whole-line t)
@@ -91,47 +78,59 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
-;;-------------;;
-;; org-mode    ;;
-;;-------------;;
-;; 画像をインラインで表示
-(setq org-startup-with-inline-images t)
+;; hydra yank
+(defhydra hydra-yank-pop ()
+  "yank"
+  ("C-y" yank nil)
+  ("M-y" yank-pop nil)
+  ("y" (yank-pop 1) "next")
+  ("Y" (yank-pop -1) "prev")
+  ("l" helm-show-kill-ring "list" :color blue))   ; or browse-kill-ring
+(global-set-key (kbd "M-y") #'hydra-yank-pop/yank-pop)
+(global-set-key (kbd "C-y") #'hydra-yank-pop/yank)
 
-;; 見出しの余分な*を消す
-(setq org-hide-leading-stars t)
-
-;; LOGBOOK drawerに時間を格納する
-(setq org-clock-into-drawer t)
-
-;; .orgファイルは自動的にorg-mode
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
-;; save file 
-(setq org-directory "~/OneDrive/Org")
-(setq org-default-notes-file "notes.org")
-
-; Org-captureのテンプレート（メニュー）の設定
-(setq org-capture-templates
-    '(("n" "Note" entry (file+headline "~/OneDrive/Org/notes.org" "Notes")
-    "* %?\nEntered on %U\n %i\n %a")
-    ))
-
-;; ショートカットキー
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-
-;; use ido-mode
-(ido-mode t)
-
-;; use ido-vertical-mode
-(use-package ido-vertical-mode
-    :config
-    (ido-vertical-mode 1)
-    (setq ido-vertical-define-keys 'C-n-and-C-p-only) ;; C-n/C-p で選択
-    (setq ido-vertical-show-count t)
+;; hydra move
+(global-set-key
+ (kbd "C-n")
+ (defhydra hydra-move
+   (:body-pre (next-line))
+   "move"
+   ("n" next-line "down")
+   ("p" previous-line "up")
+   ("f" forward-char "forward")
+   ("b" backward-char "backward")
+   ("a" beginning-of-line)
+   ("e" move-end-of-line)
+   ("v" scroll-up-command)
+   ;; Converting M-v to V here by analogy.
+   ("V" scroll-down-command)
+   ("l" recenter-top-bottom))
 )
+
+;; use ivy-rich
+(use-package ivy-rich
+  :config
+  (ivy-rich-mode 1)
+)
+
+;; use counsel
+(use-package counsel
+  :diminish ivy-mode counsel-mode
+  :custom
+  (ivy-format-function 'ivy-format-function-arrow)
+  (counsel-yank-pop-separator "\n-------\n")
+  :config
+  (counsel-mode 1)
+)
+
+;; use which-key
+(use-package which-key
+  :diminish which-key-mode
+  :hook (after-init . which-key-mode)
+)
+
+;; use amx
+(use-package amx)
 
 ;; whitespaceを利用する。1行の最大長は200文字にする。
 (use-package whitespace)
@@ -175,7 +174,7 @@
 ;; use nyan mode
 (use-package nyan-mode
    :custom
-   (nyan-cat-face-number 4)
+   (nyan-cat-face-number 6)
    (nyan-animate-nyancat t)
    :hook
    (doom-modeline-mode . nyan-mode))
@@ -203,14 +202,8 @@
     :config
     (set-cursor-color "cyan")
     (line-number-mode 0)
-    (column-number-mode 0))
-
-;; use beacon
-(use-package beacon
-    :custom
-    (beacon-color "yellow")
-    :config
-    (beacon-mode 1))
+    (column-number-mode 0)
+)
 
 ;; use yaml-mode
 (use-package yaml-mode
@@ -245,18 +238,8 @@
   (ccls-sem-highlight-method 'font-lock)
   :config
   :hook ((c-mode c++-mode objc-mode) .
-         (lambda () (require 'ccls) (lsp))))
-
-;; eshell setting
-(setq eshell-prompt-regexp "^[^#$\n]*[#$] "
-      eshell-prompt-function
-      (lambda nil
-        (concat
-	 "[" (user-login-name) "@" (system-name) " "
-	 (if (string= (eshell/pwd) (getenv "HOME"))
-	     "~" (eshell/basename (eshell/pwd)))
-	 "]"
-	 (if (= (user-uid) 0) "# " "$ "))))
+         (lambda () (require 'ccls) (lsp)))
+)
 
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
@@ -321,13 +304,26 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(all-the-icons-scale-factor 1.0)
+ '(counsel-grep-base-command
+   "ag -S --noheading --nocolor --nofilename --numbers '%s' %s")
+ '(counsel-yank-pop-height 15 t)
+ '(counsel-yank-pop-separator "
+-------
+")
  '(doom-themes-enable-bold t)
  '(doom-themes-enable-italic t)
+ '(enable-recursive-minibuffers t)
+ '(ivy-format-function (quote ivy-format-function-arrow) t)
+ '(ivy-on-del-error-function nil)
+ '(ivy-use-selectable-prompt t)
+ '(ivy-use-virtual-buffers t)
  '(nyan-animate-nyancat t)
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (ccls magit dockerfile-mode yaml-mode dashboard ivy-rich ob-mermaid beacon uuidgen markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters))))
+    (hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
+ '(swiper-action-recenter t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
