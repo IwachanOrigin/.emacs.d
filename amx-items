@@ -2,15 +2,16 @@
 ;; ----- amx-history -----
 (
  exit
+ package-list-packages
  cd
  5x5
  amx
  arp
  dbx
- dig
 )
 
 ;; ----- amx-data -----
 (
- (exit . 4)
+ (exit . 14)
+ (package-list-packages . 1)
 )

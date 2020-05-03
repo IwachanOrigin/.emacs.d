@@ -78,6 +78,10 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
+;;-------------------------------------
+;; hydra Start
+;;-------------------------------------
+
 ;; hydra yank
 (defhydra hydra-yank-pop ()
   "yank"
@@ -99,12 +103,59 @@
    ("p" previous-line "up")
    ("f" forward-char "forward")
    ("b" backward-char "backward")
-   ("a" beginning-of-line)
-   ("e" move-end-of-line)
-   ("v" scroll-up-command)
+   ("a" beginning-of-line "begin line")
+   ("e" move-end-of-line "end line")
+   ("v" scroll-up-command "scroll up")
    ;; Converting M-v to V here by analogy.
-   ("V" scroll-down-command)
-   ("l" recenter-top-bottom))
+   ("V" scroll-down-command "scroll down")
+   ("l" recenter-top-bottom "top-bottom"))
+ )
+
+;; ace-window
+;; hydra-frame-window is designed from ace-window (C-x f) and
+;; matches aw-dispatch-alist with a few extra
+(defhydra hydra-frame-window (:color red :hint nil)
+  "
+^Delete^                       ^Frame resize^             ^Window^                Window Size^^^^^^   ^Text^                         (__)
+_0_: delete-frame              _g_: resize-frame-right    _t_: toggle               ^ ^ _k_ ^ ^        _K_                           (oo)
+_1_: delete-other-frames       _H_: resize-frame-left     _e_: ace-swap-win         _h_ ^+^ _l_        ^+^                     /------\\/
+_2_: make-frame                _F_: fullscreen            ^ ^                       ^ ^ _j_ ^ ^        _J_                    / |    ||
+_d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window    _b_alance^^^^      ^ ^                   *  /\\---/\\  ~~  C-x f ;
+"
+  ("0" delete-frame :exit t)
+  ("1" delete-other-frames :exit t)
+  ("2" make-frame  :exit t)
+  ("b" balance-windows)
+  ("d" kill-and-delete-frame :exit t)
+  ("e" ace-swap-window)
+  ("F" toggle-frame-fullscreen)   ;; is <f11>
+  ("g" resize-frame-right :exit t)
+  ("H" resize-frame-left :exit t)  ;; aw-dispatch-alist uses h, I rebind here so hjkl can be used for size
+  ("n" new-frame-right :exit t)
+  ;; ("r" reverse-windows)
+  ("t" toggle-window-spilt)
+  ("w" ace-delete-window :exit t)
+  ("x" delete-frame :exit t)
+  ("K" text-scale-decrease)
+  ("J" text-scale-increase)
+  ("h" shrink-window-horizontally)
+  ("k" shrink-window)
+  ("j" enlarge-window)
+  ("l" enlarge-window-horizontally))
+
+;;-------------------------------------
+;; hydra End
+;;-------------------------------------
+
+;; use ace-window
+(use-package ace-window
+  :functions hydra-frame-window/body
+  :bind
+    ("C-x f" . hydra-frame-window/body)
+  :custom
+    (aw-keys '(?j ?k ?l ?i ?o ?h ?y ?u ?p))
+  :custom-face
+    (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
 )
 
 ;; use ivy-rich
