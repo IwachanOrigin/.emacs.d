@@ -93,24 +93,6 @@
 (global-set-key (kbd "M-y") #'hydra-yank-pop/yank-pop)
 (global-set-key (kbd "C-y") #'hydra-yank-pop/yank)
 
-;; hydra move
-(global-set-key
- (kbd "C-n")
- (defhydra hydra-move
-   (:body-pre (next-line))
-   "move"
-   ("n" next-line "down")
-   ("p" previous-line "up")
-   ("f" forward-char "forward")
-   ("b" backward-char "backward")
-   ("a" beginning-of-line "begin line")
-   ("e" move-end-of-line "end line")
-   ("v" scroll-up-command "scroll up")
-   ;; Converting M-v to V here by analogy.
-   ("V" scroll-down-command "scroll down")
-   ("l" recenter-top-bottom "top-bottom"))
- )
-
 ;; ace-window
 ;; hydra-frame-window is designed from ace-window (C-x f) and
 ;; matches aw-dispatch-alist with a few extra
@@ -158,20 +140,40 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
     (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
 )
 
-;; use ivy-rich
-(use-package ivy-rich
+;; use ivy
+(use-package ivy
+  :ensure t
   :config
-  (ivy-rich-mode 1)
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (global-set-key (kbd "<f6>") 'ivy-resume)
+)
+
+;; use swiper
+(use-package swiper
+  :ensure t
+  :config
+  (global-set-key "\C-s" 'swiper)
 )
 
 ;; use counsel
 (use-package counsel
-  :diminish ivy-mode counsel-mode
-  :custom
-  (ivy-format-function 'ivy-format-function-arrow)
-  (counsel-yank-pop-separator "\n-------\n")
+  :ensure t
   :config
-  (counsel-mode 1)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-find-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (global-set-key (kbd "C-c j") 'counsel-git-grep)
+  (global-set-key (kbd "C-c a") 'counsel-ag)
+  (global-set-key (kbd "C-x l") 'counsel-locate)
+  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
 )
 
 ;; use which-key
@@ -356,6 +358,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(all-the-icons-scale-factor 1.0)
+ '(aw-keys (quote (106 107 108 105 111 104 121 117 112)) t)
  '(counsel-grep-base-command
    "ag -S --noheading --nocolor --nofilename --numbers '%s' %s")
  '(counsel-yank-pop-height 15 t)
@@ -373,13 +376,14 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
+    (swiper ivy hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
  '(swiper-action-recenter t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
  '(font-lock-variable-name-face ((t (:foreground "violet"))))
  '(markdown-header-delimiter-face ((t (:foreground "mediumpurple"))))
  '(markdown-header-face-1 ((t (:foreground "violet" :weight bold :height 1.0))))
