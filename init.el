@@ -241,10 +241,9 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
   :config
   (load-theme 'doom-dracula t)
   (doom-themes-neotree-config)
-  (doom-themes-org-config))
-
-;; use doom-modeline
-(use-package doom-modeline
+  (doom-themes-org-config)
+  ;; use doom-modeline
+  (use-package doom-modeline
     :custom
     (doom-modeline-buffer-file-name-style 'truncate-with-project)
     (doom-modeline-icon t)
@@ -256,6 +255,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
     (set-cursor-color "cyan")
     (line-number-mode 0)
     (column-number-mode 0)
+  )
 )
 
 ;; use yaml-mode
