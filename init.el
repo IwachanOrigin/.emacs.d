@@ -255,6 +255,9 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
     (set-cursor-color "cyan")
     (line-number-mode 0)
     (column-number-mode 0)
+    (doom-modeline-def-modeline 'main
+  '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position word-count parrot selection-info)
+  '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs checker))
   )
 )
 
@@ -293,6 +296,27 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
   :hook ((c-mode c++-mode objc-mode) .
          (lambda () (require 'ccls) (lsp)))
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; org
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package org-bullets
+      :custom (org-bullets-bullet-list '("" "" "" "" "" "" "" "" "" ""))
+      :hook (org-mode . org-bullets-mode))
+
+;; 見出しの余分な*を消す
+(setq org-hide-leading-stars t)
+
+;; .orgファイルは自動的にorg-mode
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+
+;; ショートカットキー
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+
 
 ;; window を透明にする
 (add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
@@ -376,7 +400,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
  '(nyan-cat-face-number 4)
  '(package-selected-packages
    (quote
-    (swiper ivy hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
+    (org-bullets swiper ivy hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
  '(swiper-action-recenter t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

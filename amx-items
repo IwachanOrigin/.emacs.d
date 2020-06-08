@@ -2,16 +2,18 @@
 ;; ----- amx-history -----
 (
  exit
+ org-mode
  package-list-packages
+ replace-string
  cd
  5x5
  amx
- arp
- dbx
 )
 
 ;; ----- amx-data -----
 (
- (exit . 14)
- (package-list-packages . 1)
+ (exit . 64)
+ (package-list-packages . 4)
+ (replace-string . 9)
+ (org-mode . 1)
 )
