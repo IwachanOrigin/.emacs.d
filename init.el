@@ -19,7 +19,13 @@
 ;; 初期化
 (package-initialize)
 
-;; C-kで行全体を削除する
+;; font
+(setq default-frame-alist
+      (append (list
+              '(font . "Cica-12"))
+              default-frame-alist))
+
+;; c-kで行全体を削除する
 (setq kill-whole-line t)
 
 ;; cursorの点滅をやめる
@@ -174,7 +180,16 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
   (global-set-key (kbd "C-c a") 'counsel-ag)
   (global-set-key (kbd "C-x l") 'counsel-locate)
   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-)
+  )
+
+;; use ivy-rich
+(use-package ivy-rich
+  :ensure t
+  :after (ivy)
+  :init
+  (setq ivy-rich-path-style 'abbrev
+        ivy-virtual-abbreviate 'full)
+  :config (ivy-rich-mode 1))
 
 ;; use which-key
 (use-package which-key
@@ -302,7 +317,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package org-bullets
-      :custom (org-bullets-bullet-list '("" "" "" "" "" "" "" "" "" ""))
+      :custom (org-bullets-bullet-list '("" "󿢤" "󿢧" "󿢪" "󿢭" "󿢰" "󿢳" "󿢶" "󿢹" "󿢼"))
       :hook (org-mode . org-bullets-mode))
 
 ;; 見出しの余分な*を消す
