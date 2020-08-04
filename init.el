@@ -137,6 +137,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use ace-window
 (use-package ace-window
+  :defer t
   :functions hydra-frame-window/body
   :bind
     ("C-x f" . hydra-frame-window/body)
@@ -159,6 +160,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use swiper
 (use-package swiper
+  :defer t
   :ensure t
   :config
   (global-set-key "\C-s" 'swiper)
@@ -166,6 +168,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use counsel
 (use-package counsel
+  :defer t
   :ensure t
   :config
   (global-set-key (kbd "M-x") 'counsel-M-x)
@@ -184,6 +187,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use ivy-rich
 (use-package ivy-rich
+  :defer t
   :ensure t
   :after (ivy)
   :init
@@ -193,59 +197,57 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use which-key
 (use-package which-key
+  :defer t
   :diminish which-key-mode
   :hook (after-init . which-key-mode)
 )
 
 ;; use amx
-(use-package amx)
+(use-package amx
+  :defer t
+)
 
 ;; whitespaceを利用する。1行の最大長は200文字にする。
-(use-package whitespace)
+(use-package whitespace
+  :defer t
+)
 (setq whitespace-line-column 200) ;; limit line length
 (setq whitespace-style '(face lines-tail))
 (add-hook 'prog-mode-hook 'whitespace-mode)
 
-;; use git timemachine
-(use-package git-timemachine
-  :bind ("M-g t" . git-timemachine-toggle))
-
 ;; use Hungry deletion
 (use-package hungry-delete
+  :defer t
   :diminish
   :hook (after-init . global-hungry-delete-mode)
   :config (setq-default hungry-delete-chars-to-skip " \t\f\v"))
 
 ;; use rainbow deli
 (use-package rainbow-delimiters
+    :defer t
     :hook
     (prog-mode . rainbow-delimiters-mode))
 
 ;; Automatically reload files was modified by external program
 (use-package autorevert
+  :defer t
   :ensure nil
   :diminish
   :hook (after-init . global-auto-revert-mode))
 
 ;; use line number
 (use-package display-line-numbers
+  :defer t
   :ensure nil
   :hook
   ((prog-mode yaml-mode systemd-mode) . display-line-numbers-mode))
 
 ;; smart move
 (use-package mwim
+  :defer t
   :bind
   ("C-a" . mwim-beginning-of-code-or-line)
   ("C-e" . mwim-end-of-code-or-line))
-
-;; use nyan mode
-(use-package nyan-mode
-   :custom
-   (nyan-cat-face-number 6)
-   (nyan-animate-nyancat t)
-   :hook
-   (doom-modeline-mode . nyan-mode))
 
 ;; use doom-themes
 (use-package doom-themes
@@ -278,23 +280,19 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use yaml-mode
 (use-package yaml-mode
+  :defer t
   :mode ("\\.yaml\\'" "\\.yml\\'")
   :custom-face
   (font-lock-variable-name-face ((t (:foreground "violet")))))
 
 ;; use Dockerfile-mode
 (use-package dockerfile-mode
+  :defer t
   :mode "\\Dockerfile\\'")
-
-;; use magit
-(use-package magit
-  :custom
-  (magit-auto-revert-mode nil)
-  :bind
-  ("M-g s" . magit-status))
 
 ;; c/c++ mode
 (use-package cc-mode
+  :defer t
   :bind (:map c-mode-base-map
          ("C-c c" . compile))
   :hook (c-mode-common . (lambda ()
@@ -304,6 +302,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
                            (setq tab-width 4)
                            (setq c-base-offset 4))))
 (use-package ccls
+  :defer t
   :custom
   (ccls-executable "/usr/local/bin/ccls")
   (ccls-sem-highlight-method 'font-lock)
@@ -317,6 +316,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package org-bullets
+      :defer t
       :custom (org-bullets-bullet-list '("" "󿢤" "󿢧" "󿢪" "󿢭" "󿢰" "󿢳" "󿢶" "󿢹" "󿢼"))
       :hook (org-mode . org-bullets-mode))
 
@@ -367,6 +367,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use markdown mode
 (use-package markdown-mode
+  :defer t
   :custom
   (markdown-hide-markup nil)
   (markdown-bold-underscore t)
@@ -387,6 +388,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 
 ;; use dashboard
 (use-package dashboard
+    :defer t
     :diminish
     (dashboard-mode page-break-lines-mode)
     :custom
