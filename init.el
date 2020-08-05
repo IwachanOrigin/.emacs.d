@@ -301,15 +301,6 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
                            (c-set-offset 'arglist-close 0) ; 関数の引数リストの閉じ括弧はインデントしない
                            (setq tab-width 4)
                            (setq c-base-offset 4))))
-(use-package ccls
-  :defer t
-  :custom
-  (ccls-executable "/usr/local/bin/ccls")
-  (ccls-sem-highlight-method 'font-lock)
-  :config
-  :hook ((c-mode c++-mode objc-mode) .
-         (lambda () (require 'ccls) (lsp)))
-)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; org
@@ -384,44 +375,3 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
     (after-init . dashboard-setup-startup-hook)
     :config
     (add-to-list 'dashboard-items '(agenda) t))
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(all-the-icons-scale-factor 1.0)
- '(aw-keys (quote (106 107 108 105 111 104 121 117 112)) t)
- '(counsel-grep-base-command
-   "ag -S --noheading --nocolor --nofilename --numbers '%s' %s")
- '(counsel-yank-pop-height 15 t)
- '(counsel-yank-pop-separator "
--------
-")
- '(doom-themes-enable-bold t)
- '(doom-themes-enable-italic t)
- '(enable-recursive-minibuffers t)
- '(ivy-format-function (quote ivy-format-function-arrow) t)
- '(ivy-on-del-error-function nil)
- '(ivy-use-selectable-prompt t)
- '(ivy-use-virtual-buffers t)
- '(nyan-animate-nyancat t)
- '(nyan-cat-face-number 4)
- '(package-selected-packages
-   (quote
-    (org-bullets swiper ivy hydra amx which-key ivy-posframe counsel ace-window all-the-icons-ivy-rich all-the-icons-dired ccls magit dockerfile-mode yaml-mode dashboard ivy-rich markdown-mode ido-vertical-mode org-plus-contrib org git-timemachine mwim hungry-delete nyan-mode doom-modeline doom-themes rainbow-delimiters)))
- '(swiper-action-recenter t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
- '(font-lock-variable-name-face ((t (:foreground "violet"))))
- '(markdown-header-delimiter-face ((t (:foreground "mediumpurple"))))
- '(markdown-header-face-1 ((t (:foreground "violet" :weight bold :height 1.0))))
- '(markdown-header-face-2 ((t (:foreground "lightslateblue" :weight bold :height 1.0))))
- '(markdown-header-face-3 ((t (:foreground "mediumpurple1" :weight bold :height 1.0))))
- '(markdown-link-face ((t (:background "#0e1014" :foreground "#bd93f9"))))
- '(markdown-list-face ((t (:foreground "mediumpurple"))))
- '(markdown-pre-face ((t (:foreground "#bd98fe")))))
