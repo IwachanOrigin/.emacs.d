@@ -334,31 +334,16 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
 (define-key global-map (kbd "C-x SPC") 'cua-set-rectangle-mark)
 
 ;; window を透明にする
-(add-to-list 'default-frame-alist '(alpha . (0.90 0.90)))
-
-;; emacs を fullscreen mode で起動する
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+(add-to-list 'default-frame-alist '(alpha . (0.80 0.80)))
 
 ;; use markdown mode
-(use-package markdown-mode
-  :defer t
-  :custom
-  (markdown-hide-markup nil)
-  (markdown-bold-underscore t)
-  (markdown-italic-underscore t)
-  (markdown-header-scaling t)
-  (markdown-indent-function t)
-  (markdown-enable-math t)
-  (markdown-hide-urls nil)
-  :custom-face
-  (markdown-header-delimiter-face ((t (:foreground "mediumpurple"))))
-  (markdown-header-face-1 ((t (:foreground "violet" :weight bold :height 1.0))))
-  (markdown-header-face-2 ((t (:foreground "lightslateblue" :weight bold :height 1.0))))
-  (markdown-header-face-3 ((t (:foreground "mediumpurple1" :weight bold :height 1.0))))
-  (markdown-link-face ((t (:background "#0e1014" :foreground "#bd93f9"))))
-  (markdown-list-face ((t (:foreground "mediumpurple"))))
-  (markdown-pre-face ((t (:foreground "#bd98fe"))))
-  :mode "\\.md\\'")
+(package-install 'markdown-mode)
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
+;; コードブロックのハイライト化
+(setq markdown-fontify-code-blocks-natively t)
 
 ;; use dashboard
 (use-package dashboard
