@@ -216,6 +216,9 @@
       (append (list
               '(font . "Cica-12"))
               default-frame-alist))
+
+;; fullscreen mode
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
