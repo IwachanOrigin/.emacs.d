@@ -1,16 +1,10 @@
 
-;; Ignore split window horizontally
-(setq split-width-threshold nil)
-(setq split-width-threshold 160)
-
 ;;============================================================================
 ;;                                 package                                  ;;   
 ;;============================================================================
 (require 'package)
 ;; MELPAを追加
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-;; MELPA-stableを追加
-(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 ;; Orgを追加
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 ;; ELPAを追加
@@ -18,12 +12,6 @@
 
 ;; 初期化
 (package-initialize)
-
-;; font
-(setq default-frame-alist
-      (append (list
-              '(font . "Cica-12"))
-              default-frame-alist))
 
 ;; c-kで行全体を削除する
 (setq kill-whole-line t)
@@ -70,9 +58,6 @@
 ;; beep とフラッシュを消す
 (setq ring-bell-function 'ignore)
 
-;; 現在ポイントがある関数名をモードラインに表示
-(which-function-mode 1)
-
 ;; 環境を日本語、UTF-8にする
 (set-locale-environment nil)
 (set-language-environment "Japanese")
@@ -84,127 +69,14 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
-;;-------------------------------------
-;; hydra Start
-;;-------------------------------------
-
-;; hydra yank
-(defhydra hydra-yank-pop ()
-  "yank"
-  ("C-y" yank nil)
-  ("M-y" yank-pop nil)
-  ("y" (yank-pop 1) "next")
-  ("Y" (yank-pop -1) "prev")
-  ("l" helm-show-kill-ring "list" :color blue))   ; or browse-kill-ring
-(global-set-key (kbd "M-y") #'hydra-yank-pop/yank-pop)
-(global-set-key (kbd "C-y") #'hydra-yank-pop/yank)
-
-;; ace-window
-;; hydra-frame-window is designed from ace-window (C-x f) and
-;; matches aw-dispatch-alist with a few extra
-(defhydra hydra-frame-window (:color red :hint nil)
-  "
-^Delete^                       ^Frame resize^             ^Window^                Window Size^^^^^^   ^Text^                         (__)
-_0_: delete-frame              _g_: resize-frame-right    _t_: toggle               ^ ^ _k_ ^ ^        _K_                           (oo)
-_1_: delete-other-frames       _H_: resize-frame-left     _e_: ace-swap-win         _h_ ^+^ _l_        ^+^                     /------\\/
-_2_: make-frame                _F_: fullscreen            ^ ^                       ^ ^ _j_ ^ ^        _J_                    / |    ||
-_d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window    _b_alance^^^^      ^ ^                   *  /\\---/\\  ~~  C-x f ;
-"
-  ("0" delete-frame :exit t)
-  ("1" delete-other-frames :exit t)
-  ("2" make-frame  :exit t)
-  ("b" balance-windows)
-  ("d" kill-and-delete-frame :exit t)
-  ("e" ace-swap-window)
-  ("F" toggle-frame-fullscreen)   ;; is <f11>
-  ("g" resize-frame-right :exit t)
-  ("H" resize-frame-left :exit t)  ;; aw-dispatch-alist uses h, I rebind here so hjkl can be used for size
-  ("n" new-frame-right :exit t)
-  ;; ("r" reverse-windows)
-  ("t" toggle-window-spilt)
-  ("w" ace-delete-window :exit t)
-  ("x" delete-frame :exit t)
-  ("K" text-scale-decrease)
-  ("J" text-scale-increase)
-  ("h" shrink-window-horizontally)
-  ("k" shrink-window)
-  ("j" enlarge-window)
-  ("l" enlarge-window-horizontally))
-
-;;-------------------------------------
-;; hydra End
-;;-------------------------------------
-
-;; use ace-window
-(use-package ace-window
-  :defer t
-  :functions hydra-frame-window/body
-  :bind
-    ("C-x f" . hydra-frame-window/body)
-  :custom
-    (aw-keys '(?j ?k ?l ?i ?o ?h ?y ?u ?p))
-  :custom-face
-    (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
-)
-
-;; use ivy
-(use-package ivy
-  :ensure t
+;; use ido
+;; 中間/あいまい一致
+(ido-mode 1)
+(use-package ido-vertical-mode
   :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume)
-  (global-set-key (kbd "<f6>") 'ivy-resume)
-)
-
-;; use swiper
-(use-package swiper
-  :defer t
-  :ensure t
-  :config
-  (global-set-key "\C-s" 'swiper)
-)
-
-;; use counsel
-(use-package counsel
-  :defer t
-  :ensure t
-  :config
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
-  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-  (global-set-key (kbd "<f1> l") 'counsel-find-library)
-  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-  (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
-  (global-set-key (kbd "C-c a") 'counsel-ag)
-  (global-set-key (kbd "C-x l") 'counsel-locate)
-  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-  )
-
-;; use ivy-rich
-(use-package ivy-rich
-  :defer t
-  :ensure t
-  :after (ivy)
-  :init
-  (setq ivy-rich-path-style 'abbrev
-        ivy-virtual-abbreviate 'full)
-  :config (ivy-rich-mode 1))
-
-;; use which-key
-(use-package which-key
-  :defer t
-  :diminish which-key-mode
-  :hook (after-init . which-key-mode)
-)
-
-;; use amx
-(use-package amx
-  :defer t
+  (ido-vertical-mode 1)
+  (setq ido-vertical-define-keys 'C-n-and-C-p-only)    ;; C-n/C-pで候補選択する
+  (setq ido-vertical-show-count t)
 )
 
 ;; whitespaceを利用する。1行の最大長は200文字にする。
@@ -249,35 +121,6 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
   ("C-a" . mwim-beginning-of-code-or-line)
   ("C-e" . mwim-end-of-code-or-line))
 
-;; use doom-themes
-(use-package doom-themes
-  :custom
-  (doom-themes-enable-italic t)
-  (doom-themes-enable-bold t)
-  :custom-face
-  :config
-  (load-theme 'doom-dracula t)
-  (doom-themes-neotree-config)
-  (doom-themes-org-config)
-  ;; use doom-modeline
-  (use-package doom-modeline
-    :custom
-    (doom-modeline-buffer-file-name-style 'truncate-with-project)
-    (doom-modeline-icon t)
-    (doom-modeline-major-mode-icon nil)
-    (doom-modeline-minor-modes nil)
-    :hook
-    (after-init . doom-modeline-mode)
-    :config
-    (set-cursor-color "cyan")
-    (line-number-mode 0)
-    (column-number-mode 0)
-    (doom-modeline-def-modeline 'main
-  '(bar workspace-name window-number modals matches buffer-info remote-host buffer-position word-count parrot selection-info)
-  '(objed-state misc-info persp-name battery grip irc mu4e gnus github debug lsp minor-modes input-method indent-info buffer-encoding major-mode process vcs checker))
-  )
-)
-
 ;; use yaml-mode
 (use-package yaml-mode
   :defer t
@@ -303,7 +146,7 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
                            (setq c-base-offset 4))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; org
+;; Start org
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package org-bullets
@@ -328,13 +171,14 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
         ("j" "Journal" entry (file+datetree "~/OneDrive/Org/journal.org")
          "* %?\nEntered on %U\n  %i\n  %a")))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; END org
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; use cua-mode
 (cua-mode t)
 (setq cua-enable-cua-keys nil) ; デフォルトキーバインドを無効化
 (define-key global-map (kbd "C-x SPC") 'cua-set-rectangle-mark)
-
-;; window を透明にする
-(add-to-list 'default-frame-alist '(alpha . (0.80 0.80)))
 
 ;; use markdown mode
 (package-install 'markdown-mode)
@@ -352,11 +196,38 @@ _d_: kill-and-delete-frame     _n_: new-frame-right       _w_: ace-delete-window
     (dashboard-mode page-break-lines-mode)
     :custom
     (dashboard-startup-banner 4)
-    (dashboard-items '((recents . 15)
-               (projects . 5)
-               (bookmarks . 5)
+    (dashboard-items '(
+               (recents . 15)
                (agenda . 5)))
     :hook
     (after-init . dashboard-setup-startup-hook)
     :config
     (add-to-list 'dashboard-items '(agenda) t))
+
+;; use iceberg-theme
+(leaf iceberg-theme
+    :ensure t
+    :config
+    (iceberg-theme-create-theme-file)
+    (load-theme 'solarized-iceberg-dark t))
+
+;; font
+(setq default-frame-alist
+      (append (list
+              '(font . "Cica-12"))
+              default-frame-alist))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (iceberg-theme markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org-bullets org mwim lsp-mode ido-vertical-mode hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(font-lock-variable-name-face ((t (:foreground "violet")))))

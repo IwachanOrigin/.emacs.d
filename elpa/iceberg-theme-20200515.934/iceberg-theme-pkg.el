@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "iceberg-theme" "20200515.934" "Well-designed, eye-friendly, dark blue color scheme" '((emacs "26.1") (solarized-theme "1.3")) :commit "9615307cbd37e698d6939a04128162ef893313cb" :keywords '("convenience") :authors '(("Naoya Yamashita" . "conao3@gmail.com")) :maintainer '("Naoya Yamashita" . "conao3@gmail.com") :url "https://github.com/conao3/iceberg-theme.el")
