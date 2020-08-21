@@ -145,6 +145,24 @@
                            (setq tab-width 4)
                            (setq c-base-offset 4))))
 
+;; c# mode
+(use-package omnisharp
+  :after csharp-mode
+  :preface
+  (progn
+    (defun my/configure-omnisharp ()
+      (omnisharp-mode)
+      (add-to-list 'company-backends #'company-omnisharp)
+      (company-mode)
+      (local-set-key (kbd "C-c C-c") #'recompile)))
+  :init
+  (progn
+    (add-hook 'csharp-mode-hook #'my/configure-omnisharp))
+  :config
+  (progn
+    (bind-key "C-c r r" #'omnisharp-run-code-action-refactoring omnisharp-mode-map))
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start org
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -244,7 +262,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (iceberg-theme markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org-bullets org mwim lsp-mode ido-vertical-mode hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
+    (markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org-bullets org omnisharp mwim lsp-mode leaf ido-vertical-mode iceberg-theme hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
