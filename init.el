@@ -166,12 +166,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start org
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package org-bullets
-      :defer t
-      :custom (org-bullets-bullet-list '("" "󿢤" "󿢧" "󿢪" "󿢭" "󿢰" "󿢳" "󿢶" "󿢹" "󿢼"))
-      :hook (org-mode . org-bullets-mode))
-
 ;; 見出しの余分な*を消す
 (setq org-hide-leading-stars t)
 
@@ -222,12 +216,8 @@
     :config
     (add-to-list 'dashboard-items '(agenda) t))
 
-;; use iceberg-theme
-(leaf iceberg-theme
-    :ensure t
-    :config
-    (iceberg-theme-create-theme-file)
-    (load-theme 'solarized-iceberg-dark t))
+;; load theme
+(load-theme 'madhat2r t)
 
 ;; font
 (setq default-frame-alist
@@ -255,17 +245,3 @@
   )
 )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org-bullets org omnisharp mwim lsp-mode leaf ido-vertical-mode iceberg-theme hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(font-lock-variable-name-face ((t (:foreground "violet")))))
