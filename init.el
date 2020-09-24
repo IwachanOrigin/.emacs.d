@@ -236,7 +236,7 @@
               default-frame-alist))
 
 ;; fullscreen mode
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; server start for emacs-client
 (when window-system ; GUI時
