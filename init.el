@@ -16,9 +16,6 @@
 ;; c-kで行全体を削除する
 (setq kill-whole-line t)
 
-;; cursorの点滅をやめる
-(blink-cursor-mode 0)
-
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
@@ -37,11 +34,6 @@
 
 ;; C-kで行全体を削除する
 (setq kill-whole-line t)
-
-;; 改行コードを表示する
-(setq eol-mnemonic-dos "(CRLF)")
-(setq eol-mnemonic-mac "(CR)")
-(setq eol-mnemonic-unix "(LF)")
 
 ;; タブにスペースを使用する
 (setq-default tab-width 4 indent-tabs-mode nil)
@@ -197,7 +189,7 @@
 (autoload 'markdown-mode "markdown-mode"
    "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 ;; コードブロックのハイライト化
 (setq markdown-fontify-code-blocks-natively t)
 
@@ -216,9 +208,6 @@
     :config
     (add-to-list 'dashboard-items '(agenda) t))
 
-;; load theme
-(load-theme 'madhat2r t)
-
 ;; font
 (setq default-frame-alist
       (append (list
@@ -226,7 +215,10 @@
               default-frame-alist))
 
 ;; fullscreen mode
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+(set-frame-parameter nil 'fullscreen 'maximized)
+
+;; color theme
+(load-theme 'misterioso t)
 
 ;; server start for emacs-client
 (when window-system ; GUI時
@@ -244,4 +236,21 @@
     (setq confirm-kill-emacs 'y-or-n-p)
   )
 )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;; end
+;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org omnisharp mwim lsp-mode leaf ido-vertical-mode hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(font-lock-variable-name-face ((t (:foreground "violet")))))
