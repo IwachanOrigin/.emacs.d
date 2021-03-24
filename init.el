@@ -220,23 +220,6 @@
 ;; color theme
 (load-theme 'misterioso t)
 
-;; server start for emacs-client
-(when window-system ; GUI時
-  (require 'server)
-  (unless (eq (server-running-p) 't)
-    (server-start)
-    (defun iconify-emacs-when-server-is-done ()
-      (unless server-clients (iconify-frame)))
-
-    ;; C-x C-cに割り当てる
-    (global-set-key (kbd "C-x C-c") 'server-edit)
-    ;; M-x exitでEmacsを終了できるようにする
-    (defalias 'exit 'save-buffers-kill-emacs)
-    ;; 終了時にyes/noの問い合わせ
-    (setq confirm-kill-emacs 'y-or-n-p)
-  )
-)
-
 ;;
 ;; end
 ;;
@@ -247,7 +230,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org omnisharp mwim lsp-mode leaf ido-vertical-mode hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
+    (qml-mode markdown-mode yaml-mode use-package transient rainbow-delimiters projectile org omnisharp mwim lsp-mode leaf ido-vertical-mode hungry-delete dockerfile-mode dashboard all-the-icons-dired))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
