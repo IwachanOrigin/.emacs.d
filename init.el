@@ -79,6 +79,22 @@
 ;; カーソル行をハイライトする
 (global-hl-line-mode t)
 
+;; ff-find-other-fileで利用する拡張子の関連付けを行う
+(setq cc-other-file-alist
+  '(
+     ("\\.c"   (".h"))
+     ("\\.cpp"   (".h"))
+     ("\\.h"   (".c"".cpp"))
+   )
+)
+;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
+(setq ff-search-directories
+  '("." "../src" "../include")
+)
+
+;;; ff-find-other-fileをMeta+tで動くように設定する
+(global-set-key "\M-t" 'ff-find-other-file)
+
 ;; custom message
 (setq initial-scratch-message "\
 ;; This buffer is for notes you don't want to save, and for Ruby code.
