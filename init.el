@@ -1,17 +1,7 @@
 
 ;;============================================================================
-;;                                 package                                  ;;   
+;;                                 init.el                                  ;;
 ;;============================================================================
-(require 'package)
-;; MELPAを追加
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-;; Orgを追加
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-;; ELPAを追加
-(add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/") t)
-
-;; 初期化
-(package-initialize)
 
 ;; c-kで行全体を削除する
 (setq kill-whole-line t)
@@ -29,6 +19,15 @@
 
 ;; スタートアップメッセージを表示させない
 (setq inhibit-startup-message t)
+
+;; 自動保存リストファイルは作らない
+ (setq auto-save-list-file-prefix nil)
+
+;; バックアップしないようにする
+(setq backup-inhibited t)
+
+;; 自動保存ファイルは作らない
+(setq auto-save-default nil)
 
 ;; バックアップファイルを作成させない
 (setq make-backup-files nil)
@@ -92,8 +91,12 @@
   '("." "../src" "../include")
 )
 
-;;; ff-find-other-fileをMeta+tで動くように設定する
+;; ff-find-other-fileをMeta+tで動くように設定する
 (global-set-key "\M-t" 'ff-find-other-file)
+
+;; バッファのキーを変える
+(global-set-key "\M-p" 'previous-buffer)
+(global-set-key "\M-n" 'next-buffer)
 
 ;; custom message
 (setq initial-scratch-message "\
