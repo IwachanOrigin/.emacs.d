@@ -16,6 +16,10 @@
 ;; c-kで行全体を削除する
 (setq kill-whole-line t)
 
+;; 空白文字を表示する
+(setq-default show-trailing-whitespace t)
+(set-face-background 'trailing-whitespace "#b14770")
+
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
@@ -33,7 +37,10 @@
 (setq delete-auto-save-files t)
 
 ;; タブにスペースを使用する
-(setq-default tab-width 4 indent-tabs-mode nil)
+(setq-default indent-tabs-mode nil)
+
+;; タブ幅は2にする
+(setq-default tab-width 2)
 
 ;; メニューバーを非表示
 (menu-bar-mode 0)
@@ -65,6 +72,12 @@
 (if(version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode)
 )
+
+;; ちょっと透過する
+(set-frame-parameter (selected-frame) 'alpha '(0.90))
+
+;; カーソル行をハイライトする
+(global-hl-line-mode t)
 
 ;; custom message
 (setq initial-scratch-message "\
