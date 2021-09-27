@@ -39,7 +39,7 @@
 (setq-default indent-tabs-mode nil)
 
 ;; タブ幅は2にする
-(setq-default tab-width 2)
+(setq-default tab-width 4)
 
 ;; メニューバーを非表示
 (menu-bar-mode 0)
