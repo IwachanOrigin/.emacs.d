@@ -38,8 +38,8 @@
 ;; タブにスペースを使用する
 (setq-default indent-tabs-mode nil)
 
-;; タブ幅は4にする
-(setq-default tab-width 4)
+;; どんなものだろうと、タブ幅は4にする
+(setq default-tab-width 4)
 
 ;; メニューバーを非表示
 (menu-bar-mode 0)
