@@ -98,6 +98,12 @@
 (global-set-key "\M-p" 'previous-buffer)
 (global-set-key "\M-n" 'next-buffer)
 
+;; ガベージコレクションの実行頻度を下げる
+(setq gc-cons-threshold 1073741824)
+(setq garbage-collection-messages t)
+;; emacsが利用されてから60s経っても入力がない場合はガベコレ
+(run-with-idle-timer 60.0 t #'garbage-collect)
+
 ;; custom message
 (setq initial-scratch-message "\
 ;; This buffer is for notes you don't want to save, and for Ruby code.
