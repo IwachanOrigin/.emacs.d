@@ -13,6 +13,8 @@
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.c\\'" . c++-mode))
 
 ;; Ctrl + h をバックスペースに変える
 (global-set-key "\C-h" `delete-backward-char)
