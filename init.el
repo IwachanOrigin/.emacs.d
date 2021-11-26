@@ -43,15 +43,6 @@
 ;; どんなものだろうと、タブ幅は4にする
 (setq default-tab-width 4)
 
-;; メニューバーを非表示
-(menu-bar-mode 0)
-
-;; ツールバーを非表示
-(tool-bar-mode 0)
-
-;; scroll bar false
-(scroll-bar-mode 0)
-
 ;; beep とフラッシュを消す
 (setq ring-bell-function 'ignore)
 
