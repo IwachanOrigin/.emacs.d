@@ -10,4 +10,5 @@
 ;; scroll bar false
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 (push '(horizontal-scroll-bars . nil) default-frame-alist)
-
+;; 
+(setq frame-inhibit-implied-resize t)
