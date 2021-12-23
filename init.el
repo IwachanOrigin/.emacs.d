@@ -3,6 +3,24 @@
 ;;                                 init.el                                  ;;
 ;;============================================================================
 
+(require 'package)
+;; package-archivesを上書き
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("org" . "https://orgmode.org/elpa/")
+        ("gnu" . "https://elpa.gnu.org/packages/")))
+
+;; 初期化
+(package-initialize)
+
+;; use-package
+(when (not (package-installed-p 'use-package))
+   (package-refresh-contents)
+   (package-install 'use-package)
+)
+(setq use-package-always-ensure t)
+(require 'use-package)
+
 ;; c-kで行全体を削除する
 (setq kill-whole-line t)
 
@@ -58,7 +76,21 @@
 (set-default-coding-systems 'utf-8)
 
 ;; set color theme
-(load-theme 'light-blue t)
+;;(load-theme 'light-blue t)
+(use-package modus-themes
+  :ensure                         ; omit this to use the built-in themes
+  :init
+  ;; Add all your customizations prior to loading the themes
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-region '(bg-only no-extend))
+
+  ;; Load the theme files before enabling a theme (else you get an error).
+  (modus-themes-load-themes)
+  :config
+  ;; Load the theme of your choice:
+  (modus-themes-load-operandi) ;; OR (modus-themes-load-vivendi)
+  :bind ("<f5>" . modus-themes-toggle))
 
 ;; line number
 (if(version<= "26.0.50" emacs-version)
@@ -103,3 +135,15 @@
 ;; If you want to create a file, visit that file with C-x C-f,
 ;; then enter the text in that file's own buffer.")
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(modus-themes)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
