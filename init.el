@@ -76,7 +76,6 @@
 (set-default-coding-systems 'utf-8)
 
 ;; set color theme
-;;(load-theme 'light-blue t)
 (use-package modus-themes
   :ensure                         ; omit this to use the built-in themes
   :init
