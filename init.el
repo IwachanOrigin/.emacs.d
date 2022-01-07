@@ -41,7 +41,7 @@
 (setq inhibit-startup-message t)
 
 ;; 自動保存リストファイルは作らない
- (setq auto-save-list-file-prefix nil)
+(setq auto-save-list-file-prefix nil)
 
 ;; バックアップしないようにする
 (setq backup-inhibited t)
@@ -57,9 +57,6 @@
 
 ;; タブにスペースを使用する
 (setq-default indent-tabs-mode nil)
-
-;; どんなものだろうと、タブ幅は4にする
-(setq default-tab-width 4)
 
 ;; beep とフラッシュを消す
 (setq ring-bell-function 'ignore)
@@ -109,7 +106,8 @@
      ("\\.cpp"   (".h"))
      ("\\.h"   (".c"".cpp"))
    )
-)
+  )
+
 ;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
 (setq ff-search-directories
   '("." "../src" "../include")
@@ -125,8 +123,19 @@
 ;; ガベージコレクションの実行頻度を下げる
 (setq gc-cons-threshold 1073741824)
 (setq garbage-collection-messages t)
+
 ;; emacsが利用されてから60s経っても入力がない場合はガベコレ
 (run-with-idle-timer 60.0 t #'garbage-collect)
+
+;; hungry delete
+(use-package smart-hungry-delete
+  :ensure t
+  :bind (("C-h" . smart-hungry-delete-backward-char)
+         ("C-d" . smart-hungry-delete-forward-char))
+  :defer nil ;; dont defer so we can add our functions to hooks
+  :config (smart-hungry-delete-add-default-hooks)
+)
+
 
 ;; custom message
 (setq initial-scratch-message "\
