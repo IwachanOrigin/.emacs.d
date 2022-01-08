@@ -127,7 +127,7 @@
 ;; emacsが利用されてから60s経っても入力がない場合はガベコレ
 (run-with-idle-timer 60.0 t #'garbage-collect)
 
-;; hungry delete
+;; smart hungry delete
 (use-package smart-hungry-delete
   :ensure t
   :bind (("C-h" . smart-hungry-delete-backward-char)
@@ -136,6 +136,26 @@
   :config (smart-hungry-delete-add-default-hooks)
 )
 
+;; flymake
+(use-package flymake
+  :init
+  (add-hook 'c-mode-common-hook 'flymake-mode)
+  :commands flymake-mode
+)
+
+;; eglot
+;;
+(use-package eglot
+  :ensure t
+  :config
+  (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
+  (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
+  (add-hook 'c-mode-hook 'eglot-ensure)
+  (add-hook 'c++-mode-hook 'eglot-ensure)
+  ;; format on save
+  (add-hook 'c-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+  (add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+)
 
 ;; custom message
 (setq initial-scratch-message "\
