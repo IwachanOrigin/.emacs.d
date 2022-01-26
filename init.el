@@ -85,7 +85,7 @@
   (modus-themes-load-themes)
   :config
   ;; Load the theme of your choice:
-  (modus-themes-load-operandi) ;; OR (modus-themes-load-vivendi)
+  (modus-themes-load-vivendi) ;; OR (modus-themes-load-operandi)
   :bind ("<f5>" . modus-themes-toggle))
 
 ;; line number
@@ -156,6 +156,16 @@
   (add-hook 'c-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
   (add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
 )
+
+;; markdown
+(use-package markdown-mode
+  :ensure t
+  :defer t
+  :mode (("\\.md\\'" . gfm-mode)
+         ("\\.txt\\'" . gfm-mode))
+)
+
+
 
 ;; custom message
 (setq initial-scratch-message "\
