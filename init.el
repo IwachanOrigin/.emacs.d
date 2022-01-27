@@ -167,6 +167,29 @@
   :init (setq markdown-command "pandoc.exe -s --self-contained -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.min.css")
 )
 
+;; volatile-highlights
+;; yank等の操作時、該当箇所を強調する
+(use-package volatile-highlights
+  :ensure t
+  :config (volatile-highlights-mode t)
+)
+
+;; rainbow-delimiters
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode-hook . raibow-delimiters-mode)
+)
+
+;; smartparens
+;; 閉じかっこなどを自動で入れてくれる
+(use-package smartparens
+  :ensure t
+  :requires smartparens-config
+  :diminish smartparens-mode
+  :hook (prog-mode-hook . turn-on-smartparens-mode)
+  :config (show-smartparens-global-mode t)
+)
+
 
 
 ;; custom message
