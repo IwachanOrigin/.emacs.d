@@ -74,7 +74,7 @@
 
 ;; set color theme
 (use-package modus-themes
-  :ensure                         ; omit this to use the built-in themes
+  :ensure t                        ; omit this to use the built-in themes
   :init
   ;; Add all your customizations prior to loading the themes
   (setq modus-themes-italic-constructs t
@@ -138,6 +138,8 @@
 
 ;; flymake
 (use-package flymake
+  :ensure t
+  :defer t
   :init
   (add-hook 'c-mode-common-hook 'flymake-mode)
   :commands flymake-mode
@@ -146,6 +148,7 @@
 ;; eglot
 ;;
 (use-package eglot
+  :defer t
   :ensure t
   :config
   (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
@@ -171,6 +174,7 @@
 ;; yank等の操作時、該当箇所を強調する
 (use-package volatile-highlights
   :ensure t
+  :defer t
   :config (volatile-highlights-mode t)
 )
 
@@ -190,6 +194,66 @@
   :config (show-smartparens-global-mode t)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;              C-sの設定を強化する                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; swiper
+(use-package swiper
+  :ensure t
+  :config
+  (defun isearch-forward-or-swiper (use-swiper)
+    (interactive "p")
+    ;; (interactive "P") ;; 大文字のPだと，C-u C-sでないと効かない
+    (let (current-prefix-arg)
+      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
+  (global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
+)
+
+;; ivy
+(use-package ivy
+  :ensure t
+  ;; :config
+  ;; (fset 'ivy--regex 'identity)
+)
+
+;; migemo
+;; 日本語をローマ字検索できるようにする
+;; Windows版 migemoが必要 [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
+(use-package migemo
+  :ensure t
+  :config
+  ;; C/Migemo を使う
+  (setq migemo-command "cmigemo")
+  (setq migemo-options '("-q" "--emacs" "-i" "\a"))
+  (setq migemo-dictionary "D:/software/cmigemo-default-win64/dict/cp932/migemo-dict")  ;; 辞書のパス
+  (setq migemo-user-dictionary nil)
+  (setq migemo-regex-dictionary nil)
+  ;; charset encoding
+  ;;(setq migemo-coding-system 'utf-8-unix)
+  (setq migemo-coding-system 'cp932-unix)
+)
+
+;; ivy-migemo
+;; ivy系検索でmigemoを利用できるようにする
+(use-package ivy-migemo
+  :ensure t
+  :config
+  ;; toggle migemo
+  (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
+  ;; If you want to defaultly use migemo on swiper and counsel-find-file:
+  (setq ivy-re-builders-alist '((t . ivy--regex-plus)
+                              (swiper . ivy-migemo--regex-plus)
+                              (counsel-find-file . ivy-migemo--regex-plus))
+                              ;(counsel-other-function . ivy-migemo--regex-plus)
+                              )
+  ;; Or you prefer fuzzy match like ido:
+  (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)
+                              (swiper . ivy-migemo--regex-fuzzy)
+                              (counsel-find-file . ivy-migemo--regex-fuzzy))
+                              ;(counsel-other-function . ivy-migemo--regex-fuzzy)
+                              )
+)
 
 
 ;; custom message
