@@ -247,13 +247,42 @@
                               (counsel-find-file . ivy-migemo--regex-plus))
                               ;(counsel-other-function . ivy-migemo--regex-plus)
                               )
-  ;; Or you prefer fuzzy match like ido:
-  (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)
-                              (swiper . ivy-migemo--regex-fuzzy)
-                              (counsel-find-file . ivy-migemo--regex-fuzzy))
-                              ;(counsel-other-function . ivy-migemo--regex-fuzzy)
-                              )
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                   web browser                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; counsel-web
+;; ivy系の検索でweb検索ができる
+;; todo : migemoと連携
+(use-package counsel-web
+  :ensure t
+  :defer t
+  :config
+  (setq counsel-web-engine 'google)
+  (setq counsel-web-search-dynamic-update t)
+  (setq counsel-web-search-action #'browse-url)
+  :init
+  ;; Define "C-c w" as a prefix key.
+  (defvar counsel-web-map
+    (let ((map (make-sparse-keymap "counsel-web")))
+      (define-key map (kbd "w") #'counsel-web-suggest)
+      (define-key map (kbd "s") #'counsel-web-search)
+      (define-key map (kbd ".") #'counsel-web-thing-at-point)
+      map))
+  (global-set-key (kbd "C-c w") counsel-web-map)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                     dashboard                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; dashboard
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook)
+)
+
 
 
 ;; custom message
