@@ -226,7 +226,7 @@
   ;; C/Migemo を使う
   (setq migemo-command "cmigemo")
   (setq migemo-options '("-q" "--emacs" "-i" "\a"))
-  (setq migemo-dictionary "D:/software/cmigemo-default-win64/dict/cp932/migemo-dict")  ;; 辞書のパス
+  (setq migemo-dictionary "C:/Users/iwana/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict")  ;; 辞書のパス
   (setq migemo-user-dictionary nil)
   (setq migemo-regex-dictionary nil)
   ;; charset encoding
