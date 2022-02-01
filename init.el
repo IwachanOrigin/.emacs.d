@@ -292,7 +292,14 @@
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 )
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;             Color Identifiers Mode               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package color-identifiers-mode
+  :ensure t
+  :config
+  (add-hook 'after-init-hook 'global-color-identifiers-mode)
+)
 
 
 ;; custom message
