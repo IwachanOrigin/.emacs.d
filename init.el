@@ -72,22 +72,6 @@
 (setq default-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
-;; set color theme
-(use-package modus-themes
-  :ensure t                        ; omit this to use the built-in themes
-  :init
-  ;; Add all your customizations prior to loading the themes
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-region '(bg-only no-extend))
-
-  ;; Load the theme files before enabling a theme (else you get an error).
-  (modus-themes-load-themes)
-  :config
-  ;; Load the theme of your choice:
-  (modus-themes-load-vivendi) ;; OR (modus-themes-load-operandi)
-  :bind ("<f5>" . modus-themes-toggle))
-
 ;; line number
 (if(version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode)
@@ -297,10 +281,45 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package color-identifiers-mode
   :ensure t
+  :defer t
   :config
   (add-hook 'after-init-hook 'global-color-identifiers-mode)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;           emacsclientのためのsever設定             ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when (eq window-system 'w32)
+  (when (require 'server nil t)
+    (server-start)
+    ;; C-x C-cに割り当てる(好みに応じて)
+    (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
+    ;; M-x exitでEmacsを終了できるようにする
+    (defalias 'exit 'save-buffers-kill-emacs)
+    ;; 終了時にyes/noの問い合わせ
+    (setq confirm-kill-emacs 'yes-or-no-p)
+))
+
+;; 最大化 <=> 元に戻す
+(global-set-key (kbd "<f2>") 'toggle-frame-maximized)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                 set color theme                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package modus-themes
+  :ensure t                        ; omit this to use the built-in themes
+  :init
+  ;; Add all your customizations prior to loading the themes
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-region '(bg-only no-extend))
+
+  ;; Load the theme files before enabling a theme (else you get an error).
+  (modus-themes-load-themes)
+  :config
+  ;; Load the theme of your choice:
+  (modus-themes-load-vivendi) ;; OR (modus-themes-load-operandi)
+  :bind ("<f5>" . modus-themes-toggle))
 
 ;; custom message
 (setq initial-scratch-message "\
