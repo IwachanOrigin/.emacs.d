@@ -61,17 +61,6 @@
 ;; beep とフラッシュを消す
 (setq ring-bell-function 'ignore)
 
-;; 環境を日本語、UTF-8にする
-(set-locale-environment nil)
-(set-language-environment "Japanese")
-(prefer-coding-system 'utf-8)
-(set-file-name-coding-system 'utf-8)
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-buffer-file-coding-system 'utf-8)
-(setq default-buffer-file-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-
 ;; line number
 (if(version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode)
@@ -110,6 +99,34 @@
 
 ;; emacsが利用されてから60s経っても入力がない場合はガベコレ
 (run-with-idle-timer 60.0 t #'garbage-collect)
+
+;; 環境を日本語、UTF-8にする
+(setenv "LANG" "ja_JP.UTF-8")
+(prefer-coding-system 'utf-8-unix)
+(set-file-name-coding-system 'cp932)
+(setq locale-coding-system 'utf-8-unix)
+;; プロセスが出力する文字コードを判定して、process-coding-system の DECODING の設定値を決定する
+(setq default-process-coding-system '(undecided-dos . utf-8-unix))
+;; cl-lib
+(use-package cl-lib
+  :ensure t
+)
+;; サブプロセスに渡すパラメータの文字コードを cp932 にする
+;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
+(cl-loop for (func args-pos) in '((call-process        4)
+                                  (call-process-region 6)
+                                  (start-process       3))
+         do (eval `(advice-add ',func
+                               :around (lambda (orig-fun &rest args)
+                                         (setf (nthcdr ,args-pos args)
+                                               (mapcar (lambda (arg)
+                                                         (if (multibyte-string-p arg)
+                                                             (encode-coding-string arg 'cp932)
+                                                           arg))
+                                                       (nthcdr ,args-pos args)))
+                                         (apply orig-fun args))
+                               '((depth . 99))))
+)
 
 ;; smart hungry delete
 (use-package smart-hungry-delete
