@@ -128,6 +128,26 @@
                                '((depth . 99))))
 )
 
+;; indent
+(setq-default c-basic-offset 4      ;; basic indent value
+              tab-width 4           ;; tab width
+              indent-tabs-mode nil  ;; tab or space
+)
+
+;; c++ style
+(defun add-c++-mode-conf ()
+  (c-set-style "stroustrup")  ;;スタイルはストラウストラップ
+  (show-paren-mode t)         ;;カッコを強調表示する
+)
+(add-hook 'c++-mode-hook 'add-c++-mode-conf)
+
+;; C style
+(defun add-c-mode-common-conf ()
+  (c-set-style "stroustrup") ;;スタイルはストラウストラップ
+  (show-paren-mode t)        ;;カッコを強調表示する
+)
+(add-hook 'c-mode-common-hook 'add-c-mode-common-conf)
+
 ;; smart hungry delete
 (use-package smart-hungry-delete
   :ensure t
