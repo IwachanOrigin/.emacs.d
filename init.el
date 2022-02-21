@@ -3,6 +3,10 @@
 ;;                                 init.el                                  ;;
 ;;============================================================================
 
+;; profile
+;;(require 'profiler)
+;;(profiler-start 'cpu)
+
 (require 'package)
 ;; package-archivesを上書き
 (setq package-archives
@@ -21,56 +25,8 @@
 (setq use-package-always-ensure t)
 (require 'use-package)
 
-;; c-kで行全体を削除する
-(setq kill-whole-line t)
-
-;; 空白文字を表示する
-(setq-default show-trailing-whitespace t)
-(set-face-background 'trailing-whitespace "#b14770")
-
-;; cu, cuh
-(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.c\\'" . c++-mode))
-
-;; Ctrl + h をバックスペースに変える
-(global-set-key "\C-h" `delete-backward-char)
-
-;; スタートアップメッセージを表示させない
-(setq inhibit-startup-message t)
-
-;; 自動保存リストファイルは作らない
-(setq auto-save-list-file-prefix nil)
-
-;; バックアップしないようにする
-(setq backup-inhibited t)
-
-;; 自動保存ファイルは作らない
-(setq auto-save-default nil)
-
-;; バックアップファイルを作成させない
-(setq make-backup-files nil)
-
-;; 終了時にオートセーブファイルを削除する
-(setq delete-auto-save-files t)
-
-;; タブにスペースを使用する
-(setq-default indent-tabs-mode nil)
-
-;; beep とフラッシュを消す
-(setq ring-bell-function 'ignore)
-
-;; line number
-(if(version<= "26.0.50" emacs-version)
-  (global-display-line-numbers-mode)
-)
-
 ;; ちょっと透過する
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
-
-;; カーソル行をハイライトする
-(global-hl-line-mode t)
 
 ;; ff-find-other-fileで利用する拡張子の関連付けを行う
 (setq cc-other-file-alist
@@ -79,7 +35,7 @@
      ("\\.cpp"   (".h"))
      ("\\.h"   (".c"".cpp"))
    )
-  )
+)
 
 ;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
 (setq ff-search-directories
@@ -92,13 +48,6 @@
 ;; バッファのキーを変える
 (global-set-key "\M-p" 'previous-buffer)
 (global-set-key "\M-n" 'next-buffer)
-
-;; ガベージコレクションの実行頻度を下げる
-(setq gc-cons-threshold 1073741824)
-(setq garbage-collection-messages t)
-
-;; emacsが利用されてから60s経っても入力がない場合はガベコレ
-(run-with-idle-timer 60.0 t #'garbage-collect)
 
 ;; 環境を日本語、UTF-8にする
 (setenv "LANG" "ja_JP.UTF-8")
@@ -347,9 +296,26 @@
   :ensure t                        ; omit this to use the built-in themes
   :init
   ;; Add all your customizations prior to loading the themes
+  ;;(setq modus-themes-italic-constructs t
+  ;;      modus-themes-bold-constructs nil
+  ;;      modus-themes-region '(bg-only no-extend))
   (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-region '(bg-only no-extend))
+      modus-themes-bold-constructs t
+      modus-themes-mixed-fonts t
+      modus-themes-subtle-line-numbers t
+      modus-themes-mode-line '(moody borderless)
+      modus-themes-syntax nil
+      modus-themes-paren-match '(bold intense)
+      modus-themes-diffs 'deuteranopia
+      modus-themes-org-blocks 'gray-background
+      modus-themes-variable-pitch-ui t
+      modus-themes-variable-pitch-headings t
+      modus-themes-scale-headings t
+      modus-themes-scale-1 1.1
+      modus-themes-scale-2 1.15
+      modus-themes-scale-3 1.21
+      modus-themes-scale-4 1.27
+      modus-themes-scale-title 1.33)
 
   ;; Load the theme files before enabling a theme (else you get an error).
   (modus-themes-load-themes)
@@ -376,3 +342,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; profile
+;;(profiler-report)
+;;(profiler-stop)
+
