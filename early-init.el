@@ -67,3 +67,34 @@
 (if(version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode)
 )
+
+;; ff-find-other-fileで利用する拡張子の関連付けを行う
+(setq cc-other-file-alist
+  '(
+     ("\\.c"   (".h"))
+     ("\\.cpp"   (".h"))
+     ("\\.h"   (".c"".cpp"))
+   )
+)
+
+;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
+(setq ff-search-directories
+  '("." "../src" "../include")
+)
+
+;; ff-find-other-fileをMeta+tで動くように設定する
+(global-set-key "\M-t" 'ff-find-other-file)
+
+;; バッファのキーを変える
+(global-set-key "\M-p" 'previous-buffer)
+(global-set-key "\M-n" 'next-buffer)
+
+;; 環境を日本語、UTF-8にする
+(setenv "LANG" "ja_JP.UTF-8")
+(prefer-coding-system 'utf-8-unix)
+(set-file-name-coding-system 'cp932)
+(setq locale-coding-system 'utf-8-unix)
+;; プロセスが出力する文字コードを判定して、process-coding-system の DECODING の設定値を決定する
+(setq default-process-coding-system '(undecided-dos . utf-8-unix))
+
+
