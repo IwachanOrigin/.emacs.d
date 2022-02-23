@@ -23,8 +23,13 @@
 ;; Ctrl + h をバックスペースに変える
 (global-set-key "\C-h" `delete-backward-char)
 
-;; スタートアップメッセージを表示させない
+;; quiet start
 (setq inhibit-startup-message t)
+(setq inhibit-startup-screen t)
+(setq inhibit-startup-echo-area-message t)
+(setq initial-scratch-message nil)
+(defun display-startup-echo-area-message ()
+  (message ""))
 
 ;; 自動保存リストファイルは作らない
 (setq auto-save-list-file-prefix nil)
@@ -97,4 +102,6 @@
 ;; プロセスが出力する文字コードを判定して、process-coding-system の DECODING の設定値を決定する
 (setq default-process-coding-system '(undecided-dos . utf-8-unix))
 
+;; yes or no は y or n にする
+(defalias 'yes-or-no-p #'y-or-n-p)
 

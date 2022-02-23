@@ -7,31 +7,32 @@
 ;;(require 'profiler)
 ;;(profiler-start 'cpu)
 
-(require 'package)
-;; package-archivesを上書き
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("org" . "https://orgmode.org/elpa/")
-        ("gnu" . "https://elpa.gnu.org/packages/")))
+(eval-when-compile
+  (require 'package)
+  (package-initialize)
+  (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 
-;; 初期化
-(package-initialize)
+  ;; use-package
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package)
+    (package-install 'diminish))
 
-;; use-package
-(when (not (package-installed-p 'use-package))
-   (package-refresh-contents)
-   (package-install 'use-package)
-)
-(setq use-package-always-ensure t)
-(require 'use-package)
+  (setq use-package-always-ensure t)
+  (setq use-package-expand-minimally t)
+
+  (require 'use-package))
 
 ;; ちょっと透過する
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
 
 ;; cl-lib
-(use-package cl-lib
-  :ensure t
-)
+(eval-when-compile
+  (use-package cl-lib
+    :ensure t))
+
 ;; サブプロセスに渡すパラメータの文字コードを cp932 にする
 ;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
 (cl-loop for (func args-pos) in '((call-process        4)
@@ -130,10 +131,9 @@
 ;; 閉じかっこなどを自動で入れてくれる
 (use-package smartparens
   :ensure t
+  :hook (after-init . smartparens-global-mode)
   :requires smartparens-config
   :diminish smartparens-mode
-  :hook (prog-mode-hook . turn-on-smartparens-mode)
-  :config (show-smartparens-global-mode t)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -247,7 +247,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;           emacsclientのためのsever設定             ;;
+;;           emacsclientのためのserver設定             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
   (when (require 'server nil t)
@@ -297,12 +297,6 @@
   ;; Load the theme of your choice:
   (modus-themes-load-vivendi) ;; OR (modus-themes-load-operandi)
   :bind ("<f5>" . modus-themes-toggle))
-
-;; custom message
-(setq initial-scratch-message "\
-;; This buffer is for notes you don't want to save, and for Ruby code.
-;; If you want to create a file, visit that file with C-x C-f,
-;; then enter the text in that file's own buffer.")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
