@@ -75,6 +75,15 @@
   :defer t
 )
 
+;; whick-key
+(use-package which-key
+  :diminish which-key-mode
+  :hook (after-init . which-key-mode)
+)
+
+;; Hydra
+(use-package hydra)
+
 ;; smart hungry delete
 (use-package smart-hungry-delete
   :ensure t
