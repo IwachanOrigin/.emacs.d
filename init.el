@@ -216,19 +216,31 @@
 (use-package counsel-web
   :ensure t
   :defer t
+  :functions counsel-web-map
+  :bind
+  ("C-c w" . counsel-web-map/body)
   :config
   (setq counsel-web-engine 'google)
   (setq counsel-web-search-dynamic-update t)
   (setq counsel-web-search-action #'browse-url)
   :init
-  ;; Define "C-c w" as a prefix key.
-  (defvar counsel-web-map
-    (let ((map (make-sparse-keymap "counsel-web")))
-      (define-key map (kbd "w") #'counsel-web-suggest)
-      (define-key map (kbd "s") #'counsel-web-search)
-      (define-key map (kbd ".") #'counsel-web-thing-at-point)
-      map))
-  (global-set-key (kbd "C-c w") counsel-web-map)
+  (with-eval-after-load 'hydra
+    (defhydra counsel-web-map (:color pink :hint nil)
+     "
+                                 ╔═════════╗
+    Key^^^^^^                          ║ browser ║
+  ───────────────────────────────╨─────────╜
+     _w_: suggest
+     _s_: search
+     _._: at-point
+  ╭───────────────────────────────────────╯
+     [_q_]: quit
+     "
+      ("w" counsel-web-suggest)
+      ("s" counsel-web-search)
+      ("." counsel-web-thing-at-point)
+      ("q" nil)
+      ))
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
