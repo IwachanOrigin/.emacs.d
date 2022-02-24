@@ -70,6 +70,11 @@
 )
 (add-hook 'c-mode-common-hook 'add-c-mode-common-conf)
 
+;; all-the-icons
+(use-package all-the-icons
+  :defer t
+)
+
 ;; smart hungry delete
 (use-package smart-hungry-delete
   :ensure t
