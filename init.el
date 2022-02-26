@@ -127,28 +127,12 @@
   :init (setq markdown-command "pandoc.exe -s --self-contained -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.min.css")
 )
 
-;; volatile-highlights
-;; yank等の操作時、該当箇所を強調する
-(use-package volatile-highlights
-  :ensure t
-  :defer t
-  :config (volatile-highlights-mode t)
-)
-
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
   :ensure t
   :hook (prog-mode-hook . raibow-delimiters-mode)
 )
 
-;; smartparens
-;; 閉じかっこなどを自動で入れてくれる
-(use-package smartparens
-  :ensure t
-  :hook (after-init . smartparens-global-mode)
-  :requires smartparens-config
-  :diminish smartparens-mode
-)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              C-sの設定を強化する                    ;;
@@ -280,6 +264,17 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                    dimmer                        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package dimmer
+  :ensure t
+  :custom
+  (dimmer-fraction 0.2)
+  :config
+  (dimmer-mode t)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
@@ -342,7 +337,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(dashboard-heading ((t (:foreground "#f1fa8c" :weight bold)))))
 
 ;; profile
 ;;(profiler-report)
