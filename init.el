@@ -278,12 +278,28 @@
 ;;                highlight-symbol                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package highlight-symbol
+  :defer t
+  :functions highlight-symbol
   :bind
-  (:map prog-mode-map
-        ("M-o h" . highlight-symbol)
-        ("M-p" . highlight-symbol-prev)
-        ("M-n" . highlight-symbol-next)
-  )
+  ("M-o h" . highlight-symbol/body)
+  :init
+  (with-eval-after-load 'hydra
+    (defhydra highlight-symbol (:color pink :hint nil)
+     "
+                                 ╔══════════════════╗
+    Key^^^^^^                          ║ highlight symbol ║
+  ───────────────────────────────╨──────────────────╜
+     _h_: highlight
+     _p_: preview
+     _n_: next
+  ╭─────────────────────────────────────────────╯
+     [_q_]: quit
+     "
+      ("h" highlight-symbol)
+      ("p" highlight-symbol-prev)
+      ("n" highlight-symbol-next)
+      ("q" nil)
+      ))
 )
 
 
