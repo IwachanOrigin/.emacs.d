@@ -115,6 +115,139 @@
     :hook
     (after-init . hydra-posframe-mode)))
 
+;; wgrep
+(use-package wgrep
+  :defer t
+  :custom
+  (wgrep-enable-key "e")
+  (wgrep-auto-save-buffer t)
+  (wgrep-change-readonly-file t))
+
+;; ag
+(use-package ag
+  :custom
+  (ag-highligh-search t)
+  (ag-reuse-buffers t)
+  (ag-reuse-window t)
+  :bind
+  ("M-s a" . ag-project)
+  :config
+  (use-package wgrep-ag))
+
+;; anzu
+(use-package anzu
+  :diminish
+  :bind
+  ("C-r"   . anzu-query-replace-regexp)
+  ("C-M-r" . anzu-query-replace-at-cursor-thing)
+  :hook
+  (after-init . global-anzu-mode))
+
+;; avy
+(use-package avy
+  :bind
+  ("C-'" . avy-resume)
+  ("C-;" . avy-goto-char)
+  ("M-j" . hydra-avy/body)
+  ("M-v" . hydra-viewer/body)
+  :preface
+  ;; fixed cursor scroll-up
+  (defun scroll-up-in-place (n)
+    (interactive "p")
+    (forward-line (- n))
+    (scroll-down n))
+  ;; fixed cursor scroll-down
+  (defun scroll-down-in-place (n)
+    (interactive "p")
+    (forward-line n)
+    (scroll-up n))
+  ;; yank inner sexp
+  (defun yank-inner-sexp ()
+    (interactive)
+    (backward-list)
+    (mark-sexp)
+    (copy-region-as-kill (region-beginning) (region-end)))
+
+  (use-package avy-zap
+      :bind
+      ("M-z" . avy-zap-to-char-dwim)
+      ("M-z" . avy-zap-up-to-char-dwim))
+
+  (with-eval-after-load 'hydra
+        (defhydra hydra-viewer (:color pink :hint nil)
+          "
+                                                                        ╔════════╗
+   Char/Line^^^^^^  Word/Page^^^^^^^^  Line/Buff^^^^   Paren                              ║ Window ║
+  ──────────────────────────────────────────────────────────────────────╨────────╜
+       ^^_k_^^          ^^_u_^^          ^^_g_^^       _(_ ← _y_ → _)_
+       ^^^↑^^^          ^^^↑^^^          ^^^↑^^^       _,_ ← _/_ → _._
+   _h_ ← _d_ → _l_  _H_ ← _D_ → _L_  _a_ ← _K_ → _e_
+       ^^^↓^^^          ^^^↓^^^          ^^^↓^
+       ^^_j_^^          ^^_n_^^          ^^_G_
+  ╭──────────────────────────────────────────────────────────────────────────────╯
+                           [_q_]: quit, [_<SPC>_]: center
+          "
+          ("j" scroll-down-in-place)
+          ("k" scroll-up-in-place)
+          ("l" forward-char)
+          ("d" delete-char)
+          ("h" backward-char)
+          ("L" forward-word)
+          ("H" backward-word)
+          ("u" scroll-up-command)
+          ("n" scroll-down-command)
+          ("D" delete-word-at-point)
+          ("a" mwim-beginning-of-code-or-line)
+          ("e" mwim-end-of-code-or-line)
+          ("g" beginning-of-buffer)
+          ("G" end-of-buffer)
+          ("K" kill-whole-line)
+          ("(" backward-list)
+          (")" forward-list)
+          ("y" yank-inner-sexp)
+          ("." backward-forward-next-location)
+          ("," backward-forward-previous-location)
+          ("/" avy-goto-char :exit t)
+          ("<SPC>" recenter-top-bottom)
+          ("q" nil))
+
+        (defhydra hydra-avy (:color pink :hint nil)
+          "
+                                                                        ╔════════╗
+        ^^Goto^^        Kill^^        Yank^^        Move^^        Misc            ║  Jump  ║
+  ──────────────────────────────────────────────────────────────────────╨────────╜
+    _c_ ← char^^        [_k_] region  [_y_] region  [_m_] region  [_n_] line number
+    _a_ ← char2 → _b_   [_K_] line    [_Y_] line    [_M_] line    [_v_] Goto viewer
+    _w_ ← word  → _W_   [_z_] zap^^^^                             [_o_] Goto clock
+    _l_ ← line  → _e_   ^^^^^                                     _,_ ← f!y → _._
+  ╭──────────────────────────────────────────────────────────────────────────────╯
+                      [_q_]: quit, [_i_]: imenu, [_<SPC>_]: resume
+"
+          ("c" avy-goto-char :exit t)
+          ("a" avy-goto-char-2 :exit t)
+          ("b" avy-goto-char-below :exit t)
+          ("w" avy-goto-word-1 :exit t)
+          ("W" avy-goto-word-1-below :exit t)
+          ("l" avy-goto-line :exit t)
+          ("e" avy-goto-end-of-line :exit t)
+          ("M" avy-move-line)
+          ("m" avy-move-region)
+          ("K" avy-kill-whole-line)
+          ("k" avy-kill-region)
+          ("Y" avy-copy-line :exit t)
+          ("y" avy-copy-region :exit t)
+          ("n" goto-line :exit t)
+          ("o" org-clock-jump-to-current-clock :exit t)
+          ("z" avy-zap-to-char-dwim :exit t)
+          ("v" hydra-viewer/body :exit t)
+          ("<SPC>" avy-resume :exit t)
+          ("o" org-clock-jump-to-current-clock :exit t)
+          ("i" counsel-imenu :exit t)
+          ("," flymake-goto-previous-error)
+          ("." flymake-goto-next-error)
+          ("q" nil)))
+)
+
 ;; flymake
 (use-package flymake
   :ensure t
@@ -324,7 +457,6 @@
       ))
 )
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -388,7 +520,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(dashboard-heading ((t (:foreground "#f1fa8c" :weight bold)))))
+ '(dashboard-heading ((t (:foreground "#f1fa8c" :weight bold))))
+ '(hydra-posframe-border-face ((t (:background "#6272a4")))))
 
 ;; profile
 ;;(profiler-report)
