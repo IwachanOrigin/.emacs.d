@@ -72,26 +72,37 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer t
-)
+  :defer t)
+
+;; postframe
+(use-package posframe)
+
+;; point
+(use-package popwin)
+(use-package point-history
+  :load-path "~/.emacs.d/github/point-history"
+  :config
+  (point-history-mode t))
+
+;; autorevert
+(use-package autorevert
+  :ensure nil
+  :diminish
+  :hook (after-init . global-auto-revert-mode))
+
+;; hungry-delete
+(use-package hungry-delete
+  :diminish
+  :hook (after-init . global-hungry-delete-mode)
+  :config (setq-default hungry-delete-chars-to-skip " \t\f\v"))
 
 ;; whick-key
 (use-package which-key
   :diminish which-key-mode
-  :hook (after-init . which-key-mode)
-)
+  :hook (after-init . which-key-mode))
 
 ;; Hydra
 (use-package hydra)
-
-;; smart hungry delete
-(use-package smart-hungry-delete
-  :ensure t
-  :bind (("C-h" . smart-hungry-delete-backward-char)
-         ("C-d" . smart-hungry-delete-forward-char))
-  :defer nil ;; dont defer so we can add our functions to hooks
-  :config (smart-hungry-delete-add-default-hooks)
-)
 
 ;; flymake
 (use-package flymake
