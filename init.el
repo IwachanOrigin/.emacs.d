@@ -74,7 +74,7 @@
 (use-package all-the-icons
   :defer t)
 
-;; postframe
+;; posframe
 (use-package posframe)
 
 ;; point
@@ -104,16 +104,16 @@
 ;; Hydra
 (use-package hydra
   :config
-  (use-package hydra-postframe
-    :load-path "~/.emacs.d/github/hydra-postframe"
+  (use-package hydra-posframe
+    :load-path "~/.emacs.d/github/hydra-posframe"
     :custom
-    (hydra-postframe-parameters
+    (hydra-posframe-parameters
      '((left-fringe . 5)
        (right-fringe . 5)))
     :custom-face
-    (hydra-postframe-border-face ((t (:background "#6272a4"))))
+    (hydra-posframe-border-face ((t (:background "#6272a4"))))
     :hook
-    (after-init . hydra-postframe-enable)))
+    (after-init . hydra-posframe-mode)))
 
 ;; flymake
 (use-package flymake
