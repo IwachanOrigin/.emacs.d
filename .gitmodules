@@ -4,3 +4,6 @@
 [submodule "github/point-history"]
 	path = github/point-history
 	url = git@github.com:blue0513/point-history.git
+[submodule "github/hydra-postframe"]
+	path = github/hydra-postframe
+	url = git@github.com:Ladicle/hydra-posframe.git

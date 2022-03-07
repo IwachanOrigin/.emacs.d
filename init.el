@@ -102,7 +102,18 @@
   :hook (after-init . which-key-mode))
 
 ;; Hydra
-(use-package hydra)
+(use-package hydra
+  :config
+  (use-package hydra-postframe
+    :load-path "~/.emacs.d/github/hydra-postframe"
+    :custom
+    (hydra-postframe-parameters
+     '((left-fringe . 5)
+       (right-fringe . 5)))
+    :custom-face
+    (hydra-postframe-border-face ((t (:background "#6272a4"))))
+    :hook
+    (after-init . hydra-postframe-enable)))
 
 ;; flymake
 (use-package flymake
