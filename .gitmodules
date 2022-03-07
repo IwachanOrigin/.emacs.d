@@ -1,0 +1,3 @@
+[submodule "point-history"]
+	path = point-history
+	url = git@github.com:blue0513/point-history.git
