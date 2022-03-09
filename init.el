@@ -382,9 +382,6 @@
       ))
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                     dashboard                    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; dashboard
 (use-package dashboard
   :ensure t
@@ -399,18 +396,14 @@
   (after-init . dashboard-setup-startup-hook)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;             rainbow-delimiter                    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; rainbow-delimiter
 (use-package rainbow-delimiters
   :ensure t
   :config
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;             Color Identifiers Mode               ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Color Identifiers Mode
 (use-package color-identifiers-mode
   :ensure t
   :defer t
@@ -418,9 +411,7 @@
   (add-hook 'after-init-hook 'global-color-identifiers-mode)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                    dimmer                        ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; dimmer
 (use-package dimmer
   :ensure t
   :custom
@@ -429,9 +420,7 @@
   (dimmer-mode t)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                highlight-symbol                  ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; highlight-symbol
 (use-package highlight-symbol
   :defer t
   :functions highlight-symbol
@@ -454,8 +443,27 @@
       ("p" highlight-symbol-prev)
       ("n" highlight-symbol-next)
       ("q" nil)
-      ))
-)
+      )))
+
+;; projectile
+(use-package projectile
+  :diminish
+  :bind
+  ("M-o p" . counsel-projectile-switch-project)
+  :config
+  (projectile-mode +1))
+
+;; neotree
+(use-package neotree
+  :init
+  (setq-default neo-keymap-style 'concise)
+  :config
+  (setq neo-smart-open t)
+  (setq neo-create-file-auto-open t)
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+  (bind-key "<f8>" 'neotree-toggle)
+  (bind-key "<left>" 'neotree-select-up-node neotree-mode-map)
+  (bind-key "<right>" 'neotree-change-root neotree-mode-map))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
