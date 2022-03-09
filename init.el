@@ -445,11 +445,21 @@
       ("q" nil)
       )))
 
+;; ace-window
+(use-package ace-window
+  :bind
+  ("C-x o" . ace-window)
+  :config
+  (setq aw-keys '(?j ?k ?l ?u ?i ?o ?h ?y ?n))
+  :custom-face
+  (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
+ )
+
 ;; projectile
 (use-package projectile
   :diminish
   :bind
-  ("M-o p" . counsel-projectile-switch-project)
+  ("C-c p" . projectile-command-map)
   :config
   (projectile-mode +1))
 
@@ -528,6 +538,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
  '(dashboard-heading ((t (:foreground "#f1fa8c" :weight bold))))
  '(hydra-posframe-border-face ((t (:background "#6272a4")))))
 
