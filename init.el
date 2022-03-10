@@ -288,6 +288,18 @@
   :hook (prog-mode-hook . raibow-delimiters-mode)
 )
 
+;; recentf
+(use-package recentf
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-max-saved-items 20000000)
+  (recentf-auto-cleanup 'never)
+  (recentf-exclude '((expand-file-name package-user-dir)
+                     ".cache"
+                     "cache"
+                     "recentf"
+                     "COMMIT_EDITMSG\\'"))
+ )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              C-sの設定を強化する                    ;;
@@ -311,6 +323,11 @@
   ;; :config
   ;; (fset 'ivy--regex 'identity)
 )
+
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "M-y") 'counsel-yank-pop)
+(global-set-key (kbd "C-x C-r") 'counsel-recentf)
 
 ;; migemo
 ;; 日本語をローマ字検索できるようにする
