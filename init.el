@@ -516,26 +516,9 @@
   :ensure t                        ; omit this to use the built-in themes
   :init
   ;; Add all your customizations prior to loading the themes
-  ;;(setq modus-themes-italic-constructs t
-  ;;      modus-themes-bold-constructs nil
-  ;;      modus-themes-region '(bg-only no-extend))
   (setq modus-themes-italic-constructs t
-      modus-themes-bold-constructs t
-      modus-themes-mixed-fonts t
-      modus-themes-subtle-line-numbers t
-      modus-themes-mode-line '(moody borderless)
-      modus-themes-syntax nil
-      modus-themes-paren-match '(bold intense)
-      modus-themes-diffs 'deuteranopia
-      modus-themes-org-blocks 'gray-background
-      modus-themes-variable-pitch-ui t
-      modus-themes-variable-pitch-headings t
-      modus-themes-scale-headings t
-      modus-themes-scale-1 1.1
-      modus-themes-scale-2 1.15
-      modus-themes-scale-3 1.21
-      modus-themes-scale-4 1.27
-      modus-themes-scale-title 1.33)
+        modus-themes-bold-constructs nil
+        modus-themes-region '(bg-only no-extend))
 
   ;; Load the theme files before enabling a theme (else you get an error).
   (modus-themes-load-themes)
