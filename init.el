@@ -328,6 +328,7 @@
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "M-y") 'counsel-yank-pop)
 (global-set-key (kbd "C-x C-r") 'counsel-recentf)
+(global-set-key (kbd "C-x b") 'counsel-switch-buffer)
 
 ;; migemo
 ;; 日本語をローマ字検索できるようにする
