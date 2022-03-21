@@ -507,8 +507,9 @@
     (setq confirm-kill-emacs 'yes-or-no-p)
 ))
 
-;; 最大化 <=> 元に戻す
-(global-set-key (kbd "<f2>") 'toggle-frame-maximized)
+;; nsis-mode
+(use-package nsis-mode)
+(setq auto-mode-alist (append '(("\.[Nn][Ss][HhIi]\'" . nsis-mode)) auto-mode-alist))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                 set color theme                  ;;
