@@ -33,7 +33,7 @@
   (use-package cl-lib
     :ensure t))
 
-;; サブプロセスに渡すパラメータの文字コードを cp932 にする
+;; サブプロセスに渡すパラメータの文字コードを cp932 にするp
 ;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
 (cl-loop for (func args-pos) in '((call-process        4)
                                   (call-process-region 6)
@@ -510,6 +510,10 @@
 ;; nsis-mode
 (use-package nsis-mode)
 (setq auto-mode-alist (append '(("\.[Nn][Ss][HhIi]\'" . nsis-mode)) auto-mode-alist))
+
+;; cmake-mode
+(use-package cmake-mode)
+(setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                 set color theme                  ;;
