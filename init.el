@@ -507,10 +507,6 @@
     (setq confirm-kill-emacs 'yes-or-no-p)
 ))
 
-;; nsis-mode
-(use-package nsis-mode)
-(setq auto-mode-alist (append '(("\.[Nn][Ss][HhIi]\'" . nsis-mode)) auto-mode-alist))
-
 ;; cmake-mode
 (use-package cmake-mode)
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
