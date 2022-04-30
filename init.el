@@ -33,7 +33,7 @@
   (use-package cl-lib
     :ensure t))
 
-;; サブプロセスに渡すパラメータの文字コードを cp932 にするp
+;; サブプロセスに渡すパラメータの文字コードを cp932 にする
 ;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
 (cl-loop for (func args-pos) in '((call-process        4)
                                   (call-process-region 6)
@@ -421,14 +421,6 @@
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 )
 
-;; Color Identifiers Mode
-(use-package color-identifiers-mode
-  :ensure t
-  :defer t
-  :config
-  (add-hook 'after-init-hook 'global-color-identifiers-mode)
-)
-
 ;; dimmer
 (use-package dimmer
   :ensure t
@@ -510,6 +502,11 @@
 ;; cmake-mode
 (use-package cmake-mode)
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
+
+;; grep/find
+(setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
+      grep-program "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\""
+      null-device "/dev/null")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                 set color theme                  ;;
