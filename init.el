@@ -7,7 +7,7 @@
 ;;(require 'profiler)
 ;;(profiler-start 'cpu)
 
-(eval-when-compile
+(eval-and-compile
   (require 'package)
   (package-initialize)
   (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
@@ -29,7 +29,7 @@
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
 
 ;; cl-lib
-(eval-when-compile
+(eval-and-compile
   (use-package cl-lib
     :ensure t))
 
@@ -511,7 +511,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(modus-themes)))
+ '(package-selected-packages '(wgrep-ag modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
