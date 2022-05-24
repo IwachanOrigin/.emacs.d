@@ -3,6 +3,11 @@
 ;;                           early-init.el                                  ;;
 ;;============================================================================
 
+;; For Emacs 27+
+(setq package-enable-at-startup nil)
+;; Always load newest byte code
+(setq load-prefer-newer t)
+
 ;; menu bar false
 (push '(menu-bar-lines . nil) default-frame-alist)
 ;; tool bar false
@@ -104,4 +109,14 @@
 
 ;; yes or no は y or n にする
 (defalias 'yes-or-no-p #'y-or-n-p)
+
+;; grep/find
+(setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
+      grep-program "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\""
+      null-device "/dev/null")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                 set color theme                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(load-theme 'modus-vivendi t)
 

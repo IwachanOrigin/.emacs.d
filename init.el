@@ -29,7 +29,7 @@
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
 
 ;; cl-lib
-(eval-and-compile
+(eval-when-compile
   (use-package cl-lib
     :ensure t))
 
@@ -495,16 +495,6 @@
 ;; cmake-mode
 (use-package cmake-mode)
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
-
-;; grep/find
-(setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
-      grep-program "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\""
-      null-device "/dev/null")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                 set color theme                  ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(load-theme 'modus-vivendi t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
