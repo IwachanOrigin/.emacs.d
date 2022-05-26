@@ -136,6 +136,16 @@
   :hook
   (after-init . global-anzu-mode))
 
+;; counsel
+(use-package counsel
+  :ensure t
+  :bind
+  ("M-x" . counsel-M-x)
+  ("C-x C-f" . counsel-find-file)
+  ("C-x C-r" . counsel-recentf)
+  ("C-x b" . counsel-switch-buffer)
+)
+
 ;; avy
 (use-package avy
   :bind
@@ -261,8 +271,8 @@
   (add-hook 'c-mode-hook 'eglot-ensure)
   (add-hook 'c++-mode-hook 'eglot-ensure)
   ;; format on save
-  (add-hook 'c-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-  (add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+  ;;(add-hook 'c-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+  ;;(add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
 )
 
 ;; markdown
@@ -316,12 +326,6 @@
   ;; :config
   ;; (fset 'ivy--regex 'identity)
 )
-
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "M-y") 'counsel-yank-pop)
-(global-set-key (kbd "C-x C-r") 'counsel-recentf)
-(global-set-key (kbd "C-x b") 'counsel-switch-buffer)
 
 ;; migemo
 ;; 日本語をローマ字検索できるようにする
