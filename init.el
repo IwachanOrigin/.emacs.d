@@ -56,19 +56,11 @@
               indent-tabs-mode nil  ;; tab or space
 )
 
-;; c++ style
-(defun add-c++-mode-conf ()
-  (c-set-style "stroustrup")  ;;スタイルはストラウストラップ
-  (show-paren-mode t)         ;;カッコを強調表示する
+;; editorconfig
+(use-package editorconfig
+  :init
+  (editorconfig-mode)
 )
-(add-hook 'c++-mode-hook 'add-c++-mode-conf)
-
-;; C style
-(defun add-c-mode-common-conf ()
-  (c-set-style "stroustrup") ;;スタイルはストラウストラップ
-  (show-paren-mode t)        ;;カッコを強調表示する
-)
-(add-hook 'c-mode-common-hook 'add-c-mode-common-conf)
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -364,42 +356,6 @@
                               )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                   web browser                    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; counsel-web
-;; ivy系の検索でweb検索ができる
-;; todo : migemoと連携
-(use-package counsel-web
-  :ensure t
-  :defer t
-  :functions counsel-web-map
-  :bind
-  ("C-c w" . counsel-web-map/body)
-  :config
-  (setq counsel-web-engine 'google)
-  (setq counsel-web-search-dynamic-update t)
-  (setq counsel-web-search-action #'browse-url)
-  :init
-  (with-eval-after-load 'hydra
-    (defhydra counsel-web-map (:color pink :hint nil)
-     "
-                                 ╔═════════╗
-    Key^^^^^^                          ║ browser ║
-  ───────────────────────────────╨─────────╜
-     _w_: suggest
-     _s_: search
-     _._: at-point
-  ╭───────────────────────────────────────╯
-     [_q_]: quit
-     "
-      ("w" counsel-web-suggest)
-      ("s" counsel-web-search)
-      ("." counsel-web-thing-at-point)
-      ("q" nil)
-      ))
-)
-
 ;; dashboard
 (use-package dashboard
   :ensure t
@@ -422,31 +378,6 @@
   :config
   (dimmer-mode t)
 )
-
-;; highlight-symbol
-(use-package highlight-symbol
-  :defer t
-  :functions highlight-symbol
-  :bind
-  ("M-o h" . highlight-symbol/body)
-  :init
-  (with-eval-after-load 'hydra
-    (defhydra highlight-symbol (:color pink :hint nil)
-     "
-                                 ╔══════════════════╗
-    Key^^^^^^                          ║ highlight symbol ║
-  ───────────────────────────────╨──────────────────╜
-     _h_: highlight
-     _p_: preview
-     _n_: next
-  ╭─────────────────────────────────────────────╯
-     [_q_]: quit
-     "
-      ("h" highlight-symbol)
-      ("p" highlight-symbol-prev)
-      ("n" highlight-symbol-next)
-      ("q" nil)
-      )))
 
 ;; ace-window
 (use-package ace-window
@@ -501,7 +432,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(wgrep-ag modus-themes)))
+ '(package-selected-packages '(editorconfig wgrep-ag modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
