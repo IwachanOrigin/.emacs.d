@@ -61,6 +61,7 @@
   :init
   (editorconfig-mode)
 )
+(setq edconf-exec-path "~/.emacs.d/editorconfig")
 
 ;; all-the-icons
 (use-package all-the-icons
