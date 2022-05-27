@@ -63,6 +63,11 @@
 )
 (setq edconf-exec-path "~/.emacs.d/editorconfig")
 
+(add-hook 'c++-mode-hook
+ '(lambda ()
+ (c-set-style "stroustrup")
+))
+
 ;; all-the-icons
 (use-package all-the-icons
   :defer t)
