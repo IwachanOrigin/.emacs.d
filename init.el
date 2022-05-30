@@ -50,9 +50,20 @@
                                '((depth . 99))))
 )
 
+;; c++ mode
+(add-hook 'c++-mode-hook
+ '(lambda ()
+ (c-set-style "linux")
+))
+;; c mode
+(add-hook 'c-mode-hook
+ '(lambda ()
+ (c-set-style "linux")
+))
+
 ;; indent
-(setq-default c-basic-offset 2      ;; basic indent value
-              tab-width 2           ;; tab width
+(setq-default c-basic-offset 4      ;; basic indent value
+              tab-width 4           ;; tab width
               indent-tabs-mode nil  ;; tab or space
 )
 
@@ -62,17 +73,6 @@
   (editorconfig-mode)
 )
 (setq edconf-exec-path "~/.emacs.d/editorconfig")
-
-;; c++ mode
-(add-hook 'c++-mode-hook
- '(lambda ()
- (c-set-style "bsd")
-))
-;; c mode
-(add-hook 'c-mode-hook
- '(lambda ()
- (c-set-style "bsd")
-))
 
 ;; company
 (use-package company
