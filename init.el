@@ -53,19 +53,19 @@
 ;; c++ mode
 (add-hook 'c++-mode-hook
  '(lambda ()
- (c-set-style "linux")
+    (c-set-style "linux")
+    (setq indent-tabs-mode nil) ;; indent use space.
+    (setq c-basic-offset 4) ;; basic indent value
+    (setq tab-width 4)      ;; tab width
 ))
 ;; c mode
 (add-hook 'c-mode-hook
  '(lambda ()
- (c-set-style "linux")
+    (c-set-style "linux")
+    (setq indent-tabs-mode nil) ;; indent use space.
+    (setq c-basic-offset 4) ;; basic indent value
+    (setq tab-width 4)      ;; tab width
 ))
-
-;; indent
-(setq-default c-basic-offset 4      ;; basic indent value
-              tab-width 4           ;; tab width
-              indent-tabs-mode nil  ;; tab or space
-)
 
 ;; editorconfig
 (use-package editorconfig
