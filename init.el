@@ -125,14 +125,6 @@
     :hook
     (after-init . hydra-posframe-mode)))
 
-;; wgrep
-(use-package wgrep
-  :defer t
-  :custom
-  (wgrep-enable-key "e")
-  (wgrep-auto-save-buffer t)
-  (wgrep-change-readonly-file t))
-
 ;; anzu
 (use-package anzu
   :diminish
@@ -316,7 +308,6 @@
   (setq ivy-re-builders-alist '((t . ivy--regex-plus)
                               (swiper . ivy-migemo--regex-plus)
                               (counsel-find-file . ivy-migemo--regex-plus))
-                              ;(counsel-other-function . ivy-migemo--regex-plus)
                               )
 )
 
@@ -326,10 +317,9 @@
   :diminish
   (dashboard-mode page-break-lines-mode)
   :custom
+  (dashboard-startup-banner 1)
   (dashboard-center-content t)
   (dashboard-items '((recents . 15)))
-  :custom-face
-  (dashboard-heading ((t (:foreground "#f1fa8c" :weight bold))))
   :hook
   (after-init . dashboard-setup-startup-hook)
 )
@@ -338,7 +328,7 @@
 (use-package dimmer
   :ensure t
   :custom
-  (dimmer-fraction 0.2)
+  (dimmer-fraction 0.3)
   :config
   (dimmer-mode t)
 )
@@ -388,14 +378,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(editorconfig wgrep-ag modus-themes)))
+ '(package-selected-packages '(editorconfig modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
- '(dashboard-heading ((t (:foreground "#f1fa8c" :weight bold))))
  '(hydra-posframe-border-face ((t (:background "#6272a4")))))
 
 ;; profile
