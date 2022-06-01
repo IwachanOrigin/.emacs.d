@@ -317,7 +317,7 @@
   :diminish
   (dashboard-mode page-break-lines-mode)
   :custom
-  (dashboard-startup-banner 1)
+  (dashboard-startup-banner 2)
   (dashboard-center-content t)
   (dashboard-items '((recents . 15)))
   :hook
@@ -370,7 +370,10 @@
 ))
 
 ;; cmake-mode
-(use-package cmake-mode)
+(use-package cmake-mode
+  :ensure t
+  :defer 10
+  )
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
 (custom-set-variables
