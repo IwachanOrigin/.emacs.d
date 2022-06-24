@@ -52,7 +52,7 @@
 
 ;; c++ mode
 (add-hook 'c++-mode-hook
- '(lambda ()
+ #'(lambda ()
     (c-set-style "linux")
     (setq indent-tabs-mode nil) ;; indent use space.
     (setq c-basic-offset 4) ;; basic indent value
@@ -60,7 +60,7 @@
 ))
 ;; c mode
 (add-hook 'c-mode-hook
- '(lambda ()
+ #'(lambda ()
     (c-set-style "linux")
     (setq indent-tabs-mode nil) ;; indent use space.
     (setq c-basic-offset 4) ;; basic indent value
@@ -76,7 +76,6 @@
 
 ;; company
 (use-package company
-  :ensure t
   :defer t
   :init (global-company-mode)
   :config
@@ -94,14 +93,16 @@
   :defer t)
 
 ;; posframe
-(use-package posframe)
+(use-package posframe
+  :defer t)
 
-;; point
-(use-package popwin)
+;; popwin
+(use-package popwin
+  :defer t)
 
 ;; autorevert
 (use-package autorevert
-  :ensure nil
+  :defer t
   :diminish
   :hook (after-init . global-auto-revert-mode))
 
@@ -113,6 +114,7 @@
 
 ;; Hydra
 (use-package hydra
+  :defer t
   :config
   (use-package hydra-posframe
     :load-path "~/.emacs.d/github/hydra-posframe"
@@ -127,6 +129,7 @@
 
 ;; anzu
 (use-package anzu
+  :defer t
   :diminish
   :bind
   ("C-r"   . anzu-query-replace-regexp)
@@ -136,7 +139,7 @@
 
 ;; counsel
 (use-package counsel
-  :ensure t
+  :defer t
   :bind
   ("M-x" . counsel-M-x)
   ("C-x C-f" . counsel-find-file)
@@ -146,6 +149,7 @@
 
 ;; avy
 (use-package avy
+  :defer t
   :bind
   ("C-'" . avy-resume)
   ("C-;" . avy-goto-char)
@@ -206,7 +210,6 @@
 
 ;; flymake
 (use-package flymake
-  :ensure t
   :defer t
   :init
   (add-hook 'c-mode-common-hook 'flymake-mode)
@@ -217,20 +220,17 @@
 ;;
 (use-package eglot
   :defer t
-  :ensure t
   :config
   (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
-  (add-hook 'c-mode-hook #'eglot-ensure)
-  (add-hook 'c++-mode-hook #'eglot-ensure)
+  (add-hook 'c-mode-hook 'eglot-ensure)
+  (add-hook 'c++-mode-hook 'eglot-ensure)
   ;; C-M(ESC)=WindowsKeyなので入力補完を行うためにdefine-keyを変える
-  ;;(define-key eglot-mode-map (kbd "C-c <tab>") #'completion-at-point)
   (define-key eglot-mode-map (kbd "C-c <tab>") #'company-complete)
 )
 
 ;; markdown
 (use-package markdown-mode
-  :ensure t
   :defer t
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
@@ -240,12 +240,13 @@
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
-  :ensure t
-  :hook (prog-mode-hook . raibow-delimiters-mode)
+  :defer t
+  :hook (c++-mode-hook #'raibow-delimiters-mode)
 )
 
 ;; recentf
 (use-package recentf
+  :defer t
   :hook (after-init . recentf-mode)
   :custom
   (recentf-max-saved-items 100)
@@ -261,28 +262,21 @@
 
 ;; swiper
 (use-package swiper
+  :defer 1
   :ensure t
   :config
   (defun isearch-forward-or-swiper (use-swiper)
     (interactive "p")
-    ;; (interactive "P") ;; 大文字のPだと，C-u C-sでないと効かない
     (let (current-prefix-arg)
       (call-interactively (if use-swiper 'swiper 'isearch-forward))))
   (global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
-)
-
-;; ivy
-(use-package ivy
-  :ensure t
-  ;; :config
-  ;; (fset 'ivy--regex 'identity)
 )
 
 ;; migemo
 ;; 日本語をローマ字検索できるようにする
 ;; Windows版 migemoが必要 [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
 (use-package migemo
-  :ensure t
+  :defer 2
   :config
   ;; C/Migemo を使う
   (setq migemo-command "cmigemo")
@@ -300,20 +294,19 @@
 ;; ivy-migemo
 ;; ivy系検索でmigemoを利用できるようにする
 (use-package ivy-migemo
-  :ensure t
+  :defer 2
   :config
   ;; toggle migemo
   (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
   ;; If you want to defaultly use migemo on swiper and counsel-find-file:
   (setq ivy-re-builders-alist '((t . ivy--regex-plus)
-                              (swiper . ivy-migemo--regex-plus)
-                              (counsel-find-file . ivy-migemo--regex-plus))
-                              )
+                                   (swiper . ivy-migemo--regex-plus)
+                                   (counsel-find-file . ivy-migemo--regex-plus))
+                                   )
 )
 
 ;; dashboard
 (use-package dashboard
-  :ensure t
   :diminish
   (dashboard-mode page-break-lines-mode)
   :custom
@@ -326,7 +319,7 @@
 
 ;; dimmer
 (use-package dimmer
-  :ensure t
+  :defer 1
   :custom
   (dimmer-fraction 0.3)
   :config
@@ -335,6 +328,7 @@
 
 ;; ace-window
 (use-package ace-window
+  :defer t
   :bind
   ("C-x o" . ace-window)
   :config
@@ -345,6 +339,7 @@
 
 ;; neotree
 (use-package neotree
+  :defer 3
   :init
   (setq-default neo-keymap-style 'concise)
   :config
@@ -371,8 +366,7 @@
 
 ;; cmake-mode
 (use-package cmake-mode
-  :ensure t
-  :defer 10
+  :defer t
   )
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
