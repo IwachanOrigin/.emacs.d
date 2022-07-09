@@ -60,13 +60,6 @@
 ;; カーソル行をハイライトする
 (global-hl-line-mode t)
 
-;; ガベージコレクションの実行頻度を下げる
-(setq gc-cons-threshold 1073741824)
-(setq garbage-collection-messages t)
-
-;; emacsが利用されてから60s経っても入力がない場合はガベコレ
-(run-with-idle-timer 60.0 t #'garbage-collect)
-
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))

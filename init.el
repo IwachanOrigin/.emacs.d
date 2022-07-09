@@ -69,6 +69,7 @@
 
 ;; editorconfig
 (use-package editorconfig
+  :defer 2
   :init
   (editorconfig-mode)
 )
@@ -76,7 +77,7 @@
 
 ;; company
 (use-package company
-  :defer t
+  :defer 2
   :init (global-company-mode)
   :config
   ;; C-n, C-pで補完候補を次/前の候補を選択
@@ -90,31 +91,32 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer t)
+  :defer 2)
 
 ;; posframe
 (use-package posframe
-  :defer t)
+  :defer 3)
 
 ;; popwin
 (use-package popwin
-  :defer t)
+  :defer 3)
 
 ;; autorevert
 (use-package autorevert
-  :defer t
+  :defer 3
   :diminish
   :hook (after-init . global-auto-revert-mode))
 
 ;; hungry-delete
 (use-package hungry-delete
+  :defer 3
   :diminish
   :hook (after-init . global-hungry-delete-mode)
   :config (setq-default hungry-delete-chars-to-skip " \t\f\v"))
 
 ;; Hydra
 (use-package hydra
-  :defer t
+  :defer 3
   :config
   (use-package hydra-posframe
     :load-path "~/.emacs.d/github/hydra-posframe"
@@ -129,7 +131,7 @@
 
 ;; anzu
 (use-package anzu
-  :defer t
+  :defer 3
   :diminish
   :bind
   ("C-r"   . anzu-query-replace-regexp)
@@ -139,7 +141,7 @@
 
 ;; counsel
 (use-package counsel
-  :defer t
+  :defer 2
   :bind
   ("M-x" . counsel-M-x)
   ("C-x C-f" . counsel-find-file)
@@ -149,7 +151,7 @@
 
 ;; avy
 (use-package avy
-  :defer t
+  :defer 3
   :bind
   ("C-'" . avy-resume)
   ("C-;" . avy-goto-char)
@@ -210,7 +212,7 @@
 
 ;; flymake
 (use-package flymake
-  :defer t
+  :defer 3
   :init
   (add-hook 'c-mode-common-hook 'flymake-mode)
   :commands flymake-mode
@@ -219,7 +221,7 @@
 ;; eglot
 ;;
 (use-package eglot
-  :defer t
+  :defer 3
   :config
   (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
@@ -231,7 +233,7 @@
 
 ;; markdown
 (use-package markdown-mode
-  :defer t
+  :defer 3
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
@@ -240,13 +242,13 @@
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
-  :defer t
+  :defer 3
   :hook (c++-mode-hook #'raibow-delimiters-mode)
 )
 
 ;; recentf
 (use-package recentf
-  :defer t
+  :defer 1
   :hook (after-init . recentf-mode)
   :custom
   (recentf-max-saved-items 100)
@@ -262,7 +264,7 @@
 
 ;; swiper
 (use-package swiper
-  :defer 1
+  :defer 2
   :ensure t
   :config
   (defun isearch-forward-or-swiper (use-swiper)
@@ -307,6 +309,7 @@
 
 ;; dashboard
 (use-package dashboard
+  :defer 1
   :diminish
   (dashboard-mode page-break-lines-mode)
   :custom
@@ -328,47 +331,40 @@
 
 ;; ace-window
 (use-package ace-window
-  :defer t
+  :defer 1
   :bind
   ("C-x o" . ace-window)
   :config
   (setq aw-keys '(?j ?k ?l ?u ?i ?o ?h ?y ?n))
   :custom-face
   (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
- )
+)
 
-;; neotree
-(use-package neotree
+;; cmake-mode
+(use-package cmake-mode
   :defer 3
-  :init
-  (setq-default neo-keymap-style 'concise)
-  :config
-  (setq neo-smart-open t)
-  (setq neo-create-file-auto-open t)
-  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  (bind-key "<f8>" 'neotree-toggle)
-  (bind-key "<left>" 'neotree-select-up-node neotree-mode-map)
-  (bind-key "<right>" 'neotree-change-root neotree-mode-map))
+  )
+(setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
+
+;; gcmh
+(use-package gcmh
+  :defer 3
+  :config (gcmh-mode 1)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
-  (when (require 'server nil t)
-    (server-start)
+  (use-package server
+    :defer 1
+    :config (server-start)
     ;; C-x C-cに割り当てる(好みに応じて)
     (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
     ;; M-x exitでEmacsを終了できるようにする
     (defalias 'exit 'save-buffers-kill-emacs)
     ;; 終了時にyes/noの問い合わせ
-    (setq confirm-kill-emacs 'yes-or-no-p)
-))
-
-;; cmake-mode
-(use-package cmake-mode
-  :defer t
-  )
-(setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
+    (setq confirm-kill-emacs 'yes-or-no-p)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
