@@ -7,6 +7,10 @@
 ;;(require 'profiler)
 ;;(profiler-start 'cpu)
 
+(defconst my-saved-file-name-handler-alist file-name-handler-alist)
+(setq file-name-handler-alist nil)
+(setq gc-cons-threshold most-positive-fixnum)
+
 (eval-and-compile
   (require 'package)
   (package-initialize)
@@ -346,12 +350,6 @@
   )
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
-;; gcmh
-(use-package gcmh
-  :defer 3
-  :config (gcmh-mode 1)
-)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -365,6 +363,12 @@
     (defalias 'exit 'save-buffers-kill-emacs)
     ;; 終了時にyes/noの問い合わせ
     (setq confirm-kill-emacs 'yes-or-no-p)))
+
+
+(setq file-name-handler-alist my-saved-file-name-handler-alist)
+;; Run GC every 60 seconds if emacs is idle.
+(run-with-idle-timer 120.0 t #'garbage-collect)
+(setq gc-cons-threshold 16777216)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
