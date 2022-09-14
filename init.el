@@ -247,7 +247,7 @@
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
   :defer 3
-  :hook (c++-mode-hook #'raibow-delimiters-mode)
+  :hook (prog-mode . rainbow-delimiters-mode)
 )
 
 ;; recentf
@@ -350,16 +350,21 @@
 )
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
-;; moody
-(use-package moody
+;; centaur tabs
+(use-package centaur-tabs
+  :demand
   :config
-  (moody-replace-mode-line-buffer-identification)
-  (moody-replace-vc-mode)
-)
+  (centaur-tabs-mode t)
+  (setq centaur-tabs-set-icons t)       ;; icon
+  (setq centaur-tabs-cycle-scope 'tabs) ;; tab group内で循環
+  :bind
+  ("C-x ," . centaur-tabs-backward)
+  ("C-x ." . centaur-tabs-forward)
+  ("C-x n" . centaur-tabs--create-new-tab))
 
 ;; setting modus themes
-(setq modus-themes-mode-line '(moody borderless))
 (setq modus-themes-syntax 'faint)
+(setq modus-themes-tabs-accented t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
