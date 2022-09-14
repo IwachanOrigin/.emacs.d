@@ -347,8 +347,19 @@
 ;; cmake-mode
 (use-package cmake-mode
   :defer 3
-  )
+)
 (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
+
+;; moody
+(use-package moody
+  :config
+  (moody-replace-mode-line-buffer-identification)
+  (moody-replace-vc-mode)
+)
+
+;; setting modus themes
+(setq modus-themes-mode-line '(moody borderless))
+(setq modus-themes-syntax 'faint)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;           emacsclientのためのserver設定             ;;
