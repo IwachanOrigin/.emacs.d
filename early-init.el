@@ -70,6 +70,8 @@
 (if(version<= "26.0.50" emacs-version)
   (global-display-line-numbers-mode)
 )
+;; column number
+(column-number-mode)
 
 ;; ff-find-other-fileで利用する拡張子の関連付けを行う
 (setq cc-other-file-alist
