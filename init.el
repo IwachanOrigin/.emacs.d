@@ -362,6 +362,11 @@
   ("C-x ." . centaur-tabs-forward)
   ("C-x n" . centaur-tabs--create-new-tab))
 
+;; doom-modeline
+(use-package doom-modeline
+  :defer 2
+  :hook (after-init . doom-modeline-mode))
+
 ;; setting modus themes
 (setq modus-themes-syntax 'faint)
 (setq modus-themes-tabs-accented t)
