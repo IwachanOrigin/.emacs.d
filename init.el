@@ -71,6 +71,15 @@
     (setq tab-width 4)      ;; tab width
 ))
 
+;; typescript
+(use-package typescript-mode
+  :defer 5
+  :init
+  (add-hook 'typescript-mode-hook '(lambda () (setq typescript-indent-level 2)))
+  (add-to-list 'auto-mode-alist '("\.ts$" . typescript-mode))
+  (add-to-list 'auto-mode-alist '("\.tsx$" . typescript-mode))
+)
+
 ;; editorconfig
 (use-package editorconfig
   :defer 2
