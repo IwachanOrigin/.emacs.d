@@ -153,67 +153,6 @@
   ("C-x b" . counsel-switch-buffer)
 )
 
-;; avy
-(use-package avy
-  :defer 3
-  :bind
-  ("C-'" . avy-resume)
-  ("C-;" . avy-goto-char)
-  ("M-j" . hydra-avy/body)
-  :preface
-  ;; fixed cursor scroll-up
-  (defun scroll-up-in-place (n)
-    (interactive "p")
-    (forward-line (- n))
-    (scroll-down n))
-  ;; fixed cursor scroll-down
-  (defun scroll-down-in-place (n)
-    (interactive "p")
-    (forward-line n)
-    (scroll-up n))
-  ;; yank inner sexp
-  (defun yank-inner-sexp ()
-    (interactive)
-    (backward-list)
-    (mark-sexp)
-    (copy-region-as-kill (region-beginning) (region-end)))
-
-  (with-eval-after-load 'hydra
-        (defhydra hydra-avy (:color pink :hint nil)
-          "
-                                                                        ╔════════╗
-        ^^Goto^^        Kill^^        Yank^^        Move^^        Misc            ║  Jump  ║
-  ──────────────────────────────────────────────────────────────────────╨────────╜
-    _c_ ← char^^        [_k_] region  [_y_] region  [_m_] region  [_n_] line number
-    _a_ ← char2 → _b_   [_K_] line    [_Y_] line    [_M_] line
-    _w_ ← word  → _W_   ^^^^^
-    _l_ ← line  → _e_   ^^^^^                                     _,_ ← f!y → _._
-  ╭──────────────────────────────────────────────────────────────────────────────╯
-                      [_q_]: quit, [_i_]: imenu, [_<SPC>_]: resume
-"
-          ("c" avy-goto-char :exit t)
-          ("a" avy-goto-char-2 :exit t)
-          ("b" avy-goto-char-below :exit t)
-          ("w" avy-goto-word-1 :exit t)
-          ("W" avy-goto-word-1-below :exit t)
-          ("l" avy-goto-line :exit t)
-          ("e" avy-goto-end-of-line :exit t)
-          ("M" avy-move-line)
-          ("m" avy-move-region)
-          ("K" avy-kill-whole-line)
-          ("k" avy-kill-region)
-          ("Y" avy-copy-line :exit t)
-          ("y" avy-copy-region :exit t)
-          ("n" goto-line :exit t)
-          ("z" avy-zap-to-char-dwim :exit t)
-          ("v" hydra-viewer/body :exit t)
-          ("<SPC>" avy-resume :exit t)
-          ("i" counsel-imenu :exit t)
-          ("," flymake-goto-previous-error)
-          ("." flymake-goto-next-error)
-          ("q" nil)))
-)
-
 ;; flymake
 (use-package flymake
   :defer 3
@@ -345,10 +284,12 @@
 )
 
 ;; cmake-mode
+;; cmake-mode
 (use-package cmake-mode
   :defer 3
+  :config
+  (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 )
-(setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
 
 ;; centaur tabs
 (use-package centaur-tabs
