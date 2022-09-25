@@ -127,31 +127,6 @@
   :hook (after-init . global-hungry-delete-mode)
   :config (setq-default hungry-delete-chars-to-skip " \t\f\v"))
 
-;; Hydra
-(use-package hydra
-  :defer 3
-  :config
-  (use-package hydra-posframe
-    :load-path "~/.emacs.d/github/hydra-posframe"
-    :custom
-    (hydra-posframe-parameters
-     '((left-fringe . 5)
-       (right-fringe . 5)))
-    :custom-face
-    (hydra-posframe-border-face ((t (:background "#6272a4"))))
-    :hook
-    (after-init . hydra-posframe-mode)))
-
-;; anzu
-(use-package anzu
-  :defer 3
-  :diminish
-  :bind
-  ("C-r"   . anzu-query-replace-regexp)
-  ("C-M-r" . anzu-query-replace-at-cursor-thing)
-  :hook
-  (after-init . global-anzu-mode))
-
 ;; counsel
 (use-package counsel
   :defer 2
