@@ -84,15 +84,11 @@
 
 ;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
 (setq ff-search-directories
-  '("." "../src" "../include")
+  '("." "../src" "../include" "../main" "../*")
 )
 
 ;; ff-find-other-fileをMeta+tで動くように設定する
 (global-set-key "\M-t" 'ff-find-other-file)
-
-;; バッファのキーを変える
-(global-set-key "\M-p" 'previous-buffer)
-(global-set-key "\M-n" 'next-buffer)
 
 ;; 環境を日本語、UTF-8にする
 (setenv "LANG" "ja_JP.UTF-8")
@@ -104,11 +100,6 @@
 
 ;; yes or no は y or n にする
 (defalias 'yes-or-no-p #'y-or-n-p)
-
-;; grep/find
-(setq find-program "\"C:\\Program Files\\Git\\usr\\bin\\find.exe\""
-      grep-program "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\""
-      null-device "/dev/null")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                 set color theme                  ;;
