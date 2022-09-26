@@ -202,8 +202,9 @@
 )
 
 ;; migemo
-;; 日本語をローマ字検索できるようにする
-;; Windows版 migemoが必要 [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
+;; This package can use the Roman alphabet to search  the japanese language.
+;; We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
+;; Please add path cmigemo.exe.
 (use-package migemo
   :defer 2
   :config
