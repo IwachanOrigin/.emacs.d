@@ -12,7 +12,7 @@ indent_size = 2
 
 # Matches multiple files with brace expansion notation
 # Set default charset
-[*.{cpp,hpp,h}]
+[*.{cpp,hpp,h,c}]
 charset = utf-8
 indent_style = space
 indent_size = 2
