@@ -164,7 +164,7 @@
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
-  :init (setq markdown-command "pandoc.exe -s --self-contained -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.min.css")
+  :init (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css")
 )
 
 ;; rainbow-delimiters
