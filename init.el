@@ -80,6 +80,14 @@
   (add-to-list 'auto-mode-alist '("\.tsx$" . typescript-mode))
 )
 
+;; glsl-mode
+(use-package glsl-mode
+  :defer 5
+  :init
+  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode))
+)
+
 ;; editorconfig
 (use-package editorconfig
   :defer 2
