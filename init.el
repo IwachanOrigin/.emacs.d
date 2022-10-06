@@ -101,13 +101,10 @@
   :defer 2
   :init (global-company-mode)
   :config
-  ;; C-n, C-pで補完候補を次/前の候補を選択
-  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-n") 'company-select-next) ;; C-n, C-pで補完候補を次/前の候補を選択
   (define-key company-active-map (kbd "C-p") 'company-select-previous)
-  ;; TABで候補を設定
-  (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
-  ;; C-sで絞り込む
-  (define-key company-active-map (kbd "C-s") 'company-filter-candidates)
+  (define-key company-active-map (kbd "<tab>") 'company-complete-selection) ;; TABで候補を設定
+  (define-key company-active-map (kbd "C-s") 'company-filter-candidates) ;; C-sで絞り込む
 )
 
 ;; all-the-icons
@@ -162,8 +159,7 @@
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
   (add-hook 'c-mode-hook 'eglot-ensure)
   (add-hook 'c++-mode-hook 'eglot-ensure)
-  ;; C-M(ESC)=WindowsKeyなので入力補完を行うためにdefine-keyを変える
-  (define-key eglot-mode-map (kbd "C-c <tab>") #'company-complete)
+  (define-key eglot-mode-map (kbd "C-c <tab>") #'company-complete) ;; C-M(ESC)=WindowsKeyなので入力補完を行うためにdefine-keyを変える
 )
 
 ;; markdown
@@ -239,8 +235,7 @@
   ;; If you want to defaultly use migemo on swiper and counsel-find-file:
   (setq ivy-re-builders-alist '((t . ivy--regex-plus)
                                    (swiper . ivy-migemo--regex-plus)
-                                   (counsel-find-file . ivy-migemo--regex-plus))
-                                   )
+                                   (counsel-find-file . ivy-migemo--regex-plus)))
 )
 
 ;; dashboard
@@ -276,7 +271,6 @@
   (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
 )
 
-;; cmake-mode
 ;; cmake-mode
 (use-package cmake-mode
   :defer 3
