@@ -73,7 +73,7 @@
 
 ;; typescript
 (use-package typescript-mode
-  :defer 5
+  :defer t
   :init
   (add-hook 'typescript-mode-hook '(lambda () (setq typescript-indent-level 2)))
   (add-to-list 'auto-mode-alist '("\.ts$" . typescript-mode))
@@ -111,14 +111,6 @@
 (use-package all-the-icons
   :defer 2)
 
-;; posframe
-(use-package posframe
-  :defer 3)
-
-;; popwin
-(use-package popwin
-  :defer 3)
-
 ;; autorevert
 (use-package autorevert
   :defer 3
@@ -142,18 +134,16 @@
   ("C-x b" . counsel-switch-buffer)
 )
 
-;; flymake
-(use-package flymake
-  :defer 3
-  :init
-  (add-hook 'c-mode-common-hook 'flymake-mode)
-  :commands flymake-mode
-)
+;; flycheck
+(use-package flycheck
+  :defer 1
+  :config
+  (add-hook 'c-mode-hook 'flycheck-mode)
+  (add-hook 'c++-mode-hook 'flycheck-mode))
 
 ;; eglot
-;;
 (use-package eglot
-  :defer 3
+  :defer 1
   :config
   (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
@@ -330,8 +320,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
- '(hydra-posframe-border-face ((t (:background "#6272a4")))))
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; profile
 ;;(profiler-report)
