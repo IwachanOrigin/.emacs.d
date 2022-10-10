@@ -141,6 +141,10 @@
   (add-hook 'c-mode-hook 'flycheck-mode)
   (add-hook 'c++-mode-hook 'flycheck-mode))
 
+(use-package flycheck-posframe
+  :after flycheck
+  :config (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+
 ;; eglot
 (use-package eglot
   :defer 1
