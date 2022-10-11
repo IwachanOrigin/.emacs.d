@@ -256,7 +256,7 @@
 
 ;; ace-window
 (use-package ace-window
-  :defer 1
+  :defer 3
   :bind
   ("C-x o" . ace-window)
   :config
@@ -274,7 +274,7 @@
 
 ;; centaur tabs
 (use-package centaur-tabs
-  :demand
+  :defer 1
   :config
   (centaur-tabs-mode t)
   (setq centaur-tabs-set-icons t)       ;; icon
