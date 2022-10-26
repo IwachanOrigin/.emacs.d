@@ -57,10 +57,11 @@
 ;; c++ mode
 (add-hook 'c++-mode-hook
  #'(lambda ()
-    (c-set-style "linux")
-    (setq indent-tabs-mode nil) ;; indent use space.
-    (setq c-basic-offset 4) ;; basic indent value
-    (setq tab-width 4)      ;; tab width
+     (c-set-style "linux")
+     (c-set-offset 'innamespace 0)
+     (setq indent-tabs-mode nil) ;; indent use space.
+     (setq c-basic-offset 4) ;; basic indent value
+     (setq tab-width 4)      ;; tab width
 ))
 ;; c mode
 (add-hook 'c-mode-hook
@@ -69,16 +70,9 @@
     (setq indent-tabs-mode nil) ;; indent use space.
     (setq c-basic-offset 4) ;; basic indent value
     (setq tab-width 4)      ;; tab width
+    (setq c-set-offset 'innamespace 0)
 ))
 
-;; typescript
-(use-package typescript-mode
-  :defer t
-  :init
-  (add-hook 'typescript-mode-hook '(lambda () (setq typescript-indent-level 2)))
-  (add-to-list 'auto-mode-alist '("\.ts$" . typescript-mode))
-  (add-to-list 'auto-mode-alist '("\.tsx$" . typescript-mode))
-)
 
 ;; glsl-mode
 (use-package glsl-mode
