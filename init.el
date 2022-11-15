@@ -60,16 +60,16 @@
      (c-set-style "linux")
      (c-set-offset 'innamespace 0)
      (setq indent-tabs-mode nil) ;; indent use space.
-     (setq c-basic-offset 4) ;; basic indent value
-     (setq tab-width 4)      ;; tab width
+     (setq c-basic-offset 2) ;; basic indent value
+     (setq tab-width 2)      ;; tab width
 ))
 ;; c mode
 (add-hook 'c-mode-hook
  #'(lambda ()
     (c-set-style "linux")
     (setq indent-tabs-mode nil) ;; indent use space.
-    (setq c-basic-offset 4) ;; basic indent value
-    (setq tab-width 4)      ;; tab width
+    (setq c-basic-offset 2) ;; basic indent value
+    (setq tab-width 2)      ;; tab width
     (setq c-set-offset 'innamespace 0)
 ))
 
