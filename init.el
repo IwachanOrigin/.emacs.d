@@ -7,10 +7,23 @@
 ;;(require 'profiler)
 ;;(profiler-start 'cpu)
 
+;; GC
+(setq gc-cons-threshold most-positive-fixnum)
+;; Run GC every 120 seconds if emacs is idle.
+(run-with-idle-timer 120.0 t #'garbage-collect)
+(add-hook 'emacs-startup-hook
+  (lambda ()
+  ;; recover default value
+    (setq gc-cons-threshold 800000)))
+
+;; magic file name
 (defconst my-saved-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
-(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'emacs-startup-hook
+  (lambda ()
+    (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 
+;; package
 (eval-and-compile
   (require 'package)
   (package-initialize)
@@ -29,30 +42,31 @@
 
   (require 'use-package))
 
-;; ちょっと透過する
+;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
 
 ;; cl-lib
-(eval-when-compile
-  (use-package cl-lib
-    :ensure t))
+;;(eval-when-compile
+;;  (use-package cl-lib
+;;    :ensure t))
 
+;; No need? 様子を見る。 2022/11/17
 ;; サブプロセスに渡すパラメータの文字コードを cp932 にする
 ;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
-(cl-loop for (func args-pos) in '((call-process        4)
-                                  (call-process-region 6)
-                                  (start-process       3))
-         do (eval `(advice-add ',func
-                               :around (lambda (orig-fun &rest args)
-                                         (setf (nthcdr ,args-pos args)
-                                               (mapcar (lambda (arg)
-                                                         (if (multibyte-string-p arg)
-                                                             (encode-coding-string arg 'cp932)
-                                                           arg))
-                                                       (nthcdr ,args-pos args)))
-                                         (apply orig-fun args))
-                               '((depth . 99))))
-)
+;;(cl-loop for (func args-pos) in '((call-process        4)
+;;                                  (call-process-region 6)
+;;                                  (start-process       3))
+;;         do (eval `(advice-add ',func
+;;                               :around (lambda (orig-fun &rest args)
+;;                                         (setf (nthcdr ,args-pos args)
+;;                                               (mapcar (lambda (arg)
+;;                                                         (if (multibyte-string-p arg)
+;;                                                             (encode-coding-string arg 'cp932)
+;;                                                           arg))
+;;                                                       (nthcdr ,args-pos args)))
+;;                                         (apply orig-fun args))
+;;                               '((depth . 99))))
+;;)
 
 ;; c++ mode
 (add-hook 'c++-mode-hook
@@ -79,15 +93,13 @@
   :defer 5
   :init
   (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
-  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode))
-)
+  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; editorconfig
 (use-package editorconfig
   :defer 2
   :init
-  (editorconfig-mode)
-)
+  (editorconfig-mode))
 (setq edconf-exec-path "~/.emacs.d/editorconfig")
 
 ;; company
@@ -95,17 +107,20 @@
   :defer 2
   :init (global-company-mode)
   :config
-  (define-key company-active-map (kbd "C-n") 'company-select-next) ;; C-n, C-pで補完候補を次/前の候補を選択
+  ;; C-n, C-p to select next/previous candidate for completion
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous)
-  (define-key company-active-map (kbd "<tab>") 'company-complete-selection) ;; TABで候補を設定
-  (define-key company-active-map (kbd "C-s") 'company-filter-candidates) ;; C-sで絞り込む
-)
+  ;; TAB to set candidates
+  (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
+  ;; Narrow by C-s
+  (define-key company-active-map (kbd "C-s") 'company-filter-candidates))
 
 ;; all-the-icons
 (use-package all-the-icons
   :defer 2)
 
 ;; autorevert
+;; Check for file updates and update buffers as well.
 (use-package autorevert
   :defer 3
   :diminish
@@ -125,8 +140,7 @@
   ("M-x" . counsel-M-x)
   ("C-x C-f" . counsel-find-file)
   ("C-x C-r" . counsel-recentf)
-  ("C-x b" . counsel-switch-buffer)
-)
+  ("C-x b" . counsel-switch-buffer))
 
 ;; flycheck
 (use-package flycheck
@@ -147,8 +161,8 @@
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
   (add-hook 'c-mode-hook 'eglot-ensure)
   (add-hook 'c++-mode-hook 'eglot-ensure)
-  (define-key eglot-mode-map (kbd "C-c <tab>") #'company-complete) ;; C-M(ESC)=WindowsKeyなので入力補完を行うためにdefine-keyを変える
-)
+  ;; C-M(ESC)=WindowsKey, so change define-key for input completion
+  (define-key eglot-mode-map (kbd "C-c <tab>") #'company-complete))
 
 ;; markdown
 (use-package markdown-mode
@@ -156,14 +170,12 @@
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
-  :init (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css")
-)
+  :init (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
   :defer 3
-  :hook (prog-mode . rainbow-delimiters-mode)
-)
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; recentf
 (use-package recentf
@@ -174,11 +186,10 @@
   (recentf-auto-cleanup 'never)
   (recentf-exclude '((expand-file-name package-user-dir)
                      "recentf"
-                     "COMMIT_EDITMSG\\'"))
- )
+                     "COMMIT_EDITMSG\\'")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;              C-sの設定を強化する                    ;;
+;;              Enhance C-s settings                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; swiper
@@ -190,8 +201,7 @@
     (interactive "p")
     (let (current-prefix-arg)
       (call-interactively (if use-swiper 'swiper 'isearch-forward))))
-  (global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
-)
+  (global-set-key (kbd "C-s") 'isearch-forward-or-swiper))
 
 ;; migemo
 ;; This package can use the Roman alphabet to search  the japanese language.
@@ -200,12 +210,13 @@
 (use-package migemo
   :defer 2
   :config
-  ;; C/Migemo を使う
+  ;; use to C/Migemo
   (setq migemo-command "cmigemo")
   (setq migemo-options '("-q" "--emacs" "-i" "\a"))
-  ;; 以下の記述は相対パスを絶対パスとして扱う術
+  ;; The following description is the art of treating relative paths as absolute paths
   ;; (expand-file-name "~/.emacs.d/init.el")
-  (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict"))  ;; 辞書のパス
+  ;; dictionary path
+  (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict"))
   (setq migemo-user-dictionary nil)
   (setq migemo-regex-dictionary nil)
   ;; charset encoding
@@ -214,7 +225,7 @@
 )
 
 ;; ivy-migemo
-;; ivy系検索でmigemoを利用できるようにする
+;; Make migemo available for ivy-based search
 (use-package ivy-migemo
   :defer 2
   :config
@@ -223,8 +234,7 @@
   ;; If you want to defaultly use migemo on swiper and counsel-find-file:
   (setq ivy-re-builders-alist '((t . ivy--regex-plus)
                                    (swiper . ivy-migemo--regex-plus)
-                                   (counsel-find-file . ivy-migemo--regex-plus)))
-)
+                                   (counsel-find-file . ivy-migemo--regex-plus))))
 
 ;; dashboard
 (use-package dashboard
@@ -236,8 +246,7 @@
   (dashboard-center-content t)
   (dashboard-items '((recents . 15)))
   :hook
-  (after-init . dashboard-setup-startup-hook)
-)
+  (after-init . dashboard-setup-startup-hook))
 
 ;; dimmer
 (use-package dimmer
@@ -245,8 +254,7 @@
   :custom
   (dimmer-fraction 0.3)
   :config
-  (dimmer-mode t)
-)
+  (dimmer-mode t))
 
 ;; ace-window
 (use-package ace-window
@@ -256,15 +264,13 @@
   :config
   (setq aw-keys '(?j ?k ?l ?u ?i ?o ?h ?y ?n))
   :custom-face
-  (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))))
-)
+  (aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; cmake-mode
 (use-package cmake-mode
   :defer 3
   :config
-  (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist))
-)
+  (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist)))
 
 ;; centaur tabs
 (use-package centaur-tabs
@@ -272,7 +278,7 @@
   :config
   (centaur-tabs-mode t)
   (setq centaur-tabs-set-icons t)       ;; icon
-  (setq centaur-tabs-cycle-scope 'tabs) ;; tab group内で循環
+  (setq centaur-tabs-cycle-scope 'tabs) ;; Circulate within a tab group
   :bind
   ("C-x ," . centaur-tabs-backward)
   ("C-x ." . centaur-tabs-forward)
@@ -288,24 +294,18 @@
 (setq modus-themes-tabs-accented t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;           emacsclientのためのserver設定             ;;
+;;       server configuration for emacsclient       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
   (use-package server
     :defer 1
     :config (server-start)
-    ;; C-x C-cに割り当てる(好みに応じて)
+    ;; Assign kill buffer to C-x C-c
     (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
-    ;; M-x exitでEmacsを終了できるようにする
+    ;; Allow Emacs to exit with M-x exit
     (defalias 'exit 'save-buffers-kill-emacs)
-    ;; 終了時にyes/noの問い合わせ
+    ;; yes/no query on exit
     (setq confirm-kill-emacs 'yes-or-no-p)))
-
-
-(setq file-name-handler-alist my-saved-file-name-handler-alist)
-;; Run GC every 60 seconds if emacs is idle.
-(run-with-idle-timer 120.0 t #'garbage-collect)
-(setq gc-cons-threshold 16777216)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

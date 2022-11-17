@@ -3,6 +3,8 @@
 ;;                           early-init.el                                  ;;
 ;;============================================================================
 
+;; GC
+(setq gc-cons-threshold most-positive-fixnum)
 ;; For Emacs 27+
 (setq package-enable-at-startup nil)
 ;; Always load newest byte code
@@ -15,17 +17,21 @@
 ;; scroll bar false
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 (push '(horizontal-scroll-bars . nil) default-frame-alist)
-;; 
+;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
 
-;; c-kで行全体を削除する
+;; Delete an entire line with c-k
 (setq kill-whole-line t)
 
-;; 空白文字を表示する
+;; Displaying Blank Characters
 (setq-default show-trailing-whitespace t)
 (set-face-background 'trailing-whitespace "#b14770")
+;; default tab-width 2
+(setq-default tab-width 2)
+;; Use spaces for tabs
+(setq-default indent-tabs-mode nil)
 
-;; Ctrl + h をバックスペースに変える
+;; Change "Ctrl + h" to backspace
 (global-set-key "\C-h" `delete-backward-char)
 
 ;; quiet start
@@ -36,28 +42,23 @@
 (defun display-startup-echo-area-message ()
   (message ""))
 
-;; 自動保存リストファイルは作らない
+;; No automatic save list file is created.
 (setq auto-save-list-file-prefix nil)
 
-;; バックアップしないようにする
+;; Do not back up
 (setq backup-inhibited t)
 
-;; 自動保存ファイルは作らない
+;; No autosave files are created.
 (setq auto-save-default nil)
-
-;; バックアップファイルを作成させない
 (setq make-backup-files nil)
 
-;; 終了時にオートセーブファイルを削除する
+;; Delete auto-save file on exit
 (setq delete-auto-save-files t)
 
-;; タブにスペースを使用する
-(setq-default indent-tabs-mode nil)
-
-;; beep とフラッシュを消す
+;; Turn off beep and flash
 (setq ring-bell-function 'ignore)
 
-;; カーソル行をハイライトする
+;; Highlight cursor line
 (global-hl-line-mode t)
 
 ;; cu, cuh
@@ -68,37 +69,34 @@
 
 ;; line number
 (if(version<= "26.0.50" emacs-version)
-  (global-display-line-numbers-mode)
-)
+    (global-display-line-numbers-mode))
+
 ;; column number
 (column-number-mode)
 
-;; ff-find-other-fileで利用する拡張子の関連付けを行う
+;; Associate extensions to be used with ff-find-other-file
 (setq cc-other-file-alist
   '(
-     ("\\.c"   (".h"))
-     ("\\.cpp"   (".h"))
-     ("\\.h"   (".c"".cpp"))
-   )
-)
+   ("\\.c"   (".h"))
+   ("\\.cpp"   (".h"))
+   ("\\.h"   (".c"".cpp"))))
 
-;; ff-find-other-filesで探す際に対象となるディレクトリを設定する
+;; Set target directories to look for with ff-find-other-files
 (setq ff-search-directories
-  '("." "../src" "../include" "../main" "../*")
-)
+  '("." "../src" "../include" "../main" "../*"))
 
-;; ff-find-other-fileをMeta+tで動くように設定する
+;; Set ff-find-other-file to work with Meta+t
 (global-set-key "\M-t" 'ff-find-other-file)
 
-;; 環境を日本語、UTF-8にする
+;; environment to Japanese, UTF-8
 (setenv "LANG" "ja_JP.UTF-8")
 (prefer-coding-system 'utf-8-unix)
 (set-file-name-coding-system 'cp932)
 (setq locale-coding-system 'utf-8-unix)
-;; プロセスが出力する文字コードを判定して、process-coding-system の DECODING の設定値を決定する
+;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
 (setq default-process-coding-system '(undecided-dos . utf-8-unix))
 
-;; yes or no は y or n にする
+;; yes or no to y or n
 (defalias 'yes-or-no-p #'y-or-n-p)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
