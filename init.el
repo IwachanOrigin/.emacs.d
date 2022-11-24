@@ -24,12 +24,11 @@
     (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 
 ;; package
-(eval-and-compile
+(eval-when-compile
   (require 'package)
   (package-initialize)
   (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 
   ;; use-package
   (unless (package-installed-p 'use-package)
@@ -91,22 +90,22 @@
 ;; glsl-mode
 (use-package glsl-mode
   :defer 5
-  :init
+  :config
   (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; editorconfig
 (use-package editorconfig
   :defer 2
-  :init
-  (editorconfig-mode))
-(setq edconf-exec-path "~/.emacs.d/editorconfig")
+  :config
+  (editorconfig-mode)
+  (setq edconf-exec-path "~/.emacs.d/editorconfig"))
 
 ;; company
 (use-package company
   :defer 2
-  :init (global-company-mode)
   :config
+  (global-company-mode)
   ;; C-n, C-p to select next/previous candidate for completion
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous)
@@ -117,7 +116,7 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer 2)
+  :defer 1)
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -170,7 +169,7 @@
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
-  :init (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+  :config (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
@@ -238,10 +237,13 @@
 
 ;; dashboard
 (use-package dashboard
-  :defer 1
+  :defer 2
   :diminish
   (dashboard-mode page-break-lines-mode)
   :custom
+  (dashboard-set-heading-icons t)
+  (dashboard-set-navigator t)
+  (dashboard-set-file-icons t)
   (dashboard-startup-banner 2)
   (dashboard-center-content t)
   (dashboard-items '((recents . 15)))
