@@ -24,7 +24,7 @@
     (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 
 ;; package
-(eval-when-compile
+(eval-and-compile
   (require 'package)
   (package-initialize)
   (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
@@ -44,48 +44,15 @@
 ;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
 
-;; cl-lib
-;;(eval-when-compile
-;;  (use-package cl-lib
-;;    :ensure t))
-
-;; No need? 様子を見る。 2022/11/17
-;; サブプロセスに渡すパラメータの文字コードを cp932 にする
-;; ref: https://w.atwiki.jp/ntemacs/pages/16.html
-;;(cl-loop for (func args-pos) in '((call-process        4)
-;;                                  (call-process-region 6)
-;;                                  (start-process       3))
-;;         do (eval `(advice-add ',func
-;;                               :around (lambda (orig-fun &rest args)
-;;                                         (setf (nthcdr ,args-pos args)
-;;                                               (mapcar (lambda (arg)
-;;                                                         (if (multibyte-string-p arg)
-;;                                                             (encode-coding-string arg 'cp932)
-;;                                                           arg))
-;;                                                       (nthcdr ,args-pos args)))
-;;                                         (apply orig-fun args))
-;;                               '((depth . 99))))
-;;)
-
-;; c++ mode
-(add-hook 'c++-mode-hook
+;; c/c++ mode
+(add-hook 'c-mode-common-hook
  #'(lambda ()
      (c-set-style "linux")
-     (c-set-offset 'innamespace 0)
      (setq indent-tabs-mode nil) ;; indent use space.
-     (setq c-basic-offset 2) ;; basic indent value
+     ;;(setq c-basic-offset 2) ;; basic indent value
      (setq tab-width 2)      ;; tab width
+     (c-set-offset 'innamespace 0)
 ))
-;; c mode
-(add-hook 'c-mode-hook
- #'(lambda ()
-    (c-set-style "linux")
-    (setq indent-tabs-mode nil) ;; indent use space.
-    (setq c-basic-offset 2) ;; basic indent value
-    (setq tab-width 2)      ;; tab width
-    (setq c-set-offset 'innamespace 0)
-))
-
 
 ;; glsl-mode
 (use-package glsl-mode
@@ -99,7 +66,7 @@
   :defer 2
   :config
   (editorconfig-mode)
-  (setq edconf-exec-path "~/.emacs.d/editorconfig"))
+  (setq editorconfig-exec-path "~/.emacs.d/editorconfig"))
 
 ;; company
 (use-package company
@@ -122,15 +89,15 @@
 ;; Check for file updates and update buffers as well.
 (use-package autorevert
   :defer 3
-  :diminish
   :hook (after-init . global-auto-revert-mode))
 
 ;; hungry-delete
 (use-package hungry-delete
   :defer 3
-  :diminish
-  :hook (after-init . global-hungry-delete-mode)
-  :config (setq-default hungry-delete-chars-to-skip " \t\f\v"))
+  :hook
+  (after-init . global-hungry-delete-mode)
+  :config
+  (setq hungry-delete-chars-to-skip " \t\f\v"))
 
 ;; counsel
 (use-package counsel
@@ -320,7 +287,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))) t))
 
 ;; profile
 ;;(profiler-report)
