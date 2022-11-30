@@ -54,6 +54,32 @@
      (c-set-offset 'innamespace 0)
 ))
 
+;; recentf
+(use-package recentf
+  :defer 0.5
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-max-saved-items 100)
+  (recentf-auto-cleanup 'never)
+  (recentf-exclude '((expand-file-name package-user-dir)
+                     "recentf"
+                     "COMMIT_EDITMSG\\'")))
+
+;; dashboard
+(use-package dashboard
+  :defer 0.1
+  :diminish
+  (dashboard-mode page-break-lines-mode)
+  :custom
+  (dashboard-set-heading-icons t)
+  (dashboard-set-navigator t)
+  (dashboard-set-file-icons t)
+  (dashboard-startup-banner 2)
+  (dashboard-center-content t)
+  (dashboard-items '((recents . 15)))
+  :hook
+  (after-init . dashboard-setup-startup-hook))
+
 ;; glsl-mode
 (use-package glsl-mode
   :defer 5
@@ -83,7 +109,7 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer 1)
+  :defer 0.1)
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -143,24 +169,13 @@
   :defer 3
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;; recentf
-(use-package recentf
-  :defer 1
-  :hook (after-init . recentf-mode)
-  :custom
-  (recentf-max-saved-items 100)
-  (recentf-auto-cleanup 'never)
-  (recentf-exclude '((expand-file-name package-user-dir)
-                     "recentf"
-                     "COMMIT_EDITMSG\\'")))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              Enhance C-s settings                ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; swiper
 (use-package swiper
-  :defer 2
+  :defer 1
   :ensure t
   :config
   (defun isearch-forward-or-swiper (use-swiper)
@@ -174,7 +189,7 @@
 ;; We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
 ;; Please add path cmigemo.exe.
 (use-package migemo
-  :defer 2
+  :defer 1
   :config
   ;; use to C/Migemo
   (setq migemo-command "cmigemo")
@@ -193,7 +208,7 @@
 ;; ivy-migemo
 ;; Make migemo available for ivy-based search
 (use-package ivy-migemo
-  :defer 2
+  :defer 1
   :config
   ;; toggle migemo
   (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
@@ -202,20 +217,6 @@
                                    (swiper . ivy-migemo--regex-plus)
                                    (counsel-find-file . ivy-migemo--regex-plus))))
 
-;; dashboard
-(use-package dashboard
-  :defer 2
-  :diminish
-  (dashboard-mode page-break-lines-mode)
-  :custom
-  (dashboard-set-heading-icons t)
-  (dashboard-set-navigator t)
-  (dashboard-set-file-icons t)
-  (dashboard-startup-banner 2)
-  (dashboard-center-content t)
-  (dashboard-items '((recents . 15)))
-  :hook
-  (after-init . dashboard-setup-startup-hook))
 
 ;; dimmer
 (use-package dimmer
@@ -243,7 +244,7 @@
 
 ;; centaur tabs
 (use-package centaur-tabs
-  :defer 1
+  :defer 0.1
   :config
   (centaur-tabs-mode t)
   (setq centaur-tabs-set-icons t)       ;; icon
@@ -255,7 +256,7 @@
 
 ;; doom-modeline
 (use-package doom-modeline
-  :defer 2
+  :defer 1
   :hook (after-init . doom-modeline-mode))
 
 ;; setting modus themes
@@ -267,7 +268,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
   (use-package server
-    :defer 1
+    :defer 0.1
     :config (server-start)
     ;; Assign kill buffer to C-x C-c
     (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
