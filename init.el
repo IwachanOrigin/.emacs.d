@@ -49,7 +49,7 @@
  #'(lambda ()
      (c-set-style "linux")
      (setq indent-tabs-mode nil) ;; indent use space.
-     ;;(setq c-basic-offset 2) ;; basic indent value
+     (setq c-basic-offset 2) ;; basic indent value
      (setq tab-width 2)      ;; tab width
      (c-set-offset 'innamespace 0)
 ))
