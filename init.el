@@ -38,8 +38,11 @@
 
   (setq use-package-always-ensure t)
   (setq use-package-expand-minimally t)
+  (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
   (require 'use-package))
+(require 'diminish) ;; if you use :diminish
+(require 'bind-key) ;; if you use any :bind variant
 
 ;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.90))
