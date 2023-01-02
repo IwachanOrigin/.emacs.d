@@ -220,7 +220,6 @@
                                    (swiper . ivy-migemo--regex-plus)
                                    (counsel-find-file . ivy-migemo--regex-plus))))
 
-
 ;; dimmer
 (use-package dimmer
   :defer 1
@@ -264,8 +263,7 @@
 
 ;; treemacs
 (use-package treemacs
-  :ensure t
-  :defer t
+  :defer 1
   :init
   (with-eval-after-load 'winum
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
@@ -350,6 +348,52 @@
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
+
+;; whitch-key
+(use-package which-key
+  :defer 2
+  :config
+  (which-key-mode t))
+
+;; shortcut key map of emacs
+(defhydra hydra-shortcut-of-emacs (:hint nil)
+  "
+^
+^shortcut-of-emacs(M-C は C-Mと同じ)
+^
+^Move^                            ^Select^                              ^Replace^
+^-----------------------------------------------------------------------------------------------
+_M-<_: バッファの先頭へ移動    _C-x h_: 全選択                      _M-x replace-string_: 文字列置換
+_M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入
+_M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換
+_M-b_: 前の単語へ移動         _M-k_: 行を切り取り
+_M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる
+_M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択
+_M-C-n_: 次の括弧終わりへ移動
+_M-C-p_: 前の括弧始まりへ移動
+"
+  ; move
+  ("M-<" beginning-of-buffer)
+  ("M->" end-of-buffer)
+  ("M-f" forward-word)
+  ("M-b" backward-word)
+  ("M-C-a" c-beginning-of-defun)
+  ("M-C-e" c-end-of-defun)
+  ("M-C-n" forward-list)
+  ("M-C-p" backward-list)
+  ; select
+  ("C-x h" mark-whole-buffer)
+  ("C-x SPC" rectangle-mark-mode)
+  ("M-k" kill-sentence)
+  ("M-SPC" just-one-space)
+  ("M-C-h" c-mark-function)
+  ; replace
+  ("M-x replace-string" replace-string))
+
+;; hydra
+(use-package hydra
+  :defer 2
+  :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
 
 ;; setting modus themes
 (setq modus-themes-syntax 'faint)
