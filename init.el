@@ -361,10 +361,10 @@
 ^
 ^shortcut-of-emacs(M-C は C-Mと同じ)
 ^
-^Move^                            ^Select^                              ^Replace^
+^Move^                            ^Select^                              ^Others^
 ^-----------------------------------------------------------------------------------------------
 _M-<_: バッファの先頭へ移動    _C-x h_: 全選択                      _M-x replace-string_: 文字列置換
-_M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入
+_M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入            _C-x C-r_: emacs restart
 _M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換
 _M-b_: 前の単語へ移動         _M-k_: 行を切り取り
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる
@@ -388,7 +388,8 @@ _M-C-p_: 前の括弧始まりへ移動
   ("M-SPC" just-one-space)
   ("M-C-h" c-mark-function)
   ; replace
-  ("M-x replace-string" replace-string))
+  ("M-x replace-string" replace-string)
+  ("C-x C-r" restart-emacs))
 
 ;; hydra
 (use-package hydra
@@ -413,18 +414,23 @@ _M-C-p_: 前の括弧始まりへ移動
     ;; yes/no query on exit
     (setq confirm-kill-emacs 'yes-or-no-p)))
 
+;; restart-emacs
+(use-package restart-emacs
+  :defer 2
+  :bind ("C-x C-r" . restart-emacs))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(treemacs editorconfig modus-themes)))
+ '(package-selected-packages '(which-key treemacs editorconfig modus-themes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))) t))
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; profile
 ;;(profiler-report)
