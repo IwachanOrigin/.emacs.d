@@ -419,6 +419,16 @@ _M-C-p_: 前の括弧始まりへ移動
   :defer 2
   :bind ("C-x C-r" . restart-emacs))
 
+;; rst.el
+(add-to-list 'load-path "~/.emacs.d/external/rst")
+(use-package rst
+  :defer 1
+  :config
+  (add-to-list 'auto-mode-alist '("\.rst$" . rst-mode))
+  (add-to-list 'auto-mode-alist '("\.rest$" . rst-mode))
+  (setq frame-background-mode 'dark)
+  (add-hook 'rst-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
