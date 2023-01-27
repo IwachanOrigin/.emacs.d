@@ -102,13 +102,27 @@
   :defer 2
   :config
   (global-company-mode)
-  ;; C-n, C-p to select next/previous candidate for completion
-  (define-key company-active-map (kbd "C-n") 'company-select-next)
-  (define-key company-active-map (kbd "C-p") 'company-select-previous)
-  ;; TAB to set candidates
-  (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
-  ;; Narrow by C-s
-  (define-key company-active-map (kbd "C-s") 'company-filter-candidates))
+  :custom
+  (company-transformers '(company-sort-by-backend-importance))
+  (company-idle-delay 0)
+  (company-echo-delay 0)
+  (company-minimum-prefix-length 2)
+  (company-selection-wrap-around t)
+  (completion-ignore-case t)
+  :bind
+  (:map company-active-map
+        ;; C-n, C-p to select next/previous candidate for completion
+        ("C-n" . 'company-select-next)
+        ("C-p" . 'company-select-previous)
+        ;; Narrow by C-s
+        ("C-s" . 'company-filter-candidates)
+        ;; C-i, TAB to set candidates
+        ("C-i" . 'company-complete-selection)
+        ([tab] . 'company-complete-selection))
+  (:map company-search-map
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous))
+)
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -264,10 +278,9 @@
 ;; treemacs
 (use-package treemacs
   :defer 1
-  :init
+  :config
   (with-eval-after-load 'winum
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
   (progn
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
           treemacs-deferred-git-apply-delay        0.5
@@ -396,10 +409,6 @@ _M-C-p_: 前の括弧始まりへ移動
   :defer 2
   :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
 
-;; setting modus themes
-(setq modus-themes-syntax 'faint)
-(setq modus-themes-tabs-accented t)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -420,14 +429,93 @@ _M-C-p_: 前の括弧始まりへ移動
   :bind ("C-x C-r" . restart-emacs))
 
 ;; rst.el
-(add-to-list 'load-path "~/.emacs.d/external/rst")
 (use-package rst
   :defer 1
+  :load-path "~/.emacs.d/external/rst"
   :config
   (add-to-list 'auto-mode-alist '("\.rst$" . rst-mode))
   (add-to-list 'auto-mode-alist '("\.rest$" . rst-mode))
   (setq frame-background-mode 'dark)
   (add-hook 'rst-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
+
+(use-package tempbuf
+  :defer 2
+  :load-path "~/.emacs.d/external/tempbuf"
+  :config
+  (add-hook 'eglot-ensure 'turn-on-tempbuf-mode)
+  (add-hook 'flycheck-posframe-mode 'turn-on-tempbuf-mode))
+
+;; lsp-mode
+(use-package lsp-mode
+  :defer 1
+  :commands lsp
+  :custom
+  ((lsp-enable-snippet t)
+   (lsp-enable-indentation nil)
+   (lsp-prefer-flymake nil)
+   (lsp-document-sync-method 2)
+   (lsp-inhibit-message t)
+   (lsp-message-project-root-warning t)
+   (create-lockfiles nil)
+   (lsp-prefer-capf t))
+  :init
+  (unbind-key "C-l")
+  :bind
+  (("C-l C-l"  . lsp)
+   ("C-l h"    . lsp-describe-session)
+   ("C-l t"    . lsp-goto-type-definition)
+   ("C-l r"    . lsp-rename)
+   ("C-l <f5>" . lsp-restart-workspace)
+   ("C-l l"    . lsp-lens-mode))
+  :hook
+  (prog-major-mode . lsp-prog-major-mode-enable))
+
+;; lsp-ui
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :after lsp-mode
+  :custom
+  ;; lsp-ui-doc
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-header t)
+  (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-max-width  60)
+  (lsp-ui-doc-max-height 20)
+  (lsp-ui-doc-use-childframe t)
+  (lsp-ui-doc-use-webkit nil)
+ 
+  ;; lsp-ui-flycheck
+  (lsp-ui-flycheck-enable t)
+ 
+  ;; lsp-ui-sideline
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-show-symbol t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-show-code-actions t)
+ 
+  ;; lsp-ui-imenu
+  (lsp-ui-imenu-enable nil)
+  (lsp-ui-imenu-kind-position 'top)
+ 
+  ;; lsp-ui-peek
+  (lsp-ui-peek-enable t)
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-peek-peek-height 30)
+  (lsp-ui-peek-list-width 30)
+  (lsp-ui-peek-fontify 'always)
+  :hook
+  (lsp-mode . lsp-ui-mode)
+  :bind
+  (("C-l s"   . lsp-ui-sideline-mode)
+   ("C-l C-d" . lsp-ui-peek-find-definitions)
+   ("C-l C-r" . lsp-ui-peek-find-references)))
+
+;; setting modus themes
+(setq modus-themes-syntax 'faint)
+(setq modus-themes-tabs-accented t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -440,7 +528,7 @@ _M-C-p_: 前の括弧始まりへ移動
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))) t))
 
 ;; profile
 ;;(profiler-report)
