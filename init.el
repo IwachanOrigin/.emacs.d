@@ -442,8 +442,10 @@ _M-C-p_: 前の括弧始まりへ移動
   :defer 2
   :load-path "~/.emacs.d/external/tempbuf"
   :config
-  (add-hook 'eglot-ensure 'turn-on-tempbuf-mode)
-  (add-hook 'flycheck-posframe-mode 'turn-on-tempbuf-mode))
+  (add-hook 'c-mode-hook 'turn-on-tempbuf-mode)
+  (add-hook 'c++-mode-hook 'turn-on-tempbuf-mode)
+  (add-hook 'flycheck-mode-hook 'turn-on-tempbuf-mode)
+  (add-hook 'find-file-hook 'turn-on-tempbuf-mode))
 
 ;; lsp-mode
 (use-package lsp-mode
