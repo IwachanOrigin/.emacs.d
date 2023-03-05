@@ -57,6 +57,12 @@
      (c-set-offset 'innamespace 0)
 ))
 
+;; js mode
+(add-hook 'js-mode-hook
+ #'(lambda ()
+     (make-local-variable 'js-indent-level)
+     (setq js-indent-level 2)))
+
 ;; recentf
 (use-package recentf
   :defer 0.5
