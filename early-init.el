@@ -36,9 +36,15 @@
 (setq inhibit-startup-message t)
 (setq inhibit-startup-screen t)
 (setq inhibit-startup-echo-area-message t)
-(setq initial-scratch-message nil)
 (defun display-startup-echo-area-message ()
   (message ""))
+
+;; Set scratch buffer screen
+(setq initial-scratch-message
+      ";;
+;; Setup finished.
+;;
+")
 
 ;; No automatic save list file is created.
 (setq auto-save-list-file-prefix nil)
