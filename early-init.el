@@ -1,3 +1,4 @@
+;;; Personal configuration -*- lexical-binding: t -*-
 
 ;;============================================================================
 ;;                           early-init.el                                  ;;
@@ -11,12 +12,9 @@
 (setq load-prefer-newer t)
 
 ;; menu bar false
-(push '(menu-bar-lines . nil) default-frame-alist)
+;;(push '(menu-bar-lines . nil) default-frame-alist)
 ;; tool bar false
 (push '(tool-bar-lines . nil) default-frame-alist)
-;; scroll bar false
-(push '(vertical-scroll-bars . nil) default-frame-alist)
-(push '(horizontal-scroll-bars . nil) default-frame-alist)
 ;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
 
@@ -61,6 +59,9 @@
 ;; Highlight cursor line
 (global-hl-line-mode t)
 
+;; Automatically pair parentheses
+(electric-pair-mode t)
+
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
@@ -69,10 +70,10 @@
 
 ;; line number
 (if(version<= "26.0.50" emacs-version)
-    (global-display-line-numbers-mode))
+    (global-display-line-numbers-mode t))
 
 ;; column number
-(column-number-mode)
+(column-number-mode t)
 
 ;; Associate extensions to be used with ff-find-other-file
 (setq cc-other-file-alist
