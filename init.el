@@ -275,6 +275,7 @@ _M-C-p_: 前の括弧始まりへ移動
   (setq frame-background-mode 'dark)
   (add-hook 'rst-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 
+;; treemacs
 (use-package treemacs
   :config
   (with-eval-after-load 'winum
@@ -360,6 +361,12 @@ _M-C-p_: 前の括弧始まりへ移動
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
+
+;; treemacs-all-the-icons
+(use-package treemacs-all-the-icons
+  :after (treemacs)
+  :config
+  (treemacs-load-theme "all-the-icons"))
 
 ;; treemacs-projectile
 (use-package treemacs-projectile
