@@ -18,6 +18,10 @@
 ;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
 
+;; Set pixel scroll precision mode
+(setq pixel-scroll-precision-mode t)
+(setq pixel-scroll-precision-large-scroll-height 40.0)
+
 ;; Delete an entire line with c-k
 (setq kill-whole-line t)
 
