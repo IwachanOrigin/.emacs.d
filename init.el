@@ -361,8 +361,18 @@ _M-C-p_: 前の括弧始まりへ移動
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
 
+;; treemacs-projectile
 (use-package treemacs-projectile
   :after (treemacs projectile))
+
+;; centaur-tabs
+(use-package centaur-tabs
+  :demand
+  :config
+  (centaur-tabs-mode t)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward))
 
 ;; default run treemacs
 (add-hook 'emacs-startup-hook 'treemacs)
