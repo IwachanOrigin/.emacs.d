@@ -3,3 +3,7 @@ recentf
 /elpa/*
 /server/*
 *.elc
+.cache/*
+.dap-breakpoints
+.extension/*
+projectile-bookmarks.eld
