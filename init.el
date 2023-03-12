@@ -275,6 +275,18 @@ _M-C-p_: 前の括弧始まりへ移動
   (setq frame-background-mode 'dark)
   (add-hook 'rst-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 
+;; hlsl-mode.el
+(use-package hlsl-mode
+  :defer 1
+  :load-path "~/.emacs.d/external/hlsl"
+  :config
+  (add-to-list 'auto-mode-alist '("\.fx$" . hlsl-mode))
+  (add-to-list 'auto-mode-alist '("\.fxh$" . hlsl-mode))
+  (add-to-list 'auto-mode-alist '("\.hlsl$" . hlsl-mode))
+  (setq frame-background-mode 'dark)
+  (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
+
+
 ;; treemacs
 (use-package treemacs
   :config
