@@ -72,6 +72,10 @@
 ;; Automatically pair parentheses
 (electric-pair-mode t)
 
+;; Ignore case when sorting
+(custom-set-variables
+ '(sort-fold-case t t))
+
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))
@@ -84,6 +88,9 @@
 
 ;; column number
 (column-number-mode t)
+
+;; Explicit end of buffer
+(setq-default indicate-empty-lines t)
 
 ;; Associate extensions to be used with ff-find-other-file
 (setq cc-other-file-alist

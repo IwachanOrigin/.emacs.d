@@ -45,7 +45,7 @@
 (require 'bind-key) ;; if you use any :bind variant
 
 ;; A little transparent.
-(set-frame-parameter (selected-frame) 'alpha '(0.90))
+(set-frame-parameter (selected-frame) 'alpha '(0.85))
 
 ;; c/c++ mode
 (add-hook 'c-mode-common-hook
@@ -205,6 +205,11 @@
   :config
   (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist)))
 
+;; hydra
+(use-package hydra
+  :defer 2
+  :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
+
 ;; shortcut key map of emacs
 (defhydra hydra-shortcut-of-emacs (:hint nil)
   "
@@ -214,12 +219,12 @@
 ^Move^                            ^Select^                              ^Others^
 ^-----------------------------------------------------------------------------------------------
 _M-<_: バッファの先頭へ移動    _C-x h_: 全選択                      _M-x replace-string_: 文字列置換
-_M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入            _C-x C-r_: emacs restart
-_M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換
-_M-b_: 前の単語へ移動         _M-k_: 行を切り取り
+_M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入            _C-x r_: emacs restart
+_M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換     _M-x sort-lines_: 選択領域の並び替え
+_M-b_: 前の単語へ移動         _M-k_: 行を切り取り                   _M-<f10>_: 最大/最小化
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択
-_M-C-n_: 次の括弧終わりへ移動
+_M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動
 _M-C-p_: 前の括弧始まりへ移動
 "
   ; move
@@ -237,14 +242,12 @@ _M-C-p_: 前の括弧始まりへ移動
   ("M-k" kill-sentence)
   ("M-SPC" just-one-space)
   ("M-C-h" c-mark-function)
-  ; replace
+  ("C-x C-r" recentf-open-files)
+  ; Others
   ("M-x replace-string" replace-string)
-  ("C-x C-r" restart-emacs))
-
-;; hydra
-(use-package hydra
-  :defer 2
-  :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
+  ("C-x r" restart-emacs)
+  ("M-x sort-lines" sort-lines)
+  ("M-<f10>" toggle-frame-maximized))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
@@ -263,7 +266,7 @@ _M-C-p_: 前の括弧始まりへ移動
 ;; restart-emacs
 (use-package restart-emacs
   :defer 2
-  :bind ("C-x C-r" . restart-emacs))
+  :bind ("C-x r" . restart-emacs))
 
 ;; rst.el
 (use-package rst
@@ -438,6 +441,13 @@ _M-C-p_: 前の括弧始まりへ移動
   ("C-," . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
 
+(use-package dimmer
+  :config
+  (setq dimmer-fraction 0.4)
+  (setq dimmer-adjustment-mode :background)
+  (dimmer-mode t)
+ )
+
 ;; default run treemacs
 (add-hook 'emacs-startup-hook 'treemacs)
 
@@ -446,13 +456,14 @@ _M-C-p_: 前の括弧始まりへ移動
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(which-key treemacs editorconfig modus-themes)))
+ '(package-selected-packages '(which-key treemacs editorconfig modus-themes))
+ '(sort-fold-case t t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c"))) t))
+ '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; profile
 ;;(profiler-report)
