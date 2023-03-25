@@ -137,7 +137,6 @@
   :config
   (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
   (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
-  (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
   (add-hook 'c-mode-hook 'eglot-ensure)
   (add-hook 'c++-mode-hook 'eglot-ensure)
   ;; C-M(ESC)=WindowsKey, so change define-key for input completion
@@ -297,6 +296,18 @@ _M-C-p_: 前の括弧始まりへ移動
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
   (with-eval-after-load 'treemacs
     (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action))
+  (setq treemacs-python-executable
+        (when (eq system-type 'windows-nt)
+          (->> "where python"
+               (shell-command-to-string)
+               (s-trim)
+               (s-lines)
+               (--first
+                (->> (concat it " --version")
+                     (shell-command-to-string)
+                     (s-trim)
+                     (s-replace "Python " "")
+                     (version<= "3"))))))
   (progn
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
           treemacs-deferred-git-apply-delay        0.5
@@ -366,7 +377,7 @@ _M-C-p_: 前の括弧始まりへ移動
       (`(t . t)
        (treemacs-git-mode 'deferred))
       (`(t . _)
-       (treemacs-git-mode 'simple)))
+       (treemacs-git-mode 'extended)))
 
     (treemacs-hide-gitignored-files-mode nil))
   :bind
