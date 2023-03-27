@@ -47,6 +47,38 @@
 ;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.85))
 
+;; Optimization
+(when (eq window-system 'w32)
+  (setq w32-get-true-file-attributes nil
+        w32-pipe-read-delay 0
+        w32-pipe-buffer-size (* 64 1024)))
+
+(setq read-process-output-max #x10000)
+(setq ffap-machine-p-known 'reject)
+
+;; useful to IME
+(use-package tr-ime
+;  :defer 0.1
+  :config
+  (tr-ime-standard-install)
+  (setq default-input-method "W32-IME")
+  (w32-ime-initialize)
+  ;; IME のモードライン表示設定
+  (setq-default w32-ime-mode-line-state-indicator "[--]")
+  (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
+  ;; IME 初期化
+  (w32-ime-initialize)
+  ;; IME 制御（yes/no などの入力の時に IME を off にする）
+  (wrap-function-to-control-ime 'universal-argument t nil)
+  (wrap-function-to-control-ime 'read-string nil nil)
+  (wrap-function-to-control-ime 'read-char nil nil)
+  (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
+  (wrap-function-to-control-ime 'y-or-n-p nil nil)
+  (wrap-function-to-control-ime 'yes-or-no-p nil nil)
+  (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
+  (wrap-function-to-control-ime 'register-read-with-preview nil nil))
+
+
 ;; c/c++ mode
 (add-hook 'c-mode-common-hook
  #'(lambda ()
@@ -341,7 +373,7 @@ _M-C-p_: 前の括弧始まりへ移動
           treemacs-indentation                     2
           treemacs-indentation-string              " "
           treemacs-is-never-other-window           nil
-          treemacs-max-git-entries                 5000
+          treemacs-max-git-entries                 10000
           treemacs-missing-project-action          'ask
           treemacs-move-forward-on-expand          nil
           treemacs-no-png-images                   nil
@@ -466,7 +498,11 @@ _M-C-p_: 前の括弧始まりへ移動
   (setq dimmer-fraction 0.4)
   (setq dimmer-adjustment-mode :background)
   (dimmer-mode t)
- )
+  )
+
+;; Vertical partitioning is preferred over horizontal partitioning
+(setq split-width-threshold 160)
+(setq split-height-threshold nil)
 
 ;; default run treemacs
 (add-hook 'emacs-startup-hook 'treemacs)
