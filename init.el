@@ -41,7 +41,6 @@
   (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
   (require 'use-package)
-  (require 'diminish) ;; if you use :diminish
   (require 'bind-key) ;; if you use any :bind variant
 )
 
