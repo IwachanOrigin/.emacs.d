@@ -12,7 +12,7 @@
 (setq load-prefer-newer t)
 
 ;; menu bar false
-;;(push '(menu-bar-lines . nil) default-frame-alist)
+(push '(menu-bar-lines . nil) default-frame-alist)
 ;; tool bar false
 (push '(tool-bar-lines . nil) default-frame-alist)
 ;; No implicit resizing
