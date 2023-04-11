@@ -40,9 +40,10 @@
   (setq use-package-expand-minimally t)
   (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
-  (require 'use-package))
-(require 'diminish) ;; if you use :diminish
-(require 'bind-key) ;; if you use any :bind variant
+  (require 'use-package)
+  (require 'diminish) ;; if you use :diminish
+  (require 'bind-key) ;; if you use any :bind variant
+)
 
 ;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.85))
@@ -425,15 +426,11 @@ _M-C-p_: 前の括弧始まりへ移動
   :config
   (setq dimmer-fraction 0.4)
   (setq dimmer-adjustment-mode :background)
-  (dimmer-mode t)
-  )
+  (dimmer-mode t))
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
-
-;; default run treemacs
-(add-hook 'emacs-startup-hook 'treemacs)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
