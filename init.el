@@ -417,8 +417,8 @@ _M-C-p_: 前の括弧始まりへ移動
 	    (t
 	     (centaur-tabs-get-group-name (current-buffer))))))
   :bind
-  ("C-." . centaur-tabs-backward)
-  ("C-," . centaur-tabs-forward)
+  ("C-," . centaur-tabs-backward)
+  ("C-." . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
 
 (use-package dimmer
