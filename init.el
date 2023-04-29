@@ -133,8 +133,7 @@
         ([tab] . 'company-complete-selection))
   (:map company-search-map
         ("C-n" . company-select-next)
-        ("C-p" . company-select-previous))
-)
+        ("C-p" . company-select-previous)))
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -183,6 +182,12 @@
             "--pch-storage=memory"
             "--header-insertion=never"
             "--header-insertion-decorators=0"))))
+
+  (with-eval-after-load 'flymake
+    (define-key flymake-mode-map (kbd "C-c ! n") nil)
+    (define-key flymake-mode-map (kbd "C-c ! p") nil)
+    (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
+    (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
   (add-hook 'c-mode-hook #'eglot-ensure)
   (add-hook 'c++-mode-hook #'eglot-ensure))
@@ -266,7 +271,7 @@ _M-<_: バッファの先頭へ移動    _C-x h_: 全選択                     
 _M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入            _C-x r_: emacs restart
 _M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換     _M-x sort-lines_: 選択領域の並び替え
 _M-b_: 前の単語へ移動         _M-k_: 行を切り取り                   _M-<f10>_: 最大/最小化
-_M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる
+_M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_:toggle-truncate-lines
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動
 _M-C-p_: 前の括弧始まりへ移動
@@ -291,7 +296,8 @@ _M-C-p_: 前の括弧始まりへ移動
   ("M-x replace-string" replace-string)
   ("C-x r" restart-emacs)
   ("M-x sort-lines" sort-lines)
-  ("M-<f10>" toggle-frame-maximized))
+  ("M-<f10>" toggle-frame-maximized)
+  ("C-x x t" toggle-truncate-lines))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
@@ -335,39 +341,39 @@ _M-C-p_: 前の括弧始まりへ移動
 
 
 ;; treemacs
-(use-package treemacs
-  :config
-  (setq treemacs-python-executable
-        (when (eq system-type 'windows-nt)
-          (->> "where python"
-               (shell-command-to-string)
-               (s-trim)
-               (s-lines)
-               (--first
-                (->> (concat it " --version")
-                     (shell-command-to-string)
-                     (s-trim)
-                     (s-replace "Python " "")
-                     (version<= "3"))))))
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t d"   . treemacs-select-directory)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
+;;(use-package treemacs
+;;  :config
+;;  (setq treemacs-python-executable
+;;        (when (eq system-type 'windows-nt)
+;;          (->> "where python"
+;;               (shell-command-to-string)
+;;               (s-trim)
+;;               (s-lines)
+;;               (--first
+;;                (->> (concat it " --version")
+;;                     (shell-command-to-string)
+;;                     (s-trim)
+;;                     (s-replace "Python " "")
+;;                     (version<= "3"))))))
+;;  :bind
+;;  (:map global-map
+;;        ("M-0"       . treemacs-select-window)
+;;        ("C-x t 1"   . treemacs-delete-other-windows)
+;;        ("C-x t t"   . treemacs)
+;;        ("C-x t d"   . treemacs-select-directory)
+;;        ("C-x t B"   . treemacs-bookmark)
+;;        ("C-x t C-t" . treemacs-find-file)
+;;        ("C-x t M-t" . treemacs-find-tag)))
 
 ;; treemacs-all-the-icons
-(use-package treemacs-all-the-icons
-  :after (treemacs)
-  :config
-  (treemacs-load-theme "all-the-icons"))
+;;(use-package treemacs-all-the-icons
+;;  :after (treemacs)
+;;  :config
+;;  (treemacs-load-theme "all-the-icons"))
 
 ;; treemacs-projectile
-(use-package treemacs-projectile
-  :after (treemacs projectile))
+;;(use-package treemacs-projectile
+;;  :after (treemacs projectile))
 
 ;; centaur-tabs
 (use-package centaur-tabs
