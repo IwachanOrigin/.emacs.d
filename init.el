@@ -137,7 +137,19 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer 0.1)
+  :config
+  (when (member "all-the-icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'prepend))
+  (when (member "file-icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'prepend))
+  (when (member "FontAwesome" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'prepend))
+  (when (member "Material Icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'prepend))
+  (when (member "octicons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "octicons") nil 'prepend))
+  (when (member "Weather Icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'prepend)))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -386,6 +398,9 @@ _M-C-p_: 前の括弧始まりへ移動
   (setq centaur-tabs-set-icons t)
   (setq centaur-tabs-set-bar 'over)
   (setq centaur-tabs-set-modified-marker t)
+  (setq centaur-tabs-modified-marker " ●")
+  (setq centaur-tabs-set-close-button t)
+  (setq centaur-tabs-close-button " ×")
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
   (defun centaur-tabs-buffer-groups ()
