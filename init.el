@@ -270,13 +270,13 @@
 _M-<_: バッファの先頭へ移動    _C-x h_: 全選択                      _M-x replace-string_: 文字列置換
 _M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入            _C-x r_: emacs restart
 _M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換     _M-x sort-lines_: 選択領域の並び替え
-_M-b_: 前の単語へ移動         _M-k_: 行を切り取り                   _M-<f10>_: 最大/最小化
-_M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_:toggle-truncate-lines
-_M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択
-_M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動
+_M-b_: 前の単語へ移動         _M-k_: 行を切り取り                   _M-<f10>_: fullscreen/default
+_M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_: toggle-truncate-lines
+_M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択              _C-c n_: flymake next error
+_M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動            _C-c p_: flymake prev error
 _M-C-p_: 前の括弧始まりへ移動
 "
-  ; move
+  ; Move
   ("M-<" beginning-of-buffer)
   ("M->" end-of-buffer)
   ("M-f" forward-word)
@@ -285,7 +285,7 @@ _M-C-p_: 前の括弧始まりへ移動
   ("M-C-e" c-end-of-defun)
   ("M-C-n" forward-list)
   ("M-C-p" backward-list)
-  ; select
+  ; Select
   ("C-x h" mark-whole-buffer)
   ("C-x SPC" rectangle-mark-mode)
   ("M-k" kill-sentence)
@@ -297,7 +297,9 @@ _M-C-p_: 前の括弧始まりへ移動
   ("C-x r" restart-emacs)
   ("M-x sort-lines" sort-lines)
   ("M-<f10>" toggle-frame-maximized)
-  ("C-x x t" toggle-truncate-lines))
+  ("C-x x t" toggle-truncate-lines)
+  ("C-c n" flymake-goto-next-error)
+  ("C-c p" flymake-goto-prev-error))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
