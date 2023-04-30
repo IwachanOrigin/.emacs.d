@@ -266,13 +266,24 @@
   :config
   (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist)))
 
+;; helper func to hydra menu
+(defun my/hydra-disable-dimmer ()
+  (when (bound-and-true-p dimmer-mode)
+    (dimmer-mode -1)))
+
+(defun my/hydra-enable-dimmer ()
+  (unless (bound-and-true-p dimmer-mode)
+    (dimmer-mode 1)))
+
 ;; hydra
 (use-package hydra
   :defer 2
   :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
 
 ;; shortcut key map of emacs
-(defhydra hydra-shortcut-of-emacs (:hint nil)
+(defhydra hydra-shortcut-of-emacs (:hint nil
+                                   :pre (my/hydra-disable-dimmer)
+                                   :post (my/hydra-enable-dimmer))
   "
 ^
 ^shortcut-of-emacs(M-C は C-Mと同じ)
@@ -444,6 +455,7 @@ _M-C-p_: 前の括弧始まりへ移動
   ("C-." . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
 
+;; dimmer
 (use-package dimmer
   :config
   (setq dimmer-fraction 0.4)
