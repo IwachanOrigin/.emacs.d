@@ -58,7 +58,6 @@
 
 ;; useful to IME
 (use-package tr-ime
-;  :defer 0.1
   :config
   (tr-ime-standard-install)
   (setq default-input-method "W32-IME")
@@ -297,7 +296,7 @@ _M-b_: 前の単語へ移動         _M-k_: 行を切り取り                  
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_: toggle-truncate-lines
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択              _C-c n_: flymake next error
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動            _C-c p_: flymake prev error
-_M-C-p_: 前の括弧始まりへ移動
+_M-C-p_: 前の括弧始まりへ移動                                     _C-x C-n_: dired-subtree toggle
 "
   ; Move
   ("M-<" beginning-of-buffer)
@@ -322,7 +321,8 @@ _M-C-p_: 前の括弧始まりへ移動
   ("M-<f10>" toggle-frame-maximized)
   ("C-x x t" toggle-truncate-lines)
   ("C-c n" flymake-goto-next-error)
-  ("C-c p" flymake-goto-prev-error))
+  ("C-c p" flymake-goto-prev-error)
+  ("C-x C-n" dired-subtree-toggle))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
@@ -363,42 +363,6 @@ _M-C-p_: 前の括弧始まりへ移動
   (add-to-list 'auto-mode-alist '("\.hlsl$" . hlsl-mode))
   (setq frame-background-mode 'dark)
   (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
-
-
-;; treemacs
-;;(use-package treemacs
-;;  :config
-;;  (setq treemacs-python-executable
-;;        (when (eq system-type 'windows-nt)
-;;          (->> "where python"
-;;               (shell-command-to-string)
-;;               (s-trim)
-;;               (s-lines)
-;;               (--first
-;;                (->> (concat it " --version")
-;;                     (shell-command-to-string)
-;;                     (s-trim)
-;;                     (s-replace "Python " "")
-;;                     (version<= "3"))))))
-;;  :bind
-;;  (:map global-map
-;;        ("M-0"       . treemacs-select-window)
-;;        ("C-x t 1"   . treemacs-delete-other-windows)
-;;        ("C-x t t"   . treemacs)
-;;        ("C-x t d"   . treemacs-select-directory)
-;;        ("C-x t B"   . treemacs-bookmark)
-;;        ("C-x t C-t" . treemacs-find-file)
-;;        ("C-x t M-t" . treemacs-find-tag)))
-
-;; treemacs-all-the-icons
-;;(use-package treemacs-all-the-icons
-;;  :after (treemacs)
-;;  :config
-;;  (treemacs-load-theme "all-the-icons"))
-
-;; treemacs-projectile
-;;(use-package treemacs-projectile
-;;  :after (treemacs projectile))
 
 ;; centaur-tabs
 (use-package centaur-tabs
@@ -461,6 +425,19 @@ _M-C-p_: 前の括弧始まりへ移動
   (setq dimmer-fraction 0.4)
   (setq dimmer-adjustment-mode :background)
   (dimmer-mode t))
+
+;; dired-sidebar
+(use-package dired-sidebar
+  :defer 1
+  :commands (dired-sidebar-toggle-sidebar)
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+  (setq dired-sidebar-theme 'icons)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t)
+  :bind
+  (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
