@@ -114,6 +114,11 @@
 ;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
 (setq default-process-coding-system '(undecided-dos . utf-8-unix))
 
+;; Set font
+(when (member "Cascadia Code PL" (font-family-list))
+  (set-fontset-font t 'unicode (font-spec :family "Cascadia Code PL") nil 'prepend))
+(set-face-attribute 'default nil :family "Cascadia Code PL" :height 100 :weight 'Light)
+
 ;; yes or no to y or n
 (defalias 'yes-or-no-p #'y-or-n-p)
 
