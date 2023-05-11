@@ -108,6 +108,20 @@
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig"))
 
+;; dap-mode hook func
+(defun load-project-debug-config ()
+  (let ((debug-config (concat (projectile-project-root) "debug-config.el")))
+    (when (file-exists-p debug-config)
+      (load debug-config))))
+
+;; projectile
+(use-package projectile
+  :defer 2
+  :config
+  (projectile-mode 1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (add-hook 'projectile-after-switch-project-hook 'load-project-debug-config))
+
 ;; company
 (use-package company
   :defer 2
@@ -438,6 +452,29 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   (setq dired-sidebar-use-custom-font t)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
+
+;; dap-mode
+(use-package dap-mode
+  :defer 2
+  :config
+  (dap-mode 1)
+  (dap-tooltip-mode 1)
+  (dap-ui-controls-mode 1)
+  (require 'dap-lldb)
+  ;;; set the debugger executable (c++)
+  (setq dap-lldb-debug-program '("C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe")))
+
+(use-package lsp-mode
+  :defer 2
+  :config
+  (add-hook 'c++-mode-hook #'lsp)
+  (setq lsp-lldb-executable "C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe"))
+
+(use-package lsp-ui
+  :defer 2
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+  (setq lsp-ui-doc-enable nil))
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
