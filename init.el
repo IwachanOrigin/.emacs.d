@@ -58,6 +58,7 @@
 
 ;; useful to IME
 (use-package tr-ime
+  :defer 0.01
   :config
   (tr-ime-standard-install)
   (setq default-input-method "W32-IME")
@@ -150,6 +151,7 @@
 
 ;; all-the-icons
 (use-package all-the-icons
+  :defer 0.01
   :config
   (when (member "all-the-icons" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'prepend))
@@ -232,7 +234,6 @@
 ;; swiper
 (use-package swiper
   :defer 1
-  :ensure t
   :config
   (defun isearch-forward-or-swiper (use-swiper)
     (interactive "p")
@@ -343,7 +344,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when (eq window-system 'w32)
   (use-package server
-    :defer 0.1
+    :defer 0.01
     :config (server-start)
     ;; Assign kill buffer to C-x C-c
     (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
@@ -359,7 +360,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 
 ;; rst.el
 (use-package rst
-  :defer 1
+  :defer 2
   :load-path "~/.emacs.d/external/rst"
   :config
   (add-to-list 'auto-mode-alist '("\.rst$" . rst-mode))
@@ -380,6 +381,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 
 ;; centaur-tabs
 (use-package centaur-tabs
+  :defer 0.01
   :demand
   :config
   (setq centaur-tabs-style "bar")
@@ -435,6 +437,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 
 ;; dimmer
 (use-package dimmer
+  :defer 1
   :config
   (setq dimmer-fraction 0.4)
   (setq dimmer-adjustment-mode :background)
