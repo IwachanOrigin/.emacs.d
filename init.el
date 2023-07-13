@@ -225,7 +225,9 @@
   :mode (("\\.md\\'" . gfm-mode)
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
-  :config (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+  :config
+  (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css")
+  (setq markdown-fontify-code-blocks-natively t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              Enhance C-s settings                ;;
@@ -289,6 +291,16 @@
   (unless (bound-and-true-p dimmer-mode)
     (dimmer-mode 1)))
 
+;; need to pandoc, latex, eisvogel.latex
+(defun pandoc-markdown-pdf ()
+  "create beamer slids."
+  (interactive)
+  (setq infilename (buffer-file-name))
+  (setq outfilename (replace-regexp-in-string ".md" ".pdf" infilename))
+  (setq cmd-str (concat "pandoc.exe " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Meiryo UI\""))
+  (shell-command-to-string cmd-str))
+(global-set-key (kbd "C-x C-l") 'pandoc-markdown-pdf)
+
 ;; hydra
 (use-package hydra
   :defer 2
@@ -312,6 +324,7 @@ _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つに�
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択              _C-c n_: flymake next error
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動            _C-c p_: flymake prev error
 _M-C-p_: 前の括弧始まりへ移動                                     _C-x C-n_: dired-subtree toggle
+                                                              _C-x C-l_: pandoc-markdown-pdf
 "
   ; Move
   ("M-<" beginning-of-buffer)
@@ -337,7 +350,8 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   ("C-x x t" toggle-truncate-lines)
   ("C-c n" flymake-goto-next-error)
   ("C-c p" flymake-goto-prev-error)
-  ("C-x C-n" dired-subtree-toggle))
+  ("C-x C-n" dired-subtree-toggle)
+  ("C-x C-l" pandoc-markdown-pdf))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
