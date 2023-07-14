@@ -7,7 +7,8 @@
 ;; GC
 (setq gc-cons-threshold most-positive-fixnum)
 ;; For Emacs 27+
-(setq package-enable-at-startup nil)
+(setq package-enable-at-startup nil
+      package-quickstart nil)
 ;; Always load newest byte code
 (setq load-prefer-newer t)
 
@@ -15,26 +16,12 @@
 (push '(menu-bar-lines . nil) default-frame-alist)
 ;; tool bar false
 (push '(tool-bar-lines . nil) default-frame-alist)
+;; scroll bar false
+(push '(scroll-bar-mode . nil) default-frame-alist)
+;; vertical scroll bars false
+(push '(vertical-scroll-bars . nil) default-frame-alist)
 ;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
-
-;; Set pixel scroll precision mode
-(setq pixel-scroll-precision-mode t)
-(setq pixel-scroll-precision-large-scroll-height 40.0)
-
-;; Delete an entire line with c-k
-(setq kill-whole-line t)
-
-;; Displaying Blank Characters
-(setq-default show-trailing-whitespace t)
-(set-face-background 'trailing-whitespace "#b14770")
-;; default tab-width 2
-(setq-default tab-width 2)
-;; Use spaces for tabs
-(setq-default indent-tabs-mode nil)
-
-;; Change "Ctrl + h" to backspace
-(global-set-key "\C-h" `delete-backward-char)
 
 ;; quiet start
 (setq inhibit-startup-message t)
@@ -43,26 +30,29 @@
 (defun display-startup-echo-area-message ()
   (message ""))
 
-;; Set scratch buffer screen
-(setq initial-scratch-message
-      ";;
-;; Setup finished.
-;;
-")
+;; Displaying Blank Characters
+(setq-default show-trailing-whitespace t)
+(set-face-background 'trailing-whitespace "#b14770")
+;; Explicit end of buffer
+(setq-default indicate-empty-lines t)
+(setq-default indicate-buffer-boundaries 'left)
+
+;; default tab-width 2
+(setq-default tab-width 2)
+;; Use spaces for tabs
+(setq-default indent-tabs-mode nil)
 
 ;; No automatic save list file is created.
 (setq auto-save-list-file-prefix nil)
-
 ;; Do not back up
 (setq backup-inhibited t)
-
 ;; No autosave files are created.
 (setq auto-save-default nil)
 (setq make-backup-files nil)
-
 ;; Delete auto-save file on exit
 (setq delete-auto-save-files t)
-
+;; Disable lockfiles. i.e. #foo.txt
+(setq create-lockfiles nil)
 ;; Turn off beep and flash
 (setq ring-bell-function 'ignore)
 
@@ -70,11 +60,14 @@
 (global-hl-line-mode t)
 
 ;; Automatically pair parentheses
-(electric-pair-mode t)
+(electric-pair-mode 1)
 
 ;; Ignore case when sorting
 (custom-set-variables
  '(sort-fold-case t t))
+
+;; Always add a newline automatically at the end of a file while saving
+(setq-default require-final-newline t)
 
 ;; cu, cuh
 (add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
@@ -83,14 +76,16 @@
 (add-to-list 'auto-mode-alist '("\\.c\\'" . c++-mode))
 
 ;; line number
-(if(version<= "26.0.50" emacs-version)
-    (global-display-line-numbers-mode t))
+(when (version<= "26.0.50" emacs-version)
+  (global-display-line-numbers-mode t))
 
-;; column number
-(column-number-mode t)
+;; column number off
+(column-number-mode nil)
 
-;; Explicit end of buffer
-(setq-default indicate-empty-lines t)
+;; Output custom setting to custom.el.
+;; i.e. (custom-set-variables~~~ (custom-set-faces~~~~
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file t)
 
 ;; Associate extensions to be used with ff-find-other-file
 (setq cc-other-file-alist
@@ -105,6 +100,10 @@
 
 ;; Set ff-find-other-file to work with Meta+t
 (global-set-key "\M-t" 'ff-find-other-file)
+;; Change "Ctrl + h" to backspace
+(global-set-key "\C-h" `delete-backward-char)
+;; Delete an entire line with c-k
+(setq kill-whole-line t)
 
 ;; environment to Japanese, UTF-8
 (setenv "LANG" "ja_JP.UTF-8")
@@ -117,13 +116,28 @@
 ;; yes or no to y or n
 (defalias 'yes-or-no-p #'y-or-n-p)
 
+;; Set scratch buffer screen
+(setq initial-scratch-message
+      ";;
+;; Setup finished.
+;;
+")
+
+;; Highlight matching pairs of parentheses.
+(setq show-paren-delay 0)
+(show-paren-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                 set color theme                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(load-theme 'modus-vivendi t)
+;; if emacs-version more than 28, load-theme is modus-vivendi.
+;; if not emacs-version more than 28, load-theme is wonbat. 
+(if (version<= "28.0.00" emacs-version)
+    (load-theme 'modus-vivendi t)
+  (load-theme 'wombat t))
 
 ;; Set font
 (when (member "Cascadia Code PL Light" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "Cascadia Code PL Light") nil 'prepend))
-(set-face-attribute 'default nil :family "Cascadia Code PL Light" :height 100 :weight 'Light)
+  (set-fontset-font t 'unicode (font-spec :family "Cascadia Code PL Light") nil 'prepend)
+  (set-face-attribute 'default nil :family "Cascadia Code PL Light" :height 100 :weight 'Light))
 
