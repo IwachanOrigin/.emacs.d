@@ -78,7 +78,6 @@
   (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
   (wrap-function-to-control-ime 'register-read-with-preview nil nil))
 
-
 ;; c/c++ mode
 (add-hook 'c-mode-common-hook
  #'(lambda ()
@@ -108,12 +107,6 @@
   :config
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig"))
-
-;; dap-mode hook func
-(defun load-project-debug-config ()
-  (let ((debug-config (concat (projectile-project-root) "debug-config.el")))
-    (when (file-exists-p debug-config)
-      (load debug-config))))
 
 ;; projectile
 (use-package projectile
@@ -261,8 +254,7 @@
   (setq migemo-regex-dictionary nil)
   ;; charset encoding
   ;;(setq migemo-coding-system 'utf-8-unix)
-  (setq migemo-coding-system 'cp932-unix)
-)
+  (setq migemo-coding-system 'cp932-unix))
 
 ;; ivy-migemo
 ;; Make migemo available for ivy-based search
@@ -384,7 +376,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 
 ;; hlsl-mode.el
 (use-package hlsl-mode
-  :defer 1
+  :defer 5
   :load-path "~/.emacs.d/external/hlsl"
   :config
   (add-to-list 'auto-mode-alist '("\.fx$" . hlsl-mode))
@@ -449,14 +441,6 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   ("C-." . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
 
-;; dimmer
-(use-package dimmer
-  :defer 1
-  :config
-  (setq dimmer-fraction 0.4)
-  (setq dimmer-adjustment-mode :background)
-  (dimmer-mode t))
-
 ;; dired-sidebar
 (use-package dired-sidebar
   :defer 1
@@ -470,46 +454,9 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
-;; dap-mode
-(use-package dap-mode
-  :defer 2
-  :config
-  (dap-mode 1)
-  (dap-tooltip-mode 1)
-  (dap-ui-controls-mode 1)
-  (require 'dap-lldb)
-  ;;; set the debugger executable (c++)
-  (setq dap-lldb-debug-program '("C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe")))
-
-(use-package lsp-mode
-  :defer 2
-  :config
-  (add-hook 'c++-mode-hook #'lsp)
-  (setq lsp-lldb-executable "C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe"))
-
-(use-package lsp-ui
-  :defer 2
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-  (setq lsp-ui-doc-enable nil))
-
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages '(which-key treemacs editorconfig modus-themes))
- '(sort-fold-case t t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; profile
 ;;(profiler-report)
