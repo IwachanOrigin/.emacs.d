@@ -57,27 +57,27 @@
 (setq ffap-machine-p-known 'reject)
 
 ;; useful to IME
-(use-package tr-ime
-  :defer 0.01
-  :config
-  (tr-ime-standard-install)
-  (setq default-input-method "W32-IME")
-  (w32-ime-initialize)
-  ;; IME のモードライン表示設定
-  (setq-default w32-ime-mode-line-state-indicator "[--]")
-  (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
-  ;; IME 初期化
-  (w32-ime-initialize)
-  ;; IME 制御（yes/no などの入力の時に IME を off にする）
-  (wrap-function-to-control-ime 'universal-argument t nil)
-  (wrap-function-to-control-ime 'read-string nil nil)
-  (wrap-function-to-control-ime 'read-char nil nil)
-  (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
-  (wrap-function-to-control-ime 'y-or-n-p nil nil)
-  (wrap-function-to-control-ime 'yes-or-no-p nil nil)
-  (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
-  (wrap-function-to-control-ime 'register-read-with-preview nil nil))
-
+(when (eq window-system 'w32)
+  (use-package tr-ime
+    :defer 0.01
+    :config
+    (tr-ime-standard-install)
+    (setq default-input-method "W32-IME")
+    (w32-ime-initialize)
+    ;; IME のモードライン表示設定
+    (setq-default w32-ime-mode-line-state-indicator "[--]")
+    (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
+    ;; IME 初期化
+    (w32-ime-initialize)
+    ;; IME 制御（yes/no などの入力の時に IME を off にする）
+    (wrap-function-to-control-ime 'universal-argument t nil)
+    (wrap-function-to-control-ime 'read-string nil nil)
+    (wrap-function-to-control-ime 'read-char nil nil)
+    (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
+    (wrap-function-to-control-ime 'y-or-n-p nil nil)
+    (wrap-function-to-control-ime 'yes-or-no-p nil nil)
+    (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
+    (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
 
 ;; c/c++ mode
 (add-hook 'c-mode-common-hook
@@ -108,12 +108,6 @@
   :config
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig"))
-
-;; dap-mode hook func
-(defun load-project-debug-config ()
-  (let ((debug-config (concat (projectile-project-root) "debug-config.el")))
-    (when (file-exists-p debug-config)
-      (load debug-config))))
 
 ;; projectile
 (use-package projectile
@@ -226,7 +220,10 @@
          ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
-  (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css")
+  (when (eq system-type 'windows-nt)
+    (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+  (unless (eq system-type 'windows-nt)
+    (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -255,14 +252,15 @@
   (setq migemo-options '("-q" "--emacs" "-i" "\a"))
   ;; The following description is the art of treating relative paths as absolute paths
   ;; (expand-file-name "~/.emacs.d/init.el")
-  ;; dictionary path
-  (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict"))
+  ;; dictionary path and charset encoding
+  (when (eq system-type 'windows-nt)
+    (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict"))
+    (setq migemo-coding-system 'cp932-unix))
+  (unless (eq system-type 'windows-nt)
+    (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/utf-8/migemo-dict"))
+    (setq migemo-coding-system 'utf-8-unix))
   (setq migemo-user-dictionary nil)
-  (setq migemo-regex-dictionary nil)
-  ;; charset encoding
-  ;;(setq migemo-coding-system 'utf-8-unix)
-  (setq migemo-coding-system 'cp932-unix)
-)
+  (setq migemo-regex-dictionary nil))
 
 ;; ivy-migemo
 ;; Make migemo available for ivy-based search
@@ -297,7 +295,10 @@
   (interactive)
   (setq infilename (buffer-file-name))
   (setq outfilename (replace-regexp-in-string ".md" ".pdf" infilename))
-  (setq cmd-str (concat "pandoc.exe " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Meiryo UI\""))
+  (when (eq system-type 'windows-nt)
+    (setq cmd-str (concat "pandoc.exe " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Meiryo UI\"")))
+  (unless (eq system-type 'windows-nt)
+    (setq cmd-str (concat "pandoc " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Noto Sans CJK JP\"")))
   (shell-command-to-string cmd-str))
 (global-set-key (kbd "C-x C-l") 'pandoc-markdown-pdf)
 
@@ -356,7 +357,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when (eq window-system 'w32)
+(when (eq system-type 'windows-nt)
   (use-package server
     :defer 0.01
     :config (server-start)
@@ -384,7 +385,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
 
 ;; hlsl-mode.el
 (use-package hlsl-mode
-  :defer 1
+  :defer 5
   :load-path "~/.emacs.d/external/hlsl"
   :config
   (add-to-list 'auto-mode-alist '("\.fx$" . hlsl-mode))
@@ -449,14 +450,6 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   ("C-." . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
 
-;; dimmer
-(use-package dimmer
-  :defer 1
-  :config
-  (setq dimmer-fraction 0.4)
-  (setq dimmer-adjustment-mode :background)
-  (dimmer-mode t))
-
 ;; dired-sidebar
 (use-package dired-sidebar
   :defer 1
@@ -470,46 +463,9 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
-;; dap-mode
-(use-package dap-mode
-  :defer 2
-  :config
-  (dap-mode 1)
-  (dap-tooltip-mode 1)
-  (dap-ui-controls-mode 1)
-  (require 'dap-lldb)
-  ;;; set the debugger executable (c++)
-  (setq dap-lldb-debug-program '("C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe")))
-
-(use-package lsp-mode
-  :defer 2
-  :config
-  (add-hook 'c++-mode-hook #'lsp)
-  (setq lsp-lldb-executable "C:\\Program Files\\LLVM\\bin\\lldb-vscode.exe"))
-
-(use-package lsp-ui
-  :defer 2
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-  (setq lsp-ui-doc-enable nil))
-
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages '(which-key treemacs editorconfig modus-themes))
- '(sort-fold-case t t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:height 4.0 :foreground "#f1fa8c")))))
 
 ;; profile
 ;;(profiler-report)
