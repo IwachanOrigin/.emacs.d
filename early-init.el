@@ -136,8 +136,4 @@
     (load-theme 'modus-vivendi t)
   (load-theme 'wombat t))
 
-;; Set font
-(when (member "Cascadia Code PL Light" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "Cascadia Code PL Light") nil 'prepend)
-  (set-face-attribute 'default nil :family "Cascadia Code PL Light" :height 100 :weight 'Light))
 

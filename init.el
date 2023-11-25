@@ -107,7 +107,7 @@
   :defer 2
   :config
   (editorconfig-mode)
-  (setq editorconfig-exec-path "~/.emacs.d/editorconfig"))
+  (setq editorconfig-exec-path "~/.emacs.d/.editorconfig"))
 
 ;; projectile
 (use-package projectile
@@ -142,6 +142,14 @@
   (:map company-search-map
         ("C-n" . company-select-next)
         ("C-p" . company-select-previous)))
+
+;; font settings
+(when (member "HackGen" (font-family-list))
+  (set-fontset-font t 'unicode (font-spec :family "HackGen") nil 'prepend)
+  (set-face-attribute 'default nil :family "HackGen" :height 120 :weight 'Regular))
+(when (eq window-system 'w32)
+  (when (member "Segoe UI Emoji" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'prepend)))
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -302,6 +310,26 @@
   (shell-command-to-string cmd-str))
 (global-set-key (kbd "C-x C-l") 'pandoc-markdown-pdf)
 
+;; view-mode keybind func
+(defun setup-view-mode-keymap ()
+  "setup view-mode keymap"
+  (let ((keymap view-mode-map))
+    (define-key keymap (kbd "p") 'previous-line)
+    (define-key keymap (kbd "n") 'next-line)
+    (define-key keymap (kbd "b") 'backward-char)
+    (define-key keymap (kbd "f") 'forward-char)))
+
+;; view-mode hook
+(add-hook 'view-mode-hook 'setup-view-mode-keymap)
+
+;; view-mode toggle
+(defun toggle-view-mode ()
+  "toggle view-mode"
+  (interactive)
+  (cond (view-mode (view-mode -1) (set-cursor-color "#ffffff"))
+        (t (view-mode 1) (set-cursor-color "#ff0000"))))
+(global-set-key (kbd "C-x x v") 'toggle-view-mode)
+
 ;; hydra
 (use-package hydra
   :defer 2
@@ -322,10 +350,10 @@ _M->_: バッファの末尾へ移動    _C-x SPC_: C-o > 空白挿入          
 _M-f_: 次の単語へ移動                : C-t 文字列 > 文字列置換     _M-x sort-lines_: 選択領域の並び替え
 _M-b_: 前の単語へ移動         _M-k_: 行を切り取り                   _M-<f10>_: fullscreen/default
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_: toggle-truncate-lines
-_M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択              _C-c n_: flymake next error
-_M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動            _C-c p_: flymake prev error
-_M-C-p_: 前の括弧始まりへ移動                                     _C-x C-n_: dired-subtree toggle
-                                                              _C-x C-l_: pandoc-markdown-pdf
+_M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択               _C-c n_: flymake next error
+_M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動             _C-c p_: flymake prev error
+_M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-x C-n_: dired-subtree toggle
+                                                             _C-x C-l_: pandoc-markdown-pdf
 "
   ; Move
   ("M-<" beginning-of-buffer)
@@ -343,6 +371,7 @@ _M-C-p_: 前の括弧始まりへ移動                                     _C-x
   ("M-SPC" just-one-space)
   ("M-C-h" c-mark-function)
   ("C-x C-r" recentf-open-files)
+  ("C-x x v" toggle-view-mode)
   ; Others
   ("M-x replace-string" replace-string)
   ("C-x r" restart-emacs)
