@@ -146,7 +146,7 @@
 ;; font settings
 (when (member "HackGen" (font-family-list))
   (set-fontset-font t 'unicode (font-spec :family "HackGen") nil 'prepend)
-  (set-face-attribute 'default nil :family "HackGen" :height 120 :weight 'Regular))
+  (set-face-attribute 'default nil :family "HackGen" :height 110 :weight 'Regular))
 (when (eq window-system 'w32)
   (when (member "Segoe UI Emoji" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'prepend)))
@@ -311,23 +311,34 @@
 (global-set-key (kbd "C-x C-l") 'pandoc-markdown-pdf)
 
 ;; view-mode keybind func
-(defun setup-view-mode-keymap ()
+(defun my/setup-view-mode-keymap ()
   "setup view-mode keymap"
   (let ((keymap view-mode-map))
     (define-key keymap (kbd "p") 'previous-line)
     (define-key keymap (kbd "n") 'next-line)
     (define-key keymap (kbd "b") 'backward-char)
-    (define-key keymap (kbd "f") 'forward-char)))
+    (define-key keymap (kbd ",") 'centaur-tabs-backward)
+    (define-key keymap (kbd ".") 'centaur-tabs-forward)))
+
+;; update keymap and cursor color
+(defun my/update-cursor-color-viewmode ()
+  "Checked view-mode status, if view-mode is true, cursor color to red and adjust to keymap."
+  (if view-mode
+      (set-cursor-color "#ff0000")
+    (set-cursor-color "#ffffff")))
 
 ;; view-mode hook
-(add-hook 'view-mode-hook 'setup-view-mode-keymap)
+(add-hook 'view-mode-hook 'my/update-cursor-color-viewmode)
+(add-hook 'view-mode-hook 'my/setup-view-mode-keymap)
+(add-hook 'post-command-hook 'my/update-cursor-color-viewmode)
+(add-hook 'buffer-list-update-hook 'my/update-cursor-color-viewmode)
 
 ;; view-mode toggle
 (defun toggle-view-mode ()
   "toggle view-mode"
   (interactive)
-  (cond (view-mode (view-mode -1) (set-cursor-color "#ffffff"))
-        (t (view-mode 1) (set-cursor-color "#ff0000"))))
+  (cond (view-mode (view-mode -1))
+        (t (view-mode 1))))
 (global-set-key (kbd "C-x x v") 'toggle-view-mode)
 
 ;; hydra
@@ -433,9 +444,10 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   (setq centaur-tabs-set-icons t)
   (setq centaur-tabs-set-bar 'over)
   (setq centaur-tabs-set-modified-marker t)
-  (setq centaur-tabs-modified-marker " ●")
+  (setq centaur-tabs-modified-marker " **")
   (setq centaur-tabs-set-close-button t)
   (setq centaur-tabs-close-button " ×")
+  (setq centaur-tabs-label-fixed-length 12)
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
   (defun centaur-tabs-buffer-groups ()
