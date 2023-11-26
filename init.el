@@ -144,9 +144,9 @@
         ("C-p" . company-select-previous)))
 
 ;; font settings
-(when (member "HackGen" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "HackGen") nil 'prepend)
-  (set-face-attribute 'default nil :family "HackGen" :height 110 :weight 'Regular))
+(when (member "UDEV Gothic" (font-family-list))
+  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic") nil 'prepend)
+  (set-face-attribute 'default nil :family "UDEV Gothic" :height 110 :weight 'Regular))
 (when (eq window-system 'w32)
   (when (member "Segoe UI Emoji" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'prepend)))
@@ -448,8 +448,8 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   (setq centaur-tabs-set-close-button t)
   (setq centaur-tabs-close-button " ×")
   (setq centaur-tabs-label-fixed-length 40)
-  (when (member "HackGen" (font-family-list))
-    (centaur-tabs-change-fonts "HackGen" 100))
+  (when (member "UDEV Gothic" (font-family-list))
+    (centaur-tabs-change-fonts "UDEV Gothic" 100))
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
   (defun centaur-tabs-buffer-groups ()
