@@ -1,9 +1,13 @@
+
 /auto-save-list/*
-recentf
 /elpa/*
 /server/*
-*.elc
 .cache/*
-.dap-breakpoints
 .extension/*
+
+recentf
+*.elc
+.dap-breakpoints
 projectile-bookmarks.eld
+custom.el
+
