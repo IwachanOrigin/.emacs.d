@@ -447,7 +447,9 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   (setq centaur-tabs-modified-marker " **")
   (setq centaur-tabs-set-close-button t)
   (setq centaur-tabs-close-button " ×")
-  (setq centaur-tabs-label-fixed-length 12)
+  (setq centaur-tabs-label-fixed-length 40)
+  (when (member "HackGen" (font-family-list))
+    (centaur-tabs-change-fonts "HackGen" 100))
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
   (defun centaur-tabs-buffer-groups ()
@@ -490,6 +492,27 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   ("C-," . centaur-tabs-backward)
   ("C-." . centaur-tabs-forward)
   ("C-c t" . centaur-tabs-counsel-switch-group))
+
+;; Re-implementation of centaur-tabs-buffer-tab-label.
+;; Omit the middle of long filenames, as in Visual Studio.
+(defun my/centaur-tabs-buffer-tab-label (tab)
+  "Return a label for TAB.
+That is, a string used to represent it on the tab bar, truncating the middle if it's too long."
+  ;; Render tab.
+  (format " %s"
+          (let* ((bufname (if centaur-tabs--buffer-show-groups
+                              (centaur-tabs-tab-tabset tab)
+                            (buffer-name (car tab))))
+                 (maxlen centaur-tabs-label-fixed-length))
+            (if (> (length bufname) maxlen)
+                (let ((start (substring bufname 0 (/ maxlen 3)))
+                      (end (substring bufname (- (length bufname) (/ maxlen 3)))))
+                  (concat start "..." end))
+              bufname))))
+
+;; Set up your own function after centaur-tabs loading is complete.
+(with-eval-after-load 'centaur-tabs
+  (setq centaur-tabs-tab-label-function #'my/centaur-tabs-buffer-tab-label))
 
 ;; dired-sidebar
 (use-package dired-sidebar
