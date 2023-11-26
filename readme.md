@@ -1,7 +1,10 @@
+
 # init.el
-iwachanのemacs設定。
-パッケージを色々と入れまくったりしてカッコいいemacsを目指していましたが結局テキストエディタにしか使わないことに気づきました。  
-起動も遅くなるので、基本的にemacsのデフォルト機能だけで実現出来ることで設定を行ってます。
+
+This repository is iwachan's emacs setting.  
+I use to NT version emacs for windows.  
+Windows 10 or Windows 11.  
+We delay loading as much as possible.  
 
 ## Authors
 Yuji Iwanaga
