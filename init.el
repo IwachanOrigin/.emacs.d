@@ -80,13 +80,17 @@
     (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
 
 ;; c/c++ mode
+;; ref : https://i-s-2.hatenadiary.org/entry/20091026/1256557730
+;; ref : https://www.gnu.org/software/emacs/manual/
+;; ref : https://www.gnu.org/software/emacs/manual/html_mono/ccmode.html
 (add-hook 'c-mode-common-hook
  #'(lambda ()
      (c-set-style "linux")
      (setq indent-tabs-mode nil) ;; indent use space.
      (setq c-basic-offset 2) ;; basic indent value
      (setq tab-width 2)      ;; tab width
-     (c-set-offset 'innamespace 0)
+     (c-set-offset 'innamespace 0) ;; namespace pos
+     (c-set-offset 'case-label '+) ;; switch label pos
 ))
 
 ;; js mode
