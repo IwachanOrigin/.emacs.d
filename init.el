@@ -93,8 +93,16 @@
      (c-set-offset 'case-label '+) ;; switch label pos
 ))
 
+(use-package c-ts-mode
+  :ensure nil
+  :disabled t
+  :if (version < "29.0" emacs-version)
+  :init
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode)))
+
 ;; js mode
-(add-hook 'js-mode-hook
+(add-hook 'js-ts-mode-hook
  #'(lambda ()
      (make-local-variable 'js-indent-level)
      (setq js-indent-level 2)))
