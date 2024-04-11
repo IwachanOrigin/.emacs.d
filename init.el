@@ -533,8 +533,8 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
 ;; GPG key auto update
-(use-package gnu-elpa-keyring-update
-  :defer 5)
+(setq package-gnupghome-dir "~/.emacs.d/elpa/gnupg")
+(use-package gnu-elpa-keyring-update)
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
