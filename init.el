@@ -204,7 +204,7 @@
 
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-       '((c-mode c++-mode)
+       '((c-ts-mode c++-ts-mode)
          . ("clangd"
             "-j=8"
             "--log=error"
@@ -226,10 +226,10 @@
   (add-hook 'c++-mode-hook #'eglot-ensure))
 
 ;; markdown
-(use-package markdown-mode
+(use-package markdown-ts-mode
   :defer 3
-  :mode (("\\.md\\'" . gfm-mode)
-         ("\\.txt\\'" . gfm-mode))
+  :mode (("\\.md\\'" . markdown-ts-mode)
+         ("\\.txt\\'" . markdown-ts-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
   (when (eq system-type 'windows-nt)
@@ -287,10 +287,11 @@
                                    (counsel-find-file . ivy-migemo--regex-plus))))
 
 ;; cmake-mode
-(use-package cmake-mode
+(use-package cmake-ts-mode
   :defer 3
   :config
-  (setq auto-mode-alist (append '(("CMakeLists\\.txt\\'" . cmake-mode)) '(("\\.cmake\\'" . cmake-mode)) auto-mode-alist)))
+  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-ts-mode)))
 
 ;; helper func to hydra menu
 (defun my/hydra-disable-dimmer ()
@@ -530,6 +531,10 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
   (setq dired-sidebar-use-custom-font t)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
+
+;; GPG key auto update
+(use-package gnu-elpa-keyring-update
+  :defer 5)
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
