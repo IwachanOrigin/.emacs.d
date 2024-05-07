@@ -27,8 +27,9 @@
 (eval-and-compile
   (require 'package)
   (package-initialize)
-  (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 
   ;; use-package
   (unless (package-installed-p 'use-package)
@@ -78,6 +79,61 @@
     (wrap-function-to-control-ime 'yes-or-no-p nil nil)
     (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
     (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
+
+
+;; M-x `treesit-install-language-grammar` to install language grammar.
+(setq treesit-language-source-alist
+      '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+        (c . ("https://github.com/tree-sitter/tree-sitter-c"))
+        (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+        (css . ("https://github.com/tree-sitter/tree-sitter-css"))
+        (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
+        (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
+        (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+        (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
+        (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main" "src" nil nil)
+        (go . ("https://github.com/tree-sitter/tree-sitter-go"))
+        (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
+        (haskell "https://github.com/tree-sitter/tree-sitter-haskell" "master" "src" nil nil)
+        (html . ("https://github.com/tree-sitter/tree-sitter-html"))
+        (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
+        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+        (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+        (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
+        (make . ("https://github.com/alemuller/tree-sitter-make"))
+        (markdown . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
+        (markdown-inline . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src"))
+        (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
+        (org . ("https://github.com/milisims/tree-sitter-org"))
+        (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+        (php . ("https://github.com/tree-sitter/tree-sitter-php"))
+        (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
+        (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
+        (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+        (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
+        (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
+        (scala "https://github.com/tree-sitter/tree-sitter-scala" "master" "src" nil nil)
+        (toml "https://github.com/tree-sitter/tree-sitter-toml" "master" "src" nil nil)
+        (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
+        (kotlin . ("https://github.com/fwcd/tree-sitter-kotlin"))
+        (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
+        (zig . ("https://github.com/GrayJack/tree-sitter-zig"))
+        (mojo . ("https://github.com/HerringtonDarkholme/tree-sitter-mojo"))))
+
+(setq major-mode-remap-alist
+      '((c-mode          . c-ts-mode)
+        (c++-mode        . c++-ts-mode)
+        (cmake-mode      . cmake-ts-mode)
+        (conf-toml-mode  . toml-ts-mode)
+        (css-mode        . css-ts-mode)
+        (js-mode         . js-ts-mode)
+        (js-json-mode    . json-ts-mode)
+        (python-mode     . python-ts-mode)
+        (sh-mode         . bash-ts-mode)
+        (typescript-mode . typescript-ts-mode)
+        (rust-mode       . rust-ts-mode)
+        (java-mode       . java-ts-mode)
+        ))
 
 ;; c/c++ mode
 ;; ref : https://i-s-2.hatenadiary.org/entry/20091026/1256557730
@@ -234,10 +290,10 @@
   (add-hook 'c++-mode-hook #'eglot-ensure))
 
 ;; markdown
-(use-package markdown-ts-mode
+(use-package markdown-mode
   :defer 3
-  :mode (("\\.md\\'" . markdown-ts-mode)
-         ("\\.txt\\'" . markdown-ts-mode))
+  :mode (("\\.md\\'" . gfm-mode)
+         ("\\.txt\\'" . gfm-mode))
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
   (when (eq system-type 'windows-nt)
@@ -245,6 +301,11 @@
   (unless (eq system-type 'windows-nt)
     (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
+
+(use-package markdown-ts-mode
+  :mode (("\\.md\\'" . markdown-ts-mode)
+         ("\\.txt\\'" . markdown-ts-mode))
+  :defer 't)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              Enhance C-s settings                ;;
