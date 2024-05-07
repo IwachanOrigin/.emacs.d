@@ -149,16 +149,8 @@
      (c-set-offset 'case-label '+) ;; switch label pos
 ))
 
-(use-package c-ts-mode
-  :ensure nil
-  :disabled t
-  :if (version < "29.0" emacs-version)
-  :init
-  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode)))
-
 ;; js mode
-(add-hook 'js-ts-mode-hook
+(add-hook 'js-mode-hook
  #'(lambda ()
      (make-local-variable 'js-indent-level)
      (setq js-indent-level 2)))
@@ -213,28 +205,29 @@
 
 ;; font settings
 (when (member "UDEV Gothic" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic") nil 'prepend)
+  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic") nil 'append)
   (set-face-attribute 'default nil :family "UDEV Gothic" :height 110 :weight 'Regular))
 (when (eq window-system 'w32)
   (when (member "Segoe UI Emoji" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'prepend)))
+    (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'append)))
 
 ;; all-the-icons
 (use-package all-the-icons
   :defer 0.01
+  :if (display-graphic-p)
   :config
   (when (member "all-the-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'prepend))
+    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
   (when (member "file-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'prepend))
+    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append))
   (when (member "FontAwesome" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'prepend))
+    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append))
   (when (member "Material Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'prepend))
+    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append))
   (when (member "octicons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "octicons") nil 'prepend))
+    (set-fontset-font t 'unicode (font-spec :family "octicons") nil 'append))
   (when (member "Weather Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'prepend)))
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
