@@ -286,8 +286,8 @@
     (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
-  (add-hook 'c-mode-hook #'eglot-ensure)
-  (add-hook 'c++-mode-hook #'eglot-ensure))
+  (add-hook 'c-ts-mode-hook #'eglot-ensure)
+  (add-hook 'c++-ts-mode-hook #'eglot-ensure))
 
 ;; markdown
 (use-package markdown-mode
@@ -301,11 +301,6 @@
   (unless (eq system-type 'windows-nt)
     (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
-
-(use-package markdown-ts-mode
-  :mode (("\\.md\\'" . markdown-ts-mode)
-         ("\\.txt\\'" . markdown-ts-mode))
-  :defer 't)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;              Enhance C-s settings                ;;
@@ -437,7 +432,7 @@ _M-b_: 前の単語へ移動         _M-k_: 行を切り取り                  
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_: toggle-truncate-lines
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択               _C-c n_: flymake next error
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動             _C-c p_: flymake prev error
-_M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-x C-n_: dired-subtree toggle
+_M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-x C-n_: dired-sidebar-toggle-sidebar
                                                              _C-x C-l_: pandoc-markdown-pdf
 "
   ; Move
@@ -465,7 +460,7 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   ("C-x x t" toggle-truncate-lines)
   ("C-c n" flymake-goto-next-error)
   ("C-c p" flymake-goto-prev-error)
-  ("C-x C-n" dired-subtree-toggle)
+  ("C-x C-n" dired-sidebar-toggle-sidebar)
   ("C-x C-l" pandoc-markdown-pdf))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
