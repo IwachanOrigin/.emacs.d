@@ -343,9 +343,9 @@
                                    (swiper . ivy-migemo--regex-plus)
                                    (counsel-find-file . ivy-migemo--regex-plus))))
 
-;; cmake-mode
+;; cmake-ts-mode
 (use-package cmake-ts-mode
-  :defer 3
+  :defer 2
   :config
   (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-ts-mode)))
