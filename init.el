@@ -587,12 +587,17 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 (use-package dired-sidebar
   :defer 1
   :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
   :config
   (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
   (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
   (setq dired-sidebar-theme 'icons)
   (setq dired-sidebar-use-term-integration t)
-  (setq dired-sidebar-use-custom-font t)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
