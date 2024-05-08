@@ -127,6 +127,7 @@
 (setq major-mode-remap-alist
       '((c-mode          . c-ts-mode)
         (c++-mode        . c++-ts-mode)
+        (c-or-c++-mode   . c-or-c++-ts-mode)
         (cmake-mode      . cmake-ts-mode)
         (conf-toml-mode  . toml-ts-mode)
         (css-mode        . css-ts-mode)
@@ -141,8 +142,10 @@
 
 ;; c/c++ mode
 ;; ref : https://www.reddit.com/r/emacs/comments/16zhgrd/comment/k4aw2yi/?utm_source=share&utm_medium=web2x&context=3
+;; ref : https://github.com/emacs-mirror/emacs/blob/master/admin/notes/tree-sitter/starter-guide
+;; Debug -> M-x treesit-inspect-mode
 (defun myfunc/c-ts-indent-style ()
-  "Override the built-in BSD indentation style with some additional rules"
+  "Override the built-in linux indentation style with some additional rules"
   `(
     ;; align function arguments to the start of the first one, offset if standalone
     ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
@@ -151,49 +154,36 @@
     ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
     ((parent-is "parameter_list") (nth-sibling 1) 0)
     ;; indent inside case blocks
-    ((parent-is "case_statement") standalone-parent c-ts-mode-indent-offset)
-    ;; do not indent preprocessor statements
-    ((node-is "preproc") column-0 0)
-    ;; append to bsd style
-    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))
-    (setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-    (setq tab-width 2)               ;; tab width
-    (setq indent-tabs-mode nil)      ;; indent use space.
-  ))
-(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
+    ;; nearly (c-set-offset 'innamespace [0])
+    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
+    ;;
+    ((node-is "}") parent-bol 0)
+    ((node-is "]") parent-bol 0)
+    ((node-is ")") parent-bol 0)
+    ((query "(do_statement body: (compound_statement) @indent)") parent-bol 0)
+    ((query "(do_statement \"while\" @indent)") parent-bol 0)
+    ((query "(if_statement consequence: (compound_statement) @indent)") parent-bol 0)
+    ((query "(else_clause (compound_statement) @indent)") parent-bol 0)
+    ((query "(switch_statement body: (compound_statement) @indent)") parent-bol 0)
+    ((query "(compound_statement (case_statement) @indent)") parent-bol 0)
+    ((query "(for_statement body: (compound_statement) @indent)") parent-bol 0)
+    ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
+    ;; append to linux style
+    ,@(alist-get 'linux (c-ts-mode--indent-styles 'cpp))))
 
-;(use-package c++-ts-mode
-;  ;:ensure nil ;; emacs built-in
-;  :preface
-;  (defun myfunc/c-ts-indent-style()
-;  "Override the built-in BSD indentation style with some additional rules"
-;  `(
-;    ;; align function arguments to the start of the first one, offset if standalone
-;    ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
-;    ((parent-is "argument_list") (nth-sibling 1) 0)
-;    ;; same for parameters
-;    ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
-;    ((parent-is "parameter_list") (nth-sibling 1) 0)
-;    ;; indent inside case blocks
-;    ((parent-is "case_statement") standalone-parent c-ts-mode-indent-offset)
-;    ;; do not indent preprocessor statements
-;    ((node-is "preproc") column-0 0)
-;    ;; append to bsd style
-;    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
-;  :bind (:map c++-ts-mode-map
-;                ("M-<up>" . treesit-beginning-of-defun)
-;                ("M-<down>" . treesit-end-of-defun))
-;  :config
-;  (setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-;  (setq tab-width 2)               ;; tab width
-;  (setq indent-tabs-mode nil)      ;; indent use space.
-;  (setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style))
+(use-package c-ts-mode
+ :if (treesit-language-available-p 'c)
+ :custom
+ (c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+ (tab-width 2)               ;; tab width
+ (indent-tabs-mode nil)      ;; indent use space.
+ (c-ts-mode-indent-style #'myfunc/c-ts-indent-style))
 
 ;; ref : https://i-s-2.hatenadiary.org/entry/20091026/1256557730
 ;; ref : https://www.gnu.org/software/emacs/manual/
 ;; ref : https://www.gnu.org/software/emacs/manual/html_mono/ccmode.html
 (defun myfunc/c-cpp-mode-style ()
-  (setq c-set-style "bsd")
+  (setq c-set-style "linux")
   (setq indent-tabs-mode nil) ;; indent use space.
   (setq c-basic-offset 2) ;; basic indent value only c/c++-mode
   (setq tab-width 2)      ;; tab width
