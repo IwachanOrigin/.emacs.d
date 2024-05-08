@@ -45,6 +45,10 @@
   (require 'bind-key) ;; if you use any :bind variant
 )
 
+;; GPG key auto update
+(setq package-gnupghome-dir "~/.emacs.d/elpa/gnupg")
+(use-package gnu-elpa-keyring-update)
+
 ;; A little transparent.
 (set-frame-parameter (selected-frame) 'alpha '(0.85))
 
@@ -68,9 +72,9 @@
     ;; IME のモードライン表示設定
     (setq-default w32-ime-mode-line-state-indicator "[--]")
     (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
-    ;; IME 初期化
+    ;; IME Init
     (w32-ime-initialize)
-    ;; IME 制御（yes/no などの入力の時に IME を off にする）
+    ;; IME Control (Turn off IME when typing yes/no, etc)
     (wrap-function-to-control-ime 'universal-argument t nil)
     (wrap-function-to-control-ime 'read-string nil nil)
     (wrap-function-to-control-ime 'read-char nil nil)
@@ -136,18 +140,69 @@
         ))
 
 ;; c/c++ mode
+;; ref : https://www.reddit.com/r/emacs/comments/16zhgrd/comment/k4aw2yi/?utm_source=share&utm_medium=web2x&context=3
+(defun myfunc/c-ts-indent-style ()
+  "Override the built-in BSD indentation style with some additional rules"
+  `(
+    ;; align function arguments to the start of the first one, offset if standalone
+    ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
+    ((parent-is "argument_list") (nth-sibling 1) 0)
+    ;; same for parameters
+    ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
+    ((parent-is "parameter_list") (nth-sibling 1) 0)
+    ;; indent inside case blocks
+    ((parent-is "case_statement") standalone-parent c-ts-mode-indent-offset)
+    ;; do not indent preprocessor statements
+    ((node-is "preproc") column-0 0)
+    ;; append to bsd style
+    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))
+    (setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+    (setq tab-width 2)               ;; tab width
+    (setq indent-tabs-mode nil)      ;; indent use space.
+  ))
+(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
+
+;(use-package c++-ts-mode
+;  ;:ensure nil ;; emacs built-in
+;  :preface
+;  (defun myfunc/c-ts-indent-style()
+;  "Override the built-in BSD indentation style with some additional rules"
+;  `(
+;    ;; align function arguments to the start of the first one, offset if standalone
+;    ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
+;    ((parent-is "argument_list") (nth-sibling 1) 0)
+;    ;; same for parameters
+;    ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
+;    ((parent-is "parameter_list") (nth-sibling 1) 0)
+;    ;; indent inside case blocks
+;    ((parent-is "case_statement") standalone-parent c-ts-mode-indent-offset)
+;    ;; do not indent preprocessor statements
+;    ((node-is "preproc") column-0 0)
+;    ;; append to bsd style
+;    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
+;  :bind (:map c++-ts-mode-map
+;                ("M-<up>" . treesit-beginning-of-defun)
+;                ("M-<down>" . treesit-end-of-defun))
+;  :config
+;  (setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+;  (setq tab-width 2)               ;; tab width
+;  (setq indent-tabs-mode nil)      ;; indent use space.
+;  (setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style))
+
 ;; ref : https://i-s-2.hatenadiary.org/entry/20091026/1256557730
 ;; ref : https://www.gnu.org/software/emacs/manual/
 ;; ref : https://www.gnu.org/software/emacs/manual/html_mono/ccmode.html
-(add-hook 'c-mode-common-hook
- #'(lambda ()
-     (c-set-style "linux")
-     (setq indent-tabs-mode nil) ;; indent use space.
-     (setq c-basic-offset 2) ;; basic indent value
-     (setq tab-width 2)      ;; tab width
-     (c-set-offset 'innamespace 0) ;; namespace pos
-     (c-set-offset 'case-label '+) ;; switch label pos
-))
+(defun myfunc/c-cpp-mode-style ()
+  (setq c-set-style "bsd")
+  (setq indent-tabs-mode nil) ;; indent use space.
+  (setq c-basic-offset 2) ;; basic indent value only c/c++-mode
+  (setq tab-width 2)      ;; tab width
+  (c-set-offset 'innamespace 0) ;; namespace pos
+  (c-set-offset 'case-label '+) ;; switch label pos
+)
+
+(add-hook 'c-mode-hook 'myfunc/c-cpp-mode-style)
+(add-hook 'c++-mode-hook 'myfunc/c-cpp-mode-style)
 
 ;; js mode
 (add-hook 'js-mode-hook
@@ -261,7 +316,7 @@
 
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-       '((c-ts-mode c++-ts-mode)
+       '((c-mode c++-mode c-ts-mode c++-ts-mode)
          . ("clangd"
             "-j=8"
             "--log=error"
@@ -279,6 +334,8 @@
     (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
+  (add-hook 'c-mode-hook #'eglot-ensure)
+  (add-hook 'c++-mode-hook #'eglot-ensure)
   (add-hook 'c-ts-mode-hook #'eglot-ensure)
   (add-hook 'c++-ts-mode-hook #'eglot-ensure))
 
@@ -593,10 +650,6 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
   (setq dired-sidebar-use-term-integration t)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
-
-;; GPG key auto update
-(setq package-gnupghome-dir "~/.emacs.d/elpa/gnupg")
-(use-package gnu-elpa-keyring-update)
 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
