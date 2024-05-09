@@ -249,9 +249,9 @@
         ("C-p" . company-select-previous)))
 
 ;; font settings
-(when (member "UDEV Gothic" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic") nil 'append)
-  (set-face-attribute 'default nil :family "UDEV Gothic" :height 110 :weight 'Regular))
+(when (member "UDEV Gothic NF" (font-family-list))
+  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic NF") nil 'append)
+  (set-face-attribute 'default nil :family "UDEV Gothic NF" :height 110 :weight 'Regular))
 (when (eq window-system 'w32)
   (when (member "Segoe UI Emoji" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'append)))
@@ -261,6 +261,7 @@
   :defer 0.01
   :if (display-graphic-p)
   :config
+  ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
   (when (member "all-the-icons" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
   (when (member "file-icons" (font-family-list))
@@ -269,10 +270,12 @@
     (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append))
   (when (member "Material Icons" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append))
-  (when (member "octicons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "octicons") nil 'append))
+  (when (member "github-octicons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append))
   (when (member "Weather Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append))
+  :hook
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
