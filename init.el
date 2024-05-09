@@ -273,9 +273,7 @@
   (when (member "github-octicons" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append))
   (when (member "Weather Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append))
-  :hook
-  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -548,7 +546,7 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
 
 ;; centaur-tabs
 (use-package centaur-tabs
-  :defer 0.01
+  :defer 0.1
   :demand
   :config
   (setq centaur-tabs-style "bar")
@@ -560,8 +558,8 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   (setq centaur-tabs-set-close-button t)
   (setq centaur-tabs-close-button " ×")
   (setq centaur-tabs-label-fixed-length 40)
-  (when (member "UDEV Gothic" (font-family-list))
-    (centaur-tabs-change-fonts "UDEV Gothic" 100))
+  (when (member "UDEV Gothic NF" (font-family-list))
+    (centaur-tabs-change-fonts "UDEV Gothic NF" 100))
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
   (defun centaur-tabs-buffer-groups ()
