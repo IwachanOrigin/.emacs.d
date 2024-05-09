@@ -4,6 +4,7 @@
 /server/*
 .cache/*
 .extension/*
+/tree-sitter/*
 
 recentf
 *.elc
