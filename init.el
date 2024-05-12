@@ -165,11 +165,12 @@
     ((query "(if_statement consequence: (compound_statement) @indent)") parent-bol 0)
     ((query "(else_clause (compound_statement) @indent)") parent-bol 0)
     ((query "(switch_statement body: (compound_statement) @indent)") parent-bol 0)
-    ((query "(compound_statement (case_statement) @indent)") parent-bol 0)
+    ((query "((break_statement) @indent)") parent-bol 0)
+    ;;((query "(compound_statement (case_statement) @indent)") parent-bol 0)
     ((query "(for_statement body: (compound_statement) @indent)") parent-bol 0)
     ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
     ;; append to linux style
-    ,@(alist-get 'linux (c-ts-mode--indent-styles 'cpp))))
+    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
 (use-package c-ts-mode
  :if (treesit-language-available-p 'c)
