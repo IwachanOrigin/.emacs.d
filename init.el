@@ -31,6 +31,12 @@
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
   (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 
+  ;; set package-archives priority
+  (setq package-archive-priorities
+        '(("melpa-stable" . 10)
+          ("melpa" . 5)
+          ("gnu" . 5)))
+
   ;; use-package
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
@@ -201,6 +207,20 @@
  #'(lambda ()
      (make-local-variable 'js-indent-level)
      (setq js-indent-level 2)))
+
+;; dashboard
+(use-package dashboard
+  :defer 0.02
+  :init
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  :config
+  (setq dashboard-banner-logo-title "Welcome to StraEmacs Dashboard")
+  (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/straemacs.txt"))
+  (setq dashboard-center-content t)
+  (setq dashboard-vertically-center-content t)
+  (setq dashboard-icon-type 'all-the-icons)
+  (dashboard-setup-startup-hook)
+  (dashboard-refresh-buffer))
 
 ;; glsl-mode
 (use-package glsl-mode
@@ -548,7 +568,7 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
 
 ;; centaur-tabs
 (use-package centaur-tabs
-  :defer 0.1
+  :defer 0.03
   :demand
   :config
   (setq centaur-tabs-style "bar")
