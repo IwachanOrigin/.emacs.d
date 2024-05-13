@@ -145,7 +145,7 @@
 ;; ref : https://github.com/emacs-mirror/emacs/blob/master/admin/notes/tree-sitter/starter-guide
 ;; Debug -> M-x treesit-inspect-mode
 (defun myfunc/c-ts-indent-style ()
-  "Override the built-in linux indentation style with some additional rules"
+  "Override the built-in bsd indentation style with some additional rules"
   `(
     ;; align function arguments to the start of the first one, offset if standalone
     ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
@@ -166,7 +166,8 @@
     ((query "(else_clause (compound_statement) @indent)") parent-bol 0)
     ((query "(switch_statement body: (compound_statement) @indent)") parent-bol 0)
     ((query "((break_statement) @indent)") parent-bol 0)
-    ;;((query "(compound_statement (case_statement) @indent)") parent-bol 0)
+    ((query "(try_statement body: (compound_statement) @indent)") parent-bol 0)
+    ((query "(catch_clause body: (compound_statement) @indent)") parent-bol 0)
     ((query "(for_statement body: (compound_statement) @indent)") parent-bol 0)
     ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
     ;; append to linux style
@@ -184,7 +185,7 @@
 ;; ref : https://www.gnu.org/software/emacs/manual/
 ;; ref : https://www.gnu.org/software/emacs/manual/html_mono/ccmode.html
 (defun myfunc/c-cpp-mode-style ()
-  (setq c-set-style "linux")
+  (setq c-set-style "bsd")
   (setq indent-tabs-mode nil) ;; indent use space.
   (setq c-basic-offset 2) ;; basic indent value only c/c++-mode
   (setq tab-width 2)      ;; tab width
