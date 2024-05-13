@@ -214,8 +214,8 @@
   :init
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   :config
-  (setq dashboard-banner-logo-title "Welcome to StraEmacs Dashboard")
-  (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/straemacs.txt"))
+  (setq dashboard-banner-logo-title "Welcome to EmacStraylight Dashboard")
+  (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/emacstraylight.txt"))
   (setq dashboard-center-content t)
   (setq dashboard-vertically-center-content t)
   (setq dashboard-icon-type 'all-the-icons)
