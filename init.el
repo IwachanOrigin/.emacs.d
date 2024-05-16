@@ -7,6 +7,14 @@
 ;;(require 'profiler)
 ;;(profiler-start 'cpu)
 
+;; Kind of OS determine
+(defconst IS-MAC (eq system-type 'darwin))
+(defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
+(defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
+
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Output-from-Processes.html
+(setq process-adaptive-read-buffering t)
+
 ;; GC
 (setq gc-cons-threshold most-positive-fixnum)
 ;; Run GC every 120 seconds if emacs is idle.
@@ -23,6 +31,15 @@
   (lambda ()
     (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 
+;; environment to Japanese, UTF-8
+(setenv "LANG" "ja_JP.UTF-8")
+(prefer-coding-system 'utf-8-unix)
+(set-file-name-coding-system 'cp932)
+(setq locale-coding-system 'utf-8-unix)
+;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
+(when IS-WINDOWS
+  (setq-default default-process-coding-system '(utf-8-unix . japanese-cp932-dos)))
+
 ;; package
 (eval-and-compile
   (require 'package)
@@ -36,6 +53,9 @@
         '(("melpa-stable" . 10)
           ("melpa" . 5)
           ("gnu" . 5)))
+
+  (setq package-install-upgrade-built-in t)
+  (setq package-native-compile t)
 
   ;; use-package
   (unless (package-installed-p 'use-package)
@@ -658,7 +678,6 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
   :config
   (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
   (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-
   (setq dired-sidebar-theme 'icons)
   (setq dired-sidebar-use-term-integration t)
   :bind
@@ -671,4 +690,6 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 ;; profile
 ;;(profiler-report)
 ;;(profiler-stop)
+
+(provide 'init)
 

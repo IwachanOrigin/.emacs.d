@@ -20,13 +20,24 @@
 (push '(scroll-bar-mode . nil) default-frame-alist)
 ;; vertical scroll bars false
 (push '(vertical-scroll-bars . nil) default-frame-alist)
+;; display fullscreen
+(push '(fullscreen . maximized) default-frame-alist)
 ;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
+;; No use file select dialog
+(setq use-file-dialog nil)
+
+;; yes or no to y or n
+(if (version<= "27.0.00" emacs-version)
+    (setq use-short-answers t)
+  (defalias 'yes-or-no-p #'y-or-n-p))
 
 ;; quiet start
 (setq inhibit-startup-message t)
 (setq inhibit-startup-screen t)
 (setq inhibit-startup-echo-area-message t)
+;; No use x resources
+(setq inhibit-x-resources t)
 (defun display-startup-echo-area-message ()
   (message ""))
 
@@ -108,24 +119,6 @@
 ;; Delete an entire line with c-k
 (setq kill-whole-line t)
 
-;; environment to Japanese, UTF-8
-(setenv "LANG" "ja_JP.UTF-8")
-(prefer-coding-system 'utf-8-unix)
-(set-file-name-coding-system 'cp932)
-(setq locale-coding-system 'utf-8-unix)
-;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
-(setq default-process-coding-system '(undecided-dos . utf-8-unix))
-
-;; yes or no to y or n
-(defalias 'yes-or-no-p #'y-or-n-p)
-
-;; Set scratch buffer screen
-(setq initial-scratch-message
-      ";;
-;; Setup finished.
-;;
-")
-
 ;; Highlight matching pairs of parentheses.
 (setq show-paren-delay 0)
 (show-paren-mode)
@@ -139,4 +132,12 @@
     (load-theme 'modus-vivendi t)
   (load-theme 'wombat t))
 
+;; Set scratch buffer screen
+(setq initial-scratch-message
+      ";;
+;; Setup finished.
+;;
+")
+
+(provide 'early-init)
 
