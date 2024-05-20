@@ -167,6 +167,7 @@
         ))
 
 ;; c/c++ mode
+;; Most Referenced URL : https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/c-ts-mode.el
 ;; ref : https://www.reddit.com/r/emacs/comments/16zhgrd/comment/k4aw2yi/?utm_source=share&utm_medium=web2x&context=3
 ;; ref : https://github.com/emacs-mirror/emacs/blob/master/admin/notes/tree-sitter/starter-guide
 ;; Debug -> M-x treesit-inspect-mode
