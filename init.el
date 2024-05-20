@@ -186,6 +186,7 @@
     ((node-is "}") parent-bol 0)
     ((node-is "]") parent-bol 0)
     ((node-is ")") parent-bol 0)
+    ((node-is "field_initializer_list") parent-bol 2)
     ((query "(do_statement body: (compound_statement) @indent)") parent-bol 0)
     ((query "(do_statement \"while\" @indent)") parent-bol 0)
     ((query "(if_statement consequence: (compound_statement) @indent)") parent-bol 0)
