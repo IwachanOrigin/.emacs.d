@@ -233,8 +233,6 @@
 ;; dashboard
 (use-package dashboard
   :defer 0.02
-  :init
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   :config
   (setq dashboard-banner-logo-title "Welcome to EmacStraylight Dashboard")
   (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/emacstraylight.txt"))
