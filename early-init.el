@@ -104,13 +104,14 @@
 ;; Associate extensions to be used with ff-find-other-file
 (setq cc-other-file-alist
   '(
-   ("\\.c"   (".h"))
-   ("\\.cpp"   (".h"))
-   ("\\.h"   (".c"".cpp"))))
+   ("\\.c"   (".h" ".hpp"))
+   ("\\.cpp"   (".h" ".hpp"))
+   ("\\.h"   (".c" ".cpp"))
+   ("\\.hpp"   (".c" ".cpp"))))
 
 ;; Set target directories to look for with ff-find-other-files
 (setq ff-search-directories
-  '("." "../src" "../include" "../main" "../*"))
+  '("." "../src" "../include" "../main" "../core" "../*"))
 
 ;; Set ff-find-other-file to work with Meta+t
 (global-set-key "\M-t" 'ff-find-other-file)
