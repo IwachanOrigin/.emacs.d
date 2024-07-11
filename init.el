@@ -450,8 +450,9 @@
     (dimmer-mode 1)))
 
 ;; need to pandoc, latex, eisvogel.latex
-(defun pandoc-markdown-pdf ()
-  "create beamer slids."
+;; eisvogel.latex => https://github.com/enhuiz/eisvogel
+(defun pandoc-markdown-slides-pdf ()
+  "create beamer slides."
   (interactive)
   (setq infilename (buffer-file-name))
   (setq outfilename (replace-regexp-in-string ".md" ".pdf" infilename))
@@ -460,7 +461,22 @@
   (unless (eq system-type 'windows-nt)
     (setq cmd-str (concat "pandoc " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Noto Sans CJK JP\"")))
   (shell-command-to-string cmd-str))
-(global-set-key (kbd "C-x C-l") 'pandoc-markdown-pdf)
+(global-set-key (kbd "C-x C-l") 'pandoc-markdown-slides-pdf)
+
+;;
+(defun pandoc-buffer-pdf ()
+  "create buffer to pdf."
+  (interactive)
+  (let* ((buffer-content (buffer-string))
+         (tempfile (make-temp-file "pandoc-buffer" nil ".md"))
+         (outfilename (concat (file-name-sans-extension tempfile) ".pdf"))
+         (cmd-str (if (eq system-type 'windows-nt)
+                      (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename)
+                    (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename))))
+    (with-temp-file tempfile
+      (insert buffer-content))
+    (shell-command-to-string cmd-str)
+    (message "PDF created: %s" outfilename)))
 
 ;; view-mode keybind func
 (defun my/setup-view-mode-keymap ()
