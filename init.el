@@ -509,6 +509,14 @@
         (t (view-mode 1))))
 (global-set-key (kbd "C-x x v") 'toggle-view-mode)
 
+;; display-fill-column-indicator-mode toggle
+(defun toggle-display-fill-column-indicator-mode ()
+  "toggle display-fill-column-indicator-mode"
+  (interactive)
+  (cond (display-fill-column-indicator-mode (display-fill-column-indicator-mode -1))
+        (t (display-fill-column-indicator-mode 1))))
+(global-set-key (kbd "C-c h") 'toggle-display-fill-column-indicator-mode)
+
 ;; hydra
 (use-package hydra
   :defer 2
@@ -533,6 +541,7 @@ _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択         
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動             _C-c p_: flymake prev error
 _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-x C-n_: dired-sidebar-toggle-sidebar
                                                              _C-x C-l_: pandoc-markdown-pdf
+                                                             _C-c h_: toggle-display-fill-column-indicator-mode
 "
   ; Move
   ("M-<" beginning-of-buffer)
@@ -560,7 +569,8 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   ("C-c n" flymake-goto-next-error)
   ("C-c p" flymake-goto-prev-error)
   ("C-x C-n" dired-sidebar-toggle-sidebar)
-  ("C-x C-l" pandoc-markdown-pdf))
+  ("C-x C-l" pandoc-markdown-pdf)
+  ("C-c h" toggle-display-fill-column-indicator-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;       server configuration for emacsclient       ;;
@@ -702,6 +712,10 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
+
+;; Display a bar that clearly indicates the number of characters per line
+(setq-default display-fill-column-indicator-column 100)
+(global-display-fill-column-indicator-mode)
 
 ;; profile
 ;;(profiler-report)
