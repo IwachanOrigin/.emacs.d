@@ -704,8 +704,9 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
   :config
   (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
   (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-  (setq dired-sidebar-theme 'icons)
+  (setq dired-sidebar-theme 'ascii)
   (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-resize-on-open t)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
