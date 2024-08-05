@@ -12,9 +12,6 @@
 (defconst IS-LINUX (memq system-type '(gnu gnu/linux gnu/kfreebsd berkeley-unix)))
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
-;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Output-from-Processes.html
-(setq process-adaptive-read-buffering t)
-
 ;; GC
 (setq gc-cons-threshold most-positive-fixnum)
 ;; Run GC every 120 seconds if emacs is idle.
@@ -68,24 +65,26 @@
   (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
   (require 'use-package)
-  (require 'bind-key) ;; if you use any :bind variant
 )
 
-;; GPG key auto update
-(setq package-gnupghome-dir "~/.emacs.d/elpa/gnupg")
-(use-package gnu-elpa-keyring-update)
-
-;; A little transparent.
-(set-frame-parameter (selected-frame) 'alpha '(0.85))
-
-;; Optimization
-(when (eq window-system 'w32)
-  (setq w32-get-true-file-attributes nil
-        w32-pipe-read-delay 0
-        w32-pipe-buffer-size (* 64 1024)))
-
-(setq read-process-output-max #x10000)
-(setq ffap-machine-p-known 'reject)
+;; all-the-icons
+(use-package all-the-icons
+  :defer 0.01
+  :if (display-graphic-p)
+  :config
+  ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
+  (when (member "all-the-icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
+  (when (member "file-icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append))
+  (when (member "FontAwesome" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append))
+  (when (member "Material Icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append))
+  (when (member "github-octicons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append))
+  (when (member "Weather Icons" (font-family-list))
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
 
 ;; useful to IME
 (when (eq window-system 'w32)
@@ -110,126 +109,6 @@
     (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
     (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
 
-
-;; M-x `treesit-install-language-grammar` to install language grammar.
-(setq treesit-language-source-alist
-      '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
-        (c . ("https://github.com/tree-sitter/tree-sitter-c"))
-        (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-        (css . ("https://github.com/tree-sitter/tree-sitter-css"))
-        (cmake . ("https://github.com/uyha/tree-sitter-cmake"))
-        (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp"))
-        (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
-        (elisp . ("https://github.com/Wilfred/tree-sitter-elisp"))
-        (elixir "https://github.com/elixir-lang/tree-sitter-elixir" "main" "src" nil nil)
-        (go . ("https://github.com/tree-sitter/tree-sitter-go"))
-        (gomod      . ("https://github.com/camdencheek/tree-sitter-go-mod.git"))
-        (haskell "https://github.com/tree-sitter/tree-sitter-haskell" "master" "src" nil nil)
-        (html . ("https://github.com/tree-sitter/tree-sitter-html"))
-        (java       . ("https://github.com/tree-sitter/tree-sitter-java.git"))
-        (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-        (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-        (lua . ("https://github.com/Azganoth/tree-sitter-lua"))
-        (make . ("https://github.com/alemuller/tree-sitter-make"))
-        (markdown . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
-        (markdown-inline . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src"))
-        (ocaml . ("https://github.com/tree-sitter/tree-sitter-ocaml" nil "ocaml/src"))
-        (org . ("https://github.com/milisims/tree-sitter-org"))
-        (python . ("https://github.com/tree-sitter/tree-sitter-python"))
-        (php . ("https://github.com/tree-sitter/tree-sitter-php"))
-        (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "typescript/src"))
-        (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" nil "tsx/src"))
-        (ruby . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-        (rust . ("https://github.com/tree-sitter/tree-sitter-rust"))
-        (sql . ("https://github.com/m-novikov/tree-sitter-sql"))
-        (scala "https://github.com/tree-sitter/tree-sitter-scala" "master" "src" nil nil)
-        (toml "https://github.com/tree-sitter/tree-sitter-toml" "master" "src" nil nil)
-        (vue . ("https://github.com/merico-dev/tree-sitter-vue"))
-        (kotlin . ("https://github.com/fwcd/tree-sitter-kotlin"))
-        (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))
-        (zig . ("https://github.com/GrayJack/tree-sitter-zig"))
-        (mojo . ("https://github.com/HerringtonDarkholme/tree-sitter-mojo"))))
-
-(setq major-mode-remap-alist
-      '((c-mode          . c-ts-mode)
-        (c++-mode        . c++-ts-mode)
-        (c-or-c++-mode   . c-or-c++-ts-mode)
-        (cmake-mode      . cmake-ts-mode)
-        (conf-toml-mode  . toml-ts-mode)
-        (css-mode        . css-ts-mode)
-        (js-mode         . js-ts-mode)
-        (js-json-mode    . json-ts-mode)
-        (python-mode     . python-ts-mode)
-        (sh-mode         . bash-ts-mode)
-        (typescript-mode . typescript-ts-mode)
-        (rust-mode       . rust-ts-mode)
-        (java-mode       . java-ts-mode)
-        ))
-
-;; c/c++ mode
-;; Most Referenced URL : https://github.com/emacs-mirror/emacs/blob/master/lisp/progmodes/c-ts-mode.el
-;; ref : https://www.reddit.com/r/emacs/comments/16zhgrd/comment/k4aw2yi/?utm_source=share&utm_medium=web2x&context=3
-;; ref : https://github.com/emacs-mirror/emacs/blob/master/admin/notes/tree-sitter/starter-guide
-;; Debug -> M-x treesit-inspect-mode
-(defun myfunc/c-ts-indent-style ()
-  "Override the built-in bsd indentation style with some additional rules"
-  `(
-    ;; align function arguments to the start of the first one, offset if standalone
-    ((match nil "argument_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
-    ((parent-is "argument_list") (nth-sibling 1) 0)
-    ;; same for parameters
-    ((match nil "parameter_list" nil 1 1) parent-bol c-ts-mode-indent-offset)
-    ((parent-is "parameter_list") (nth-sibling 1) 0)
-    ;; indent inside case blocks
-    ;; nearly (c-set-offset 'innamespace [0])
-    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
-    ;;
-    ((node-is "}") parent-bol 0)
-    ((node-is "]") parent-bol 0)
-    ((node-is ")") parent-bol 0)
-    ((node-is "field_initializer_list") parent-bol 2)
-    ((query "(do_statement body: (compound_statement) @indent)") parent-bol 0)
-    ((query "(do_statement \"while\" @indent)") parent-bol 0)
-    ((query "(if_statement consequence: (compound_statement) @indent)") parent-bol 0)
-    ((query "(else_clause (compound_statement) @indent)") parent-bol 0)
-    ((query "(switch_statement body: (compound_statement) @indent)") parent-bol 0)
-    ((query "((break_statement) @indent)") parent-bol 0)
-    ((query "(try_statement body: (compound_statement) @indent)") parent-bol 0)
-    ((query "(catch_clause body: (compound_statement) @indent)") parent-bol 0)
-    ((query "(for_statement body: (compound_statement) @indent)") parent-bol 0)
-    ((query "(for_statement initializer: (_) @indent)") parent-bol 5)
-    ;; append to linux style
-    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
-
-(use-package c-ts-mode
- :if (treesit-language-available-p 'c)
- :custom
- (c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
- (tab-width 2)               ;; tab width
- (indent-tabs-mode nil)      ;; indent use space.
- (c-ts-mode-indent-style #'myfunc/c-ts-indent-style))
-
-;; ref : https://i-s-2.hatenadiary.org/entry/20091026/1256557730
-;; ref : https://www.gnu.org/software/emacs/manual/
-;; ref : https://www.gnu.org/software/emacs/manual/html_mono/ccmode.html
-(defun myfunc/c-cpp-mode-style ()
-  (setq c-set-style "bsd")
-  (setq indent-tabs-mode nil) ;; indent use space.
-  (setq c-basic-offset 2) ;; basic indent value only c/c++-mode
-  (setq tab-width 2)      ;; tab width
-  (c-set-offset 'innamespace 0) ;; namespace pos
-  (c-set-offset 'case-label '+) ;; switch label pos
-)
-
-(add-hook 'c-mode-hook 'myfunc/c-cpp-mode-style)
-(add-hook 'c++-mode-hook 'myfunc/c-cpp-mode-style)
-
-;; js mode
-(add-hook 'js-mode-hook
- #'(lambda ()
-     (make-local-variable 'js-indent-level)
-     (setq js-indent-level 2)))
-
 ;; dashboard
 (use-package dashboard
   :defer 0.02
@@ -241,28 +120,6 @@
   (setq dashboard-icon-type 'all-the-icons)
   (dashboard-setup-startup-hook)
   (dashboard-refresh-buffer))
-
-;; glsl-mode
-(use-package glsl-mode
-  :defer 5
-  :config
-  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
-  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
-
-;; editorconfig
-(use-package editorconfig
-  :defer 2
-  :config
-  (editorconfig-mode)
-  (setq editorconfig-exec-path "~/.emacs.d/.editorconfig"))
-
-;; projectile
-(use-package projectile
-  :defer 2
-  :config
-  (projectile-mode 1)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (add-hook 'projectile-after-switch-project-hook 'load-project-debug-config))
 
 ;; company
 (use-package company
@@ -294,28 +151,6 @@
 (when (member "UDEV Gothic NF" (font-family-list))
   (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic NF") nil 'append)
   (set-face-attribute 'default nil :family "UDEV Gothic NF" :height 110 :weight 'Regular))
-(when (eq window-system 'w32)
-  (when (member "Segoe UI Emoji" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Segoe UI Emoji") nil 'append)))
-
-;; all-the-icons
-(use-package all-the-icons
-  :defer 0.01
-  :if (display-graphic-p)
-  :config
-  ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
-  (when (member "all-the-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
-  (when (member "file-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append))
-  (when (member "FontAwesome" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append))
-  (when (member "Material Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append))
-  (when (member "github-octicons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append))
-  (when (member "Weather Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -339,6 +174,78 @@
   ("C-x C-f" . counsel-find-file)
   ("C-x C-r" . counsel-recentf)
   ("C-x b" . counsel-switch-buffer))
+
+;; dired-sidebar
+(use-package dired-sidebar
+  :defer 1
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+  (setq dired-sidebar-theme 'ascii)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-resize-on-open t)
+  :bind
+  (("C-x C-n" . dired-sidebar-toggle-sidebar)))
+
+;;
+;; programing language config
+;;
+
+;; c/c++ mode
+(use-package cc-mode
+  :defer 1
+  :config
+  (setq c-default-style "bsd")
+  (setq c-basic-offset 2) ;; basic indent value
+  (setq tab-width 2)      ;; tab width
+  (setq indent-tabs-mode nil)  ;; indent use space.
+  )
+
+;; js mode
+(add-hook 'js-mode-hook
+ #'(lambda ()
+     (make-local-variable 'js-indent-level)
+     (setq js-indent-level 2)))
+
+;; glsl-mode
+(use-package glsl-mode
+  :defer 5
+  :config
+  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
+
+;; markdown
+(use-package markdown-mode
+  :defer 3
+  :mode (("\\.md\\'" . gfm-mode)
+         ("\\.txt\\'" . gfm-mode))
+  ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
+  :config
+  (when (eq system-type 'windows-nt)
+    (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+  (unless (eq system-type 'windows-nt)
+    (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+  (setq markdown-fontify-code-blocks-natively t))
+
+;; cmake-ts-mode
+(use-package cmake-mode
+  :defer 2
+  :config
+  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
+  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode)))
+
+;; editorconfig
+(use-package editorconfig
+  :defer 2
+  :config
+  (editorconfig-mode)
+  (setq editorconfig-exec-path "~/.emacs.d/.editorconfig"))
 
 ;; eglot
 (progn
@@ -368,26 +275,53 @@
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
   (add-hook 'c-mode-hook #'eglot-ensure)
-  (add-hook 'c++-mode-hook #'eglot-ensure)
-  (add-hook 'c-ts-mode-hook #'eglot-ensure)
-  (add-hook 'c++-ts-mode-hook #'eglot-ensure))
+  (add-hook 'c++-mode-hook #'eglot-ensure))
 
-;; markdown
-(use-package markdown-mode
-  :defer 3
-  :mode (("\\.md\\'" . gfm-mode)
-         ("\\.txt\\'" . gfm-mode))
-  ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
-  :config
+
+;;
+;; Custom functions
+;;
+
+;; need to pandoc, latex, eisvogel.latex
+;; eisvogel.latex => https://github.com/enhuiz/eisvogel
+(defun pandoc-markdown-slides-pdf ()
+  "create beamer slides."
+  (interactive)
+  (setq infilename (buffer-file-name))
+  (setq outfilename (replace-regexp-in-string ".md" ".pdf" infilename))
   (when (eq system-type 'windows-nt)
-    (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+    (setq cmd-str (concat "pandoc.exe " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Meiryo UI\"")))
   (unless (eq system-type 'windows-nt)
-    (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
-  (setq markdown-fontify-code-blocks-natively t))
+    (setq cmd-str (concat "pandoc " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Noto Sans CJK JP\"")))
+  (shell-command-to-string cmd-str))
+(global-set-key (kbd "C-x C-l") 'pandoc-markdown-slides-pdf)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;              Enhance C-s settings                ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Generate buffer to pdf use pandoc.
+(defun pandoc-buffer-pdf ()
+  "create buffer to pdf."
+  (interactive)
+  (let* ((buffer-content (buffer-string))
+         (tempfile (make-temp-file "pandoc-buffer" nil ".md"))
+         (outfilename (concat (file-name-sans-extension tempfile) ".pdf"))
+         (cmd-str (if (eq system-type 'windows-nt)
+                      (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename)
+                    (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename))))
+    (with-temp-file tempfile
+      (insert buffer-content))
+    (shell-command-to-string cmd-str)
+    (message "PDF created: %s" outfilename)))
+
+;; display-fill-column-indicator-mode toggle
+(defun toggle-display-fill-column-indicator-mode ()
+  "toggle display-fill-column-indicator-mode"
+  (interactive)
+  (cond (display-fill-column-indicator-mode (display-fill-column-indicator-mode -1))
+        (t (display-fill-column-indicator-mode 1))))
+(global-set-key (kbd "C-c h") 'toggle-display-fill-column-indicator-mode)
+
+;;
+;; Enhance C-s settings
+;;
 
 ;; swiper
 (use-package swiper
@@ -433,12 +367,11 @@
                                    (swiper . ivy-migemo--regex-plus)
                                    (counsel-find-file . ivy-migemo--regex-plus))))
 
-;; cmake-ts-mode
-(use-package cmake-ts-mode
-  :defer 2
-  :config
-  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-ts-mode)))
+
+
+;;
+;; Hydra config
+;;
 
 ;; helper func to hydra menu
 (defun my/hydra-disable-dimmer ()
@@ -448,74 +381,6 @@
 (defun my/hydra-enable-dimmer ()
   (unless (bound-and-true-p dimmer-mode)
     (dimmer-mode 1)))
-
-;; need to pandoc, latex, eisvogel.latex
-;; eisvogel.latex => https://github.com/enhuiz/eisvogel
-(defun pandoc-markdown-slides-pdf ()
-  "create beamer slides."
-  (interactive)
-  (setq infilename (buffer-file-name))
-  (setq outfilename (replace-regexp-in-string ".md" ".pdf" infilename))
-  (when (eq system-type 'windows-nt)
-    (setq cmd-str (concat "pandoc.exe " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Meiryo UI\"")))
-  (unless (eq system-type 'windows-nt)
-    (setq cmd-str (concat "pandoc " infilename " -o " outfilename " --from markdown --to beamer --template eisvogel.latex --listings --pdf-engine \"xelatex\" -V CJKmainfont=\"Noto Sans CJK JP\"")))
-  (shell-command-to-string cmd-str))
-(global-set-key (kbd "C-x C-l") 'pandoc-markdown-slides-pdf)
-
-;;
-(defun pandoc-buffer-pdf ()
-  "create buffer to pdf."
-  (interactive)
-  (let* ((buffer-content (buffer-string))
-         (tempfile (make-temp-file "pandoc-buffer" nil ".md"))
-         (outfilename (concat (file-name-sans-extension tempfile) ".pdf"))
-         (cmd-str (if (eq system-type 'windows-nt)
-                      (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename)
-                    (format "pandoc.exe \"%s\" -o \"%s\" --pdf-engine=xelatex -V documentclass=bxjsarticle -V classoption=pandoc" tempfile outfilename))))
-    (with-temp-file tempfile
-      (insert buffer-content))
-    (shell-command-to-string cmd-str)
-    (message "PDF created: %s" outfilename)))
-
-;; view-mode keybind func
-(defun my/setup-view-mode-keymap ()
-  "setup view-mode keymap"
-  (let ((keymap view-mode-map))
-    (define-key keymap (kbd "p") 'previous-line)
-    (define-key keymap (kbd "n") 'next-line)
-    (define-key keymap (kbd "b") 'backward-char)
-    (define-key keymap (kbd ",") 'centaur-tabs-backward)
-    (define-key keymap (kbd ".") 'centaur-tabs-forward)))
-
-;; update keymap and cursor color
-(defun my/update-cursor-color-viewmode ()
-  "Checked view-mode status, if view-mode is true, cursor color to red and adjust to keymap."
-  (if view-mode
-      (set-cursor-color "#ff0000")
-    (set-cursor-color "#ffffff")))
-
-;; view-mode hook
-(add-hook 'view-mode-hook 'my/update-cursor-color-viewmode)
-(add-hook 'view-mode-hook 'my/setup-view-mode-keymap)
-(add-hook 'post-command-hook 'my/update-cursor-color-viewmode)
-(add-hook 'buffer-list-update-hook 'my/update-cursor-color-viewmode)
-
-;; view-mode toggle
-(defun toggle-view-mode ()
-  "toggle view-mode"
-  (interactive)
-  (cond (view-mode (view-mode -1))
-        (t (view-mode 1))))
-(global-set-key (kbd "C-x x v") 'toggle-view-mode)
-
-;; display-fill-column-indicator-mode toggle
-(defun toggle-display-fill-column-indicator-mode ()
-  "toggle display-fill-column-indicator-mode"
-  (interactive)
-  (cond (display-fill-column-indicator-mode (display-fill-column-indicator-mode -1))
-        (t (display-fill-column-indicator-mode 1))))
-(global-set-key (kbd "C-c h") 'toggle-display-fill-column-indicator-mode)
 
 ;; hydra
 (use-package hydra
@@ -572,9 +437,10 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   ("C-x C-l" pandoc-markdown-pdf)
   ("C-c h" toggle-display-fill-column-indicator-mode))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;       server configuration for emacsclient       ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; server configuration for emacsclient
+;;
+
 (when (eq system-type 'windows-nt)
   (use-package server
     :defer 0.01
@@ -612,6 +478,10 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   (setq frame-background-mode 'dark)
   (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 
+;;
+;; Centaur-tabs config
+;;
+
 ;; centaur-tabs
 (use-package centaur-tabs
   :defer 0.03
@@ -630,46 +500,9 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
     (centaur-tabs-change-fonts "UDEV Gothic NF" 100))
   (centaur-tabs-headline-match)
   (centaur-tabs-mode t)
-  (defun centaur-tabs-buffer-groups ()
-    "`centaur-tabs-buffer-groups' control buffers' group rules.
- Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
- All buffer name start with * will group to \"Emacs\".
- Other buffer group by `centaur-tabs-get-group-name' with project name."
-    (list
-     (cond
-	    ((or (string-equal "*" (substring (buffer-name) 0 1))
-	         (memq major-mode '(magit-process-mode
-				                      magit-status-mode
-				                      magit-diff-mode
-				                      magit-log-mode
-				                      magit-file-mode
-				                      magit-blob-mode
-				                      magit-blame-mode)))
-	     "Emacs")
-	    ((derived-mode-p 'prog-mode)
-	     "Editing")
-	    ((derived-mode-p 'dired-mode)
-	     "Dired")
-	    ((memq major-mode '(helpful-mode
-			                    help-mode))
-	     "Help")
-	    ((memq major-mode '(org-mode
-			                    org-agenda-clockreport-mode
-			                    org-src-mode
-			                    org-agenda-mode
-			                    org-beamer-mode
-			                    org-indent-mode
-			                    org-bullets-mode
-			                    org-cdlatex-mode
-			                    org-agenda-log-mode
-			                    diary-mode))
-	     "OrgMode")
-	    (t
-	     (centaur-tabs-get-group-name (current-buffer))))))
   :bind
   ("C-," . centaur-tabs-backward)
-  ("C-." . centaur-tabs-forward)
-  ("C-c t" . centaur-tabs-counsel-switch-group))
+  ("C-." . centaur-tabs-forward))
 
 ;; Re-implementation of centaur-tabs-buffer-tab-label.
 ;; Omit the middle of long filenames, as in Visual Studio.
@@ -692,24 +525,6 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 (with-eval-after-load 'centaur-tabs
   (setq centaur-tabs-tab-label-function #'my/centaur-tabs-buffer-tab-label))
 
-;; dired-sidebar
-(use-package dired-sidebar
-  :defer 1
-  :commands (dired-sidebar-toggle-sidebar)
-  :init
-  (add-hook 'dired-sidebar-mode-hook
-            (lambda ()
-              (unless (file-remote-p default-directory)
-                (auto-revert-mode))))
-  :config
-  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-  (setq dired-sidebar-theme 'ascii)
-  (setq dired-sidebar-use-term-integration t)
-  (setq dired-sidebar-resize-on-open t)
-  :bind
-  (("C-x C-n" . dired-sidebar-toggle-sidebar)))
-
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
@@ -717,6 +532,9 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 ;; Display a bar that clearly indicates the number of characters per line
 (setq-default display-fill-column-indicator-column 100)
 (global-display-fill-column-indicator-mode)
+
+;; A little transparent.
+(set-frame-parameter (selected-frame) 'alpha '(0.85))
 
 ;; profile
 ;;(profiler-report)
