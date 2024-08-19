@@ -205,6 +205,7 @@
   (setq c-basic-offset 2) ;; basic indent value
   (setq tab-width 2)      ;; tab width
   (setq indent-tabs-mode nil)  ;; indent use space.
+  (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
   )
 
 ;; js mode
@@ -233,7 +234,7 @@
     (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
 
-;; cmake-ts-mode
+;; cmake-mode
 (use-package cmake-mode
   :defer 2
   :config
@@ -323,16 +324,6 @@
 ;; Enhance C-s settings
 ;;
 
-;; swiper
-(use-package swiper
-  :defer 1
-  :config
-  (defun isearch-forward-or-swiper (use-swiper)
-    (interactive "p")
-    (let (current-prefix-arg)
-      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
-  (global-set-key (kbd "C-s") 'isearch-forward-or-swiper))
-
 ;; migemo
 ;; This package can use the Roman alphabet to search  the japanese language.
 ;; We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
@@ -366,6 +357,17 @@
   (setq ivy-re-builders-alist '((t . ivy--regex-plus)
                                    (swiper . ivy-migemo--regex-plus)
                                    (counsel-find-file . ivy-migemo--regex-plus))))
+
+;; swiper
+(use-package swiper
+  :defer 1
+  :config
+  (defun isearch-forward-or-swiper (use-swiper)
+    (interactive "p")
+    (let (current-prefix-arg)
+      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
+  ;(global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
+  )
 
 
 
