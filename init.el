@@ -224,8 +224,7 @@
 ;; markdown
 (use-package markdown-mode
   :defer 3
-  :mode (("\\.md\\'" . gfm-mode)
-         ("\\.txt\\'" . gfm-mode))
+  :mode ("\\.md\\'" . gfm-mode)
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
   (when (eq system-type 'windows-nt)
@@ -239,14 +238,14 @@
   :defer 2
   :config
   (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
-  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode)))
+  (add-to-list 'auto-mode-alist '("\.cmake$" . cmake-mode)))
 
 ;; editorconfig
 (use-package editorconfig
   :defer 2
   :config
   (editorconfig-mode)
-  (setq editorconfig-exec-path "~/.emacs.d/.editorconfig"))
+  (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
 ;; eglot
 (progn
@@ -257,7 +256,7 @@
 
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-       '((c-mode c++-mode c-ts-mode c++-ts-mode)
+       '((c-mode c++-mode)
          . ("clangd"
             "-j=8"
             "--log=error"
