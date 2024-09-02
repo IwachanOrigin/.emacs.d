@@ -4,7 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(dashboard c++-ts-mode dired-sidebar gnu-elpa-keyring-update markdown-ts-mode centaur-tabs restart-emacs hydra cmake-mode ivy-migemo migemo markdown-mode counsel hungry-delete all-the-icons company projectile editorconfig glsl-mode tr-ime))
+   '(verilog-mode use-package tramp tr-ime svg soap-client so-long seq restart-emacs python projectile project org markdown-mode ivy-migemo hydra hungry-delete glsl-mode editorconfig dired-sidebar dashboard counsel company cmake-mode centaur-tabs all-the-icons))
  '(sort-fold-case t t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
