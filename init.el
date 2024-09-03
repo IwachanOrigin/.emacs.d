@@ -141,13 +141,6 @@
   :init
   (global-corfu-mode))
 
-;; Setting completion style
-(use-package emacs
-  :init
-  (setq completion-styles '(orderless) ;; orderlessスタイルを使用
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
-
 ;; Orderless
 (use-package orderless
   :ensure t
@@ -181,13 +174,13 @@
   (setq hungry-delete-chars-to-skip " \t\f\v"))
 
 ;; counsel
-(use-package counsel
-  :defer 2
-  :bind
-  ("M-x" . counsel-M-x)
-  ("C-x C-f" . counsel-find-file)
-  ("C-x C-r" . counsel-recentf)
-  ("C-x b" . counsel-switch-buffer))
+;(use-package counsel
+;  :defer 2
+;  :bind
+;  ("M-x" . counsel-M-x)
+;  ("C-x C-f" . counsel-find-file)
+;  ("C-x C-r" . counsel-recentf)
+;  ("C-x b" . counsel-switch-buffer))
 
 ;; dired-sidebar
 (use-package dired-sidebar
@@ -366,28 +359,98 @@
 
 ;; ivy-migemo
 ;; Make migemo available for ivy-based search
-(use-package ivy-migemo
-  :defer 1
+;(use-package ivy-migemo
+;  :defer 1
+;  :config
+;  ;; toggle migemo
+;  (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
+;  ;; If you want to defaultly use migemo on swiper and counsel-find-file:
+;  (setq ivy-re-builders-alist '((t . ivy--regex-plus)
+;                                   (swiper . ivy-migemo--regex-plus)
+;                                   (counsel-find-file . ivy-migemo--regex-plus))))
+;
+;;; swiper
+;(use-package swiper
+;  :defer 1
+;  :config
+;  (defun isearch-forward-or-swiper (use-swiper)
+;    (interactive "p")
+;    (let (current-prefix-arg)
+;      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
+;  ;(global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
+;  )
+
+;; Vertico
+(use-package vertico
+  :ensure t
+  :defer 2
+  :init
+  (vertico-mode)
+  :custom
+  (vertico-cycle t)) ;; 候補リストを循環する
+
+;; Consult
+(use-package consult
+  :ensure t
+  :defer 2
+  :bind
+  (("C-c M-x" . consult-mode-command)
+   ("C-x C-f" . consult-find-file)
+   ("C-x C-r" . consult-recent-file)
+   ("C-x b" . consult-buffer)
+   ("C-s" . consult-line)  ;; Swiperの代替として
+   ("M-s g" . consult-grep)
+   ("M-s G" . consult-git-grep)
+   )
   :config
-  ;; toggle migemo
-  (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
-  ;; If you want to defaultly use migemo on swiper and counsel-find-file:
-  (setq ivy-re-builders-alist '((t . ivy--regex-plus)
-                                   (swiper . ivy-migemo--regex-plus)
-                                   (counsel-find-file . ivy-migemo--regex-plus))))
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+  ;; M-y (yank-pop) でconsult-yank-from-kill-ringを使用
+  (advice-add #'yank-pop :override #'consult-yank-pop))
 
-;; swiper
-(use-package swiper
-  :defer 1
-  :config
-  (defun isearch-forward-or-swiper (use-swiper)
-    (interactive "p")
-    (let (current-prefix-arg)
-      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
-  ;(global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
-  )
+;; Marginalia
+(use-package marginalia
+  :ensure t
+  :defer 2
+  :init
+  (marginalia-mode))
 
+;; Use orderless. Config is top.
 
+;; Embark
+(use-package embark
+  :ensure t
+  :defer 2
+  :bind
+  (("C-'" . embark-act)         ;; コンテキストメニュー
+   ("C-;" . embark-dwim)        ;; 項目を実行
+   ("C-x B" . embark-bindings)) ;; Embarkのキーバインド一覧
+  :init
+  ;; Embarkからの非推奨のミニバッファインターフェイスのサポートを無効化
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+;; EmbarkとConsultの統合
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+;; 保存されたコマンドの履歴を使うための設定
+(use-package savehist
+  :init
+  (savehist-mode))
+
+;; Setting completion style
+(use-package emacs
+  :init
+  (setq completion-styles '(orderless basic) ;; orderlessスタイルを使用
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))
+        read-extended-command-predicate #'command-completion-default-include-p
+        enable-recursive-minibuffers t
+        completion-in-region-function #'consult-completion-in-region))
 
 ;;
 ;; Hydra config
@@ -424,7 +487,7 @@ _M-b_: 前の単語へ移動         _M-k_: 行を切り取り                  
 _M-C-a_: 関数定義の先頭へ移動  _M-SPC_: 連続スペースを1つにまとめる   _C-x x t_: toggle-truncate-lines
 _M-C-e_: 関数定義の末尾へ移動  _M-C-h_: 関数単位で選択               _C-c n_: flymake next error
 _M-C-n_: 次の括弧終わりへ移動  _C-x C-r_: Recentfの起動             _C-c p_: flymake prev error
-_M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-x C-n_: dired-sidebar-toggle-sidebar
+_M-C-p_: 前の括弧始まりへ移動                                       _C-x C-n_: dired-sidebar-toggle-sidebar
                                                              _C-x C-l_: pandoc-markdown-pdf
                                                              _C-c h_: toggle-display-fill-column-indicator-mode
 "
@@ -444,7 +507,6 @@ _M-C-p_: 前の括弧始まりへ移動  _C-x x v_: toggle-view-mode         _C-
   ("M-SPC" just-one-space)
   ("M-C-h" c-mark-function)
   ("C-x C-r" recentf-open-files)
-  ("C-x x v" toggle-view-mode)
   ; Others
   ("M-x replace-string" replace-string)
   ("C-x r" restart-emacs)
