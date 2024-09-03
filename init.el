@@ -209,17 +209,17 @@
   )
 
 ;; js mode
-(add-hook 'js-mode-hook
- #'(lambda ()
-     (make-local-variable 'js-indent-level)
-     (setq js-indent-level 2)))
+;(add-hook 'js-mode-hook
+; #'(lambda ()
+;     (make-local-variable 'js-indent-level)
+;     (setq js-indent-level 2)))
 
 ;; glsl-mode
-(use-package glsl-mode
-  :defer 5
-  :config
-  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
-  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
+;(use-package glsl-mode
+;  :defer 5
+;  :config
+;  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
+;  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; markdown
 (use-package markdown-mode
@@ -232,13 +232,6 @@
   (unless (eq system-type 'windows-nt)
     (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
-
-;; cmake-mode
-(use-package cmake-mode
-  :defer 2
-  :config
-  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
-  (add-to-list 'auto-mode-alist '("\.cmake$" . cmake-mode)))
 
 ;; editorconfig
 (use-package editorconfig
@@ -277,6 +270,18 @@
   (add-hook 'c-mode-hook #'eglot-ensure)
   (add-hook 'c++-mode-hook #'eglot-ensure))
 
+;; tree-sitter
+(when (and (fboundp 'treesit-available-p)
+           (treesit-available-p))
+  (setq treesit-font-lock-level 4))
+(use-package treesit-auto
+  :ensure t
+  :defer 2
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 ;;
 ;; Custom functions
