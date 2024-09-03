@@ -401,6 +401,7 @@
    ("C-s" . consult-line)  ;; Swiperの代替として
    ("M-s g" . consult-grep)
    ("M-s G" . consult-git-grep)
+   ("M-s r" . consult-ripgrep)
    )
   :config
   (setq register-preview-delay 0.5
