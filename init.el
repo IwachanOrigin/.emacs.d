@@ -185,6 +185,7 @@
 ;  ("C-x b" . counsel-switch-buffer))
 
 ;; dired-sidebar
+;; dired-sidebar-20240522.2316 or later
 (use-package dired-sidebar
   :defer 1
   :commands (dired-sidebar-toggle-sidebar)
