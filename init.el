@@ -1,4 +1,6 @@
 
+;; -*- lexical-binding: t -*-
+
 ;;============================================================================
 ;;                                 init.el                                  ;;
 ;;============================================================================
@@ -394,6 +396,10 @@
   :defer 2
   :init
   (vertico-mode)
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
   :custom
   (vertico-cycle t)) ;; 候補リストを循環する
 
@@ -403,7 +409,6 @@
   :defer 2
   :bind
   (("C-c M-x" . consult-mode-command)
-   ("C-x C-f" . consult-find-file)
    ("C-x C-r" . consult-recent-file)
    ("C-x b" . consult-buffer)
    ("C-s" . consult-line)  ;; Swiperの代替として
@@ -416,6 +421,18 @@
         register-preview-function #'consult-register-format)
   ;; M-y (yank-pop) でconsult-yank-from-kill-ringを使用
   (advice-add #'yank-pop :override #'consult-yank-pop))
+
+;; find-fileでプレビュー
+(setq read-file-name-function #'consult-find-file-with-preview)
+(defun consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
+  (interactive)
+  (let ((default-directory (or dir default-directory))
+        (minibuffer-completing-file-name t))
+    (consult--read #'read-file-name-internal :state (consult--file-preview)
+                   :prompt prompt
+                   :initial initial
+                   :require-match mustmatch
+                   :predicate pred)))
 
 ;; Marginalia
 (use-package marginalia
