@@ -275,7 +275,15 @@
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
   (add-hook 'c-mode-hook #'eglot-ensure)
-  (add-hook 'c++-mode-hook #'eglot-ensure))
+  (add-hook 'c++-mode-hook #'eglot-ensure)
+  (add-hook 'c-ts-mode-hook
+            (lambda ()
+              (eglot-ensure)
+              (c-ts-mode-set-global-style 'bsd)))
+  (add-hook 'c++-ts-mode-hook
+            (lambda ()
+              (eglot-ensure)
+              (c-ts-mode-set-global-style 'bsd))))
 
 ;; tree-sitter
 (when (and (fboundp 'treesit-available-p)
