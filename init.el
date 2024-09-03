@@ -121,31 +121,45 @@
   (dashboard-setup-startup-hook)
   (dashboard-refresh-buffer))
 
-;; company
-(use-package company
-  :defer 2
-  :config
-  (global-company-mode)
+;; Corfu
+(use-package corfu
+  :ensure t
+  :defer 3
   :custom
-  (company-transformers '(company-sort-by-backend-importance))
-  (company-idle-delay 0)
-  (company-echo-delay 0)
-  (company-minimum-prefix-length 2)
-  (company-selection-wrap-around t)
-  (completion-ignore-case t)
+  (corfu-cycle t)                ;; 候補リストをループする
+  (corfu-auto t)                 ;; 自動的に候補を表示
+  (corfu-auto-prefix 2)          ;; 2文字以上入力で補完を開始
+  (corfu-auto-delay 0)           ;; 補完の遅延時間（0秒）
+  (completion-ignore-case t)     ;; 大文字小文字を無視する
   :bind
-  (:map company-active-map
-        ;; C-n, C-p to select next/previous candidate for completion
-        ("C-n" . 'company-select-next)
-        ("C-p" . 'company-select-previous)
-        ;; Narrow by C-s
-        ("C-s" . 'company-filter-candidates)
-        ;; C-i, TAB to set candidates
-        ("C-i" . 'company-complete-selection)
-        ([tab] . 'company-complete-selection))
-  (:map company-search-map
-        ("C-n" . company-select-next)
-        ("C-p" . company-select-previous)))
+  (:map corfu-map
+        ("C-n" . corfu-next)     ;; C-nで次の候補を選択
+        ("C-p" . corfu-previous) ;; C-pで前の候補を選択
+        ("C-s" . corfu-info-documentation) ;; C-sで候補の絞り込み
+        ("C-i" . corfu-complete) ;; C-iまたはTABで候補を確定
+        ([tab] . corfu-complete))
+  :init
+  (global-corfu-mode))
+
+;; Setting completion style
+(use-package emacs
+  :init
+  (setq completion-styles '(orderless) ;; orderlessスタイルを使用
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+;; Orderless
+(use-package orderless
+  :ensure t
+  :defer 2)
+
+;; Support corfu popup
+(use-package corfu-popupinfo
+  :after corfu
+  :ensure nil ;; `corfu-popupinfo` was part of `corfu` package
+  :hook (corfu-mode . corfu-popupinfo-mode)
+  :config
+  (setq corfu-popupinfo-delay 0.2)) ;; popup delay time
 
 ;; font settings
 (when (member "UDEV Gothic NF" (font-family-list))
