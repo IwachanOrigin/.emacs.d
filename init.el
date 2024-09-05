@@ -175,15 +175,6 @@
   :config
   (setq hungry-delete-chars-to-skip " \t\f\v"))
 
-;; counsel
-;(use-package counsel
-;  :defer 2
-;  :bind
-;  ("M-x" . counsel-M-x)
-;  ("C-x C-f" . counsel-find-file)
-;  ("C-x C-r" . counsel-recentf)
-;  ("C-x b" . counsel-switch-buffer))
-
 ;; dired-sidebar
 ;; dired-sidebar-20240522.2316 or later
 (use-package dired-sidebar
@@ -218,18 +209,12 @@
   (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
   )
 
-;; js mode
-;(add-hook 'js-mode-hook
-; #'(lambda ()
-;     (make-local-variable 'js-indent-level)
-;     (setq js-indent-level 2)))
-
 ;; glsl-mode
-;(use-package glsl-mode
-;  :defer 5
-;  :config
-;  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
-;  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
+(use-package glsl-mode
+  :defer 5
+  :config
+  (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
+  (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; markdown
 (use-package markdown-mode
@@ -367,29 +352,6 @@
     (setq migemo-coding-system 'utf-8-unix))
   (setq migemo-user-dictionary nil)
   (setq migemo-regex-dictionary nil))
-
-;; ivy-migemo
-;; Make migemo available for ivy-based search
-;(use-package ivy-migemo
-;  :defer 1
-;  :config
-;  ;; toggle migemo
-;  (define-key ivy-minibuffer-map (kbd "M-m") #'ivy-migemo-toggle-migemo)
-;  ;; If you want to defaultly use migemo on swiper and counsel-find-file:
-;  (setq ivy-re-builders-alist '((t . ivy--regex-plus)
-;                                   (swiper . ivy-migemo--regex-plus)
-;                                   (counsel-find-file . ivy-migemo--regex-plus))))
-;
-;;; swiper
-;(use-package swiper
-;  :defer 1
-;  :config
-;  (defun isearch-forward-or-swiper (use-swiper)
-;    (interactive "p")
-;    (let (current-prefix-arg)
-;      (call-interactively (if use-swiper 'swiper 'isearch-forward))))
-;  ;(global-set-key (kbd "C-s") 'isearch-forward-or-swiper)
-;  )
 
 ;; Vertico
 (use-package vertico
