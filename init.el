@@ -228,6 +228,11 @@
     (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
   (setq markdown-fontify-code-blocks-natively t))
 
+;; cmake-mode
+(use-package cmake-mode
+  :defer 1
+  )
+
 ;; editorconfig
 (use-package editorconfig
   :defer 2
