@@ -19,16 +19,16 @@
 ;; Run GC every 120 seconds if emacs is idle.
 (run-with-idle-timer 120.0 t #'garbage-collect)
 (add-hook 'emacs-startup-hook
-  (lambda ()
-  ;; recover default value
-    (setq gc-cons-threshold 800000)))
+          (lambda ()
+            ;; recover default value
+            (setq gc-cons-threshold 800000)))
 
 ;; magic file name
 (defconst my-saved-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
 (add-hook 'emacs-startup-hook
-  (lambda ()
-    (setq file-name-handler-alist my-saved-file-name-handler-alist)))
+          (lambda ()
+            (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 
 ;; environment to Japanese, UTF-8
 (setenv "LANG" "ja_JP.UTF-8")
@@ -67,7 +67,7 @@
   (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
   (require 'use-package)
-)
+  )
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -198,17 +198,6 @@
 ;; programing language config
 ;;
 
-;; c/c++ mode
-(use-package cc-mode
-  :defer 1
-  :config
-  (setq c-default-style "bsd")
-  (setq c-basic-offset 2) ;; basic indent value
-  (setq tab-width 2)      ;; tab width
-  (setq indent-tabs-mode nil)  ;; indent use space.
-  (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
-  )
-
 ;; glsl-mode
 (use-package glsl-mode
   :defer 5
@@ -240,26 +229,49 @@
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
+;; 
+(defun my-c-or-c++-mode-maybe-use-ts-mode ()
+  "Automatically switch to c-ts-mode or c++-ts-mode if available."
+  (cond
+   ;; About C++ file
+   ((derived-mode-p 'c++-mode)
+    (c++-ts-mode))
+   ;; About C file
+   ((derived-mode-p 'c-mode)
+    (c-ts-mode))))
+
+;; c/c++ ts mode indent style
+(defun myfunc/c-ts-indent-style ()
+  "Override the built-in BSD indentation style with some additional rules.
+   Docs: https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser_002dbased-Indentation.html
+   Notes: `treesit-explore-mode' can be very useful to see where you're at in the tree-sitter tree,
+          especially paired with `(setq treesit--indent-verbose t)' to debug what rules is being
+          applied at a given point."
+  `(;; do not indent namespace children
+    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
+    ;; append to bsd style
+    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
+
 ;; eglot
 (progn
   (customize-set-variable 'eglot-autoshutdown t)
   (customize-set-variable 'eglot-extend-to-xref t)
   (customize-set-variable 'eglot-ignored-server-capabilities
-    (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
+                          (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
 
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-       '((c-mode c++-mode)
-         . ("clangd"
-            "-j=8"
-            "--log=error"
-            "--background-index"
-            "--clang-tidy"
-            "--cross-file-rename"
-            "--completion-style=detailed"
-            "--pch-storage=memory"
-            "--header-insertion=never"
-            "--header-insertion-decorators=0"))))
+                 '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
+                   . ("clangd"
+                      "-j=8"
+                      "--log=error"
+                      "--background-index"
+                      "--clang-tidy"
+                      "--cross-file-rename"
+                      "--completion-style=detailed"
+                      "--pch-storage=memory"
+                      "--header-insertion=never"
+                      "--header-insertion-decorators=0"))))
 
   (with-eval-after-load 'flymake
     (define-key flymake-mode-map (kbd "C-c ! n") nil)
@@ -267,16 +279,19 @@
     (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
-  (add-hook 'c-mode-hook #'eglot-ensure)
-  (add-hook 'c++-mode-hook #'eglot-ensure)
-  (add-hook 'c-ts-mode-hook
-            (lambda ()
-              (eglot-ensure)
-              (c-ts-mode-set-global-style 'bsd)))
+  (add-hook 'c-mode-hook #'my-c-or-c++-mode-maybe-use-ts-mode)
+  (add-hook 'c++-mode-hook #'my-c-or-c++-mode-maybe-use-ts-mode)
   (add-hook 'c++-ts-mode-hook
             (lambda ()
               (eglot-ensure)
-              (c-ts-mode-set-global-style 'bsd))))
+              (setq-local c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+              (setq-local c-ts-mode-indent-style #'myfunc/c-ts-indent-style)))
+  (add-hook 'c-ts-mode-hook
+            (lambda ()
+              (eglot-ensure)
+              (setq-local c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+              (setq-local c-ts-mode-indent-style #'myfunc/c-ts-indent-style)))
+  )
 
 ;; tree-sitter
 (when (and (fboundp 'treesit-available-p)
@@ -466,8 +481,8 @@
 
 ;; shortcut key map of emacs
 (defhydra hydra-shortcut-of-emacs (:hint nil
-                                   :pre (my/hydra-disable-dimmer)
-                                   :post (my/hydra-enable-dimmer))
+                                         :pre (my/hydra-disable-dimmer)
+                                         :post (my/hydra-enable-dimmer))
   "
 ^
 ^shortcut-of-emacs(M-C は C-Mと同じ)
@@ -485,7 +500,7 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
                                                              _C-x C-l_: pandoc-markdown-pdf
                                                              _C-c h_: toggle-display-fill-column-indicator-mode
 "
-  ; Move
+  ;; Move
   ("M-<" beginning-of-buffer)
   ("M->" end-of-buffer)
   ("M-f" forward-word)
@@ -494,14 +509,14 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
   ("M-C-e" c-end-of-defun)
   ("M-C-n" forward-list)
   ("M-C-p" backward-list)
-  ; Select
+  ;; Select
   ("C-x h" mark-whole-buffer)
   ("C-x SPC" rectangle-mark-mode)
   ("M-k" kill-sentence)
   ("M-SPC" just-one-space)
   ("M-C-h" c-mark-function)
   ("C-x C-r" recentf-open-files)
-  ; Others
+  ;; Others
   ("M-x replace-string" replace-string)
   ("C-x r" restart-emacs)
   ("M-x sort-lines" sort-lines)
