@@ -590,9 +590,11 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
     (setq confirm-kill-emacs 'yes-or-no-p)))
 
 ;; restart-emacs
-(use-package restart-emacs
-  :defer 2
-  :bind ("C-x r" . restart-emacs))
+(when (>= emacs-major-version 29)
+  (global-set-key (kbd "C-x r") #'restart-emacs)
+  (advice-add 'restart-emacs :after
+              (lambda (&rest _)
+                (run-at-time "2.0 sec" nil #'raise-frame))))
 
 ;; rst.el
 (use-package rst
