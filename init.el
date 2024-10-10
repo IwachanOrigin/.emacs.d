@@ -1,4 +1,3 @@
-
 ;; -*- lexical-binding: t -*-
 
 ;;============================================================================
@@ -66,8 +65,7 @@
   (setq use-package-expand-minimally t)
   (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
-  (require 'use-package)
-  )
+  (require 'use-package))
 
 ;; all-the-icons
 (use-package all-the-icons
@@ -123,6 +121,16 @@
   (dashboard-setup-startup-hook)
   (dashboard-refresh-buffer))
 
+;;
+(defun corfu-enable-always-in-minibuffer ()
+  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+  (unless (or (bound-and-true-p mct--active)
+              (bound-and-true-p vertico--input))
+    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                corfu-popupinfo-delay nil)
+    (corfu-mode 1)))
+
 ;; Corfu
 (use-package corfu
   :ensure t
@@ -133,13 +141,16 @@
   (corfu-auto-prefix 2)          ;; 2文字以上入力で補完を開始
   (corfu-auto-delay 0)           ;; 補完の遅延時間（0秒）
   (completion-ignore-case t)     ;; 大文字小文字を無視する
+  (tab-always-indent 'complete)
+  :config
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
   :bind
   (:map corfu-map
         ("C-n" . corfu-next)     ;; C-nで次の候補を選択
         ("C-p" . corfu-previous) ;; C-pで前の候補を選択
         ("C-s" . corfu-info-documentation) ;; C-sで候補の絞り込み
         ("C-i" . corfu-complete) ;; C-iまたはTABで候補を確定
-        ([tab] . corfu-complete))
+        ([tab] . corfu-insert))
   :init
   (global-corfu-mode))
 
@@ -198,6 +209,17 @@
 ;; programing language config
 ;;
 
+;; c/c++ mode
+(use-package cc-mode
+  :defer 1
+  :config
+  (setq c-default-style "bsd")
+  (setq c-basic-offset 2) ;; basic indent value
+  (setq tab-width 2)      ;; tab width
+  (setq indent-tabs-mode nil)  ;; indent use space.
+  (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
+  )
+
 ;; glsl-mode
 (use-package glsl-mode
   :defer 5
@@ -241,16 +263,16 @@
     (c-ts-mode))))
 
 ;; c/c++ ts mode indent style
-(defun myfunc/c-ts-indent-style ()
-  "Override the built-in BSD indentation style with some additional rules.
-   Docs: https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser_002dbased-Indentation.html
-   Notes: `treesit-explore-mode' can be very useful to see where you're at in the tree-sitter tree,
-          especially paired with `(setq treesit--indent-verbose t)' to debug what rules is being
-          applied at a given point."
-  `(;; do not indent namespace children
-    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
-    ;; append to bsd style
-    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
+;(defun myfunc/c-ts-indent-style ()
+;  "Override the built-in BSD indentation style with some additional rules.
+;   Docs: https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser_002dbased-Indentation.html
+;   Notes: `treesit-explore-mode' can be very useful to see where you're at in the tree-sitter tree,
+;          especially paired with `(setq treesit--indent-verbose t)' to debug what rules is being
+;          applied at a given point."
+;  `(;; do not indent namespace children
+;    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
+;    ;; append to bsd style
+;    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
 ;; eglot
 (progn
@@ -284,13 +306,15 @@
   (add-hook 'c++-ts-mode-hook
             (lambda ()
               (eglot-ensure)
-              (setq-local c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-              (setq-local c-ts-mode-indent-style #'myfunc/c-ts-indent-style)))
+              ;(setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+              ;(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
+              (setq c-ts-mode-set-global-style 'bsd)))
   (add-hook 'c-ts-mode-hook
             (lambda ()
               (eglot-ensure)
-              (setq-local c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-              (setq-local c-ts-mode-indent-style #'myfunc/c-ts-indent-style)))
+              ;(setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
+              ;(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
+              (setq c-ts-mode-set-global-style 'bsd)))
   )
 
 ;; tree-sitter
