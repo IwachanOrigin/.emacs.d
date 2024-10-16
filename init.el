@@ -273,28 +273,19 @@
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
-;; 
-(defun my-c-or-c++-mode-maybe-use-ts-mode ()
-  "Automatically switch to c-ts-mode or c++-ts-mode if available."
-  (cond
-   ;; About C++ file
-   ((derived-mode-p 'c++-mode)
-    (c++-ts-mode))
-   ;; About C file
-   ((derived-mode-p 'c-mode)
-    (c-ts-mode))))
-
 ;; c/c++ ts mode indent style
-;(defun myfunc/c-ts-indent-style ()
-;  "Override the built-in BSD indentation style with some additional rules.
-;   Docs: https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser_002dbased-Indentation.html
-;   Notes: `treesit-explore-mode' can be very useful to see where you're at in the tree-sitter tree,
-;          especially paired with `(setq treesit--indent-verbose t)' to debug what rules is being
-;          applied at a given point."
-;  `(;; do not indent namespace children
-;    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
-;    ;; append to bsd style
-;    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
+;; NOTE : When applying custom indentation rules in c-ts-mode,
+;;        a reference to the function must be passed in c-ts-mode-set-style.
+(defun my-c-ts-indent-style ()
+  "Custom indentation style for C/C++ using c-ts-mode."
+  (message "Applying custom indent style")
+  ;; Return the indent rule list
+  `(;; do not indent preprocessor
+    ((node-is "preproc") column-0 0)
+    ;; do not indent namespace children
+    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
+    ;; Add the indent rule of bsd
+    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
 ;; eglot
 (progn
@@ -323,20 +314,28 @@
     (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
     (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
-  (add-hook 'c-mode-hook #'my-c-or-c++-mode-maybe-use-ts-mode)
-  (add-hook 'c++-mode-hook #'my-c-or-c++-mode-maybe-use-ts-mode)
   (add-hook 'c++-ts-mode-hook
             (lambda ()
               (eglot-ensure)
-              ;(setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-              ;(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
-              (setq c-ts-mode-set-global-style 'bsd)))
+              (message "called c++-ts-mode-hook")
+              (setq-local indent-tabs-mode nil)
+              (setq-local c-tab-always-indent nil)
+              (setq-local c-ts-mode-indent-offset 2)
+              ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
+              (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
+              ;(setq treesit--indent-verbose t) ;; Debug mode
+              ))
   (add-hook 'c-ts-mode-hook
             (lambda ()
               (eglot-ensure)
-              ;(setq c-ts-mode-indent-offset 2) ;; basic indent value only c/c++-ts-mode
-              ;(setq c-ts-mode-indent-style #'myfunc/c-ts-indent-style)
-              (setq c-ts-mode-set-global-style 'bsd)))
+              (message "called c-ts-mode-hook")
+              (setq-local indent-tabs-mode nil)
+              (setq-local c-tab-always-indent nil)
+              (setq-local c-ts-mode-indent-offset 2)
+              ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
+              (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
+              ;(setq treesit--indent-verbose t) ;; Debug mode
+              ))
   )
 
 ;; tree-sitter
