@@ -284,6 +284,8 @@
     ((node-is "preproc") column-0 0)
     ;; do not indent namespace children
     ((n-p-gp nil nil "namespace_definition") grand-parent 0)
+    ;; If the element is a constructor initialization list, default indentation is performed.
+    ((node-is "field_initializer_list") parent-bol c-ts-mode-indent-offset)
     ;; Add the indent rule of bsd
     ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
@@ -323,7 +325,7 @@
               (setq-local c-ts-mode-indent-offset 2)
               ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
               (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
-              ;(setq treesit--indent-verbose t) ;; Debug mode
+              (setq treesit--indent-verbose t) ;; Debug mode
               ))
   (add-hook 'c-ts-mode-hook
             (lambda ()
