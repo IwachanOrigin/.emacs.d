@@ -288,6 +288,8 @@
     ((node-is "field_initializer_list") parent-bol c-ts-mode-indent-offset)
     ;; Adjust indentation in case of range for.
     ((match "compound_statement" "for_range_loop") standalone-parent 0)
+    ;; Adjust indentation of wave brackets and elements used in lambda expressions.
+    ((match "compound_statement" "lambda_expression") standalone-parent 0)
     ;; Add the indent rule of bsd
     ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
