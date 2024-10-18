@@ -286,6 +286,8 @@
     ((n-p-gp nil nil "namespace_definition") grand-parent 0)
     ;; If the element is a constructor initialization list, default indentation is performed.
     ((node-is "field_initializer_list") parent-bol c-ts-mode-indent-offset)
+    ;; Adjust indentation in case of range for.
+    ((match "compound_statement" "for_range_loop") standalone-parent 0)
     ;; Add the indent rule of bsd
     ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
 
