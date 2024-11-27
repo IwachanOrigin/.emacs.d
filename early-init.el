@@ -21,7 +21,7 @@
 ;; vertical scroll bars false
 (push '(vertical-scroll-bars . nil) default-frame-alist)
 ;; display fullscreen
-(push '(fullscreen . maximized) default-frame-alist)
+;;(push '(fullscreen . maximized) default-frame-alist)
 ;; No implicit resizing
 (setq frame-inhibit-implied-resize t)
 ;; No use file select dialog

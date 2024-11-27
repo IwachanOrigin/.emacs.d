@@ -1,5 +1,4 @@
 ;; -*- lexical-binding: t -*-
-
 ;;============================================================================
 ;;                                 init.el                                  ;;
 ;;============================================================================
@@ -69,9 +68,11 @@
 
 ;; all-the-icons
 (use-package all-the-icons
-  :defer 0.01
+  :defer 1
   :if (display-graphic-p)
   :config
+  (unless (file-exists-p (concat (getenv "HOME") "/.emacs.d/fonts/all-the-icons.ttf"))
+    (all-the-icons-install-fonts t))
   ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
   (when (member "all-the-icons" (font-family-list))
     (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
@@ -211,7 +212,7 @@
 ;; dired-sidebar
 ;; dired-sidebar-20240522.2316 or later
 (use-package dired-sidebar
-  :defer 1
+  :after all-the-icons
   :commands (dired-sidebar-toggle-sidebar)
   :init
   (add-hook 'dired-sidebar-mode-hook
@@ -221,9 +222,12 @@
   :config
   (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
   (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-  (setq dired-sidebar-theme 'ascii)
   (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t)
+  (setq dired-sidebar-theme 'icons)
   (setq dired-sidebar-resize-on-open t)
+  (setq dired-sidebar-window-fixed nil)
+  (setq dired-sidebar-width 60)
   :bind
   (("C-x C-n" . dired-sidebar-toggle-sidebar)))
 
@@ -304,13 +308,13 @@
     (add-to-list 'eglot-server-programs
                  '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
                    . ("clangd"
-                      "-j=8"
+                      "-j=2"
                       "--log=error"
-                      "--background-index"
+                      "--background-index=false"
                       "--clang-tidy"
                       "--cross-file-rename"
                       "--completion-style=detailed"
-                      "--pch-storage=memory"
+                      "--pch-storage=disk"
                       "--header-insertion=never"
                       "--header-insertion-decorators=0"))))
 
@@ -340,7 +344,7 @@
               (setq-local c-ts-mode-indent-offset 2)
               ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
               (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
-              ;(setq treesit--indent-verbose t) ;; Debug mode
+              (setq treesit--indent-verbose t) ;; Debug mode
               ))
   )
 
@@ -397,6 +401,28 @@
   (cond (display-fill-column-indicator-mode (display-fill-column-indicator-mode -1))
         (t (display-fill-column-indicator-mode 1))))
 (global-set-key (kbd "C-c h") 'toggle-display-fill-column-indicator-mode)
+
+;; 
+(defun my-setup-frame-size-and-position ()
+  "プライマリモニターの解像度の70%に設定し、中央に配置します。"
+  (let* ((monitor-attrs (car (display-monitor-attributes-list)))  ; プライマリモニターの情報を取得
+         (geometry (alist-get 'geometry monitor-attrs))           ; モニターのジオメトリ（位置とサイズ）
+         (screen-width (nth 2 geometry))                          ; ディスプレイの幅（ピクセル）
+         (screen-height (nth 3 geometry))                         ; ディスプレイの高さ（ピクセル）
+         (char-width (frame-char-width))                          ; 1文字の幅（ピクセル）
+         (char-height (frame-char-height))                        ; 1文字の高さ（ピクセル）
+         (frame-width (round (/ (* 0.7 screen-width) char-width))) ; フレーム幅（文字単位）
+         (frame-height (round (/ (* 0.7 screen-height) char-height))) ; フレーム高さ（文字単位）
+         (frame-left (round (/ (- screen-width (* frame-width char-width)) 2))) ; 左端位置
+         (frame-top (round (/ (- screen-height (* frame-height char-height)) 2)))) ; 上端位置
+    ;; default-frame-alistに設定を追加
+    (add-to-list 'default-frame-alist `(width . ,frame-width))
+    (add-to-list 'default-frame-alist `(height . ,frame-height))
+    (add-to-list 'default-frame-alist `(left . ,frame-left))
+    (add-to-list 'default-frame-alist `(top . ,frame-top))))
+
+;; Adjusted config when run emacs
+(my-setup-frame-size-and-position)
 
 ;;
 ;; Enhance C-s settings
@@ -672,7 +698,6 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
-
 ;; Display a bar that clearly indicates the number of characters per line
 (setq-default display-fill-column-indicator-column 100)
 (global-display-fill-column-indicator-mode)
