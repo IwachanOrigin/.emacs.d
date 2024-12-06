@@ -168,6 +168,34 @@
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
+;; fontaine
+(use-package fontaine
+  :config
+  (cond (IS-LINUX
+         (setq fontaine-presets
+               '((regular
+                  :default-family "CommitMono Nerd Font Mono"
+                  :fixed-pitch-family "CommitMono Nerd Font Mono"
+                  :variable-pitch-family "CommitMono Nerd Font Mono"
+                  :italic-family "CommitMono Nerd Font Mono Italic")
+                 (large
+                  :default-family "CommitMono Nerd Font Mono"
+                  :variable-pitch-family "CommitMono Nerd Font Mono"))))
+
+        (IS-WINDOWS
+         (setq fontaine-presets
+               '((regular
+                  :default-family "CommitMono Nerd Font Mono"
+                  :fixed-pitch-family "CommitMono Nerd Font Mono"
+                  :variable-pitch-family "CommitMono Nerd Font Mono"
+                  :italic-family "CommitMono Nerd Font Mono")
+                 (large
+                  :default-family "CommitMono Nerd Font Mono"
+                  :variable-pitch-family "CommitMono Nerd Font Mono")))))
+
+  (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
+  (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
+
 ;; icons
 (use-package nerd-icons)
 (use-package nerd-icons-completion
