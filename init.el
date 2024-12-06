@@ -13,13 +13,10 @@
 (defconst IS-WINDOWS (memq system-type '(cygwin windows-nt ms-dos)))
 
 ;; GC
-(setq gc-cons-threshold most-positive-fixnum)
-;; Run GC every 120 seconds if emacs is idle.
-(run-with-idle-timer 120.0 t #'garbage-collect)
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            ;; recover default value
-            (setq gc-cons-threshold 800000)))
+(setq gc-cons-percentage 0.2
+      gc-cons-threshold (* 128 1024 1024))
+(add-hook 'focus-out-hook #'garbage-collect)
+(setq garbage-collection-messages t)
 
 ;; magic file name
 (defconst my-saved-file-name-handler-alist file-name-handler-alist)
@@ -36,6 +33,9 @@
 ;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
 (when IS-WINDOWS
   (setq-default default-process-coding-system '(utf-8-unix . japanese-cp932-dos)))
+
+;; native-compの警告を表示しない
+(setq native-comp-async-report-warnings-errors 'silent)
 
 ;; package
 (eval-and-compile
@@ -66,26 +66,119 @@
 
   (require 'use-package))
 
-;; all-the-icons
-(use-package all-the-icons
-  :defer 1
-  :if (display-graphic-p)
+;; vc-use-package
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+(require 'vc-use-package)
+
+;; so-long
+(use-package so-long
+  :init
+  (global-so-long-mode +1))
+
+;; Optimizing performance
+;; https://ayatakesi.github.io/lispref/25.2/html/Output-from-Processes.html
+(setq process-adaptive-read-buffering t)
+;; protesilaos
+;; 閉じ括弧を入力しても点滅させない
+(setq blink-matching-paren nil)
+;; vcのバックエンドをGitのみに変更
+(setq vc-handled-backends '(Git))
+;; doomemacs
+;; ファイル検索を2回行わないようにする
+(setq auto-mode-case-fold nil)
+;; 双方向の並び替えを抑制する
+(setq-default bidi-display-reordering 'left-to-right)
+;; 長い行の双方向スキャン
+(setq bidi-inhibit-bpa t)
+;; フォーカスされていないウィンドウのカーソルを削除
+(setq-default cursor-in-non-selected-windows nil)
+(setq highlight-nonselected-windows nil)
+;; 高速なスクロール
+(setq fast-but-imprecise-scrolling t)
+;; ドメインにpingを送信しない
+(setq ffap-machine-p-known 'reject)
+;; UIの更新頻度を下げる
+(setq idle-update-delay 1.0)
+;; 不要なフォント表示化を抑制
+(setq redisplay-skip-fontification-on-input t)
+;; Windowsの最適化
+(when IS-WINDOWS
+  (setq w32-get-true-file-attributes nil
+        w32-pipe-read-delay 0
+        w32-pipe-buffer-size (* 64 1024)))
+;; Centaur Emacs
+;; 各OSの最適化
+(when IS-WINDOWS
+  (setq w32-use-native-image-API t))
+(unless IS-MAC
+  (setq command-line-ns-option-alist nil))
+(unless IS-LINUX
+  (setq command-line-x-option-alist nil))
+
+;; Org
+(use-package org
+  :init
+  (setq org-return-follows-link t  ; Returnキーでリンク先を開く
+        org-mouse-1-follows-link t ; マウスクリックでリンク先を開く
+        ))
+;; アンダースコアを入力しても下付き文字にならないようにする
+(setq org-use-sub-superscripts '{}
+      org-export-with-sub-superscripts nil)
+
+;; org-indent
+(use-package org-indent
+  :ensure nil
+  :hook (org-mode . org-indent-mode))
+
+;; org-modern
+(use-package org-modern
   :config
-  (unless (file-exists-p (concat (getenv "HOME") "/.emacs.d/fonts/all-the-icons.ttf"))
-    (all-the-icons-install-fonts t))
-  ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
-  (when (member "all-the-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append))
-  (when (member "file-icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append))
-  (when (member "FontAwesome" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append))
-  (when (member "Material Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append))
-  (when (member "github-octicons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append))
-  (when (member "Weather Icons" (font-family-list))
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)))
+  (setopt
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+
+   ;; Agenda styling
+   org-agenda-tags-column 0
+   org-agenda-block-separator ?─
+   org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+   org-agenda-current-time-string
+   "◀── now ─────────────────────────────────────────────────")
+
+  ;; Ellipsis styling
+  (setopt org-ellipsis "…")
+  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
+
+  (global-org-modern-mode))
+
+;; org-modern-indent
+(use-package org-modern-indent
+  :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
+  :config
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+
+;; icons
+(use-package nerd-icons)
+(use-package nerd-icons-completion
+  :hook (after-init . nerd-icons-completion-mode))
+(use-package nerd-icons-dired
+  :hook (dired-mode . nerd-icons-dired-mode))
+(use-package nerd-icons-corfu
+  :vc ( :fetcher github :repo "LuigiPiucco/nerd-icons-corfu")
+  :after corfu nerd-icons
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 ;; useful to IME
 (when (eq window-system 'w32)
@@ -122,78 +215,543 @@
   (dashboard-setup-startup-hook)
   (dashboard-refresh-buffer))
 
-;;
-(defun corfu-enable-always-in-minibuffer ()
-  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
-  (unless (or (bound-and-true-p mct--active)
-              (bound-and-true-p vertico--input))
-    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
-    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
-                corfu-popupinfo-delay nil)
-    (corfu-mode 1)))
-
-;; Corfu
+;; corfu
 (use-package corfu
-  :ensure t
-  :defer 3
-  :custom
-  (corfu-cycle t)                ;; 候補リストをループする
-  (corfu-auto t)                 ;; 自動的に候補を表示
-  (corfu-auto-prefix 2)          ;; 2文字以上入力で補完を開始
-  (corfu-auto-delay 0)           ;; 補完の遅延時間（0秒）
-  (completion-ignore-case t)     ;; 大文字小文字を無視する
-  (tab-always-indent 'complete)
+  :demand t
+  :hook (prog-mode . (lambda ()
+                       (global-set-key [remap c-indent-line-or-region] #'indent-for-tab-command)))
   :config
-  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
-  :bind
-  (:map corfu-map
-        ("C-n" . corfu-next)     ;; C-nで次の候補を選択
-        ("C-p" . corfu-previous) ;; C-pで前の候補を選択
-        ("C-s" . corfu-info-documentation) ;; C-sで候補の絞り込み
-        ("C-i" . corfu-complete) ;; C-iまたはTABで候補を確定
-        ([tab] . corfu-insert))
-  :init
-  (global-corfu-mode))
+  (setopt corfu-cycle t
+          corfu-auto t
+          corfu-auto-delay 0.0
+          corfu-auto-prefix 2
+          corfu-on-exact-match 'show)
 
-;; Support corfu popup
+  (global-corfu-mode +1)
+
+  (with-eval-after-load 'lsp-mode
+    (setopt lsp-completion-provider :none))
+
+  (with-eval-after-load 'orderless
+    (defun my/orderless-for-corfu ()
+      (setq-local orderless-matching-styles '(orderless-flex)))
+
+    (add-hook 'corfu-mode-hook #'my/orderless-for-corfu)))
+;; corfu-popup
 (use-package corfu-popupinfo
-  :after corfu
-  :ensure nil ;; `corfu-popupinfo` was part of `corfu` package
-  :hook (corfu-mode . corfu-popupinfo-mode)
-  :config
-  (setq corfu-popupinfo-delay 0.2)) ;; popup delay time
+  :ensure nil
+  :hook (corfu-mode . corfu-popupinfo-mode))
+;; corfu-magic
+(with-eval-after-load 'corfu
+  (setq corfu-preselect 'prompt)
 
-;; Add extensions of corfu
+  (define-key corfu-map (kbd "TAB") 'corfu-next)
+  (define-key corfu-map (kbd "<tab>") 'corfu-next)
+  (define-key corfu-map (kbd "S-TAB") 'corfu-previous)
+  (define-key corfu-map (kbd "<backtab>") 'corfu-previous)
+
+  (defvar corfu--index)
+  (defvar corfu-magic-insert-or-next-line
+    `(menu-item "" nil :filter ,(lambda (&optional _)
+                                  (when (>= corfu--index 0)
+                                    'corfu-insert)))
+    "If we made a selection during `corfu' completion, select it.")
+  (define-key corfu-map (kbd "RET") corfu-magic-insert-or-next-line)
+
+  (defvar corfu-magic-cancel-or-backspace
+    `(menu-item "" nil :filter ,(lambda (&optional _)
+                                  (when (>= corfu--index 0)
+                                    'corfu-reset)))
+    "If we made a selection during `corfu' completion, cancel it.")
+  (define-key corfu-map (kbd "DEL") corfu-magic-cancel-or-backspace)
+  (define-key corfu-map (kbd "<backspace") corfu-magic-cancel-or-backspace)
+  )
+
+;; cape
 (use-package cape
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
+  :config
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
+  (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
+  (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
+
+  (add-hook 'completion-at-point-functions #'tempel-complete)
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
-)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block))
+;; dabbrevのサイズを制限
+(setq dabbrev-friend-buffer-function (lambda (other-buffer)
+                                       (< (buffer-size other-buffer) (* 1024 1024))))
 
-;; Orderless
+;; TABで補完を表示する
+(setq tab-always-indent 'complete)
+
+;; vertico
+(use-package vertico
+  :init
+  (setq vertico-cycle t)
+  (vertico-mode +1))
+;; vertico-repeat
+(use-package vertico-repeat
+  :ensure nil
+  :after vertico
+  :hook (minibuffer-setup . vertico-repeat-save))
+;; vertico-directory
+(use-package vertico-directory
+  :ensure nil
+  :after vertico
+  :bind ( :map vertico-map
+          ("<backspace>" . vertico-directory-delete-char)))
+;; vertico-buffer
+(use-package vertico-buffer
+  :ensure nil
+  :config
+  (setq vertico-buffer-display-action '(display-buffer-at-bottom))
+  (vertico-buffer-mode +1))
+;; Prefix current candidate with arrow
+(defvar +vertico-current-arrow t)
+
+(cl-defmethod vertico--format-candidate :around
+  (cand prefix suffix index start &context ((and +vertico-current-arrow
+                                                 (not (bound-and-true-p vertico-flat-mode)))
+                                            (eql t)))
+  (setq cand (cl-call-next-method cand prefix suffix index start))
+  (let ((arrow (nerd-icons-faicon "nf-fa-hand_o_right")))
+    (if (bound-and-true-p vertico-grid-mode)
+        (if (= vertico--index index)
+            (concat arrow " " cand)
+          (concat #("_" 0 1 (display " ")) cand))
+      (if (= vertico--index index)
+          (concat " " arrow " " cand)
+        (concat "    " cand)))))
+;; vertico-truncate
+(use-package vertico-truncate
+  :vc ( :fetcher github :repo "jdtsmith/vertico-truncate")
+  :config
+  (vertico-truncate-mode +1))
+
+;; orderless
 (use-package orderless
-  :ensure t
-  :defer 2)
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides nil)
 
-;; font settings
-(when (member "UDEV Gothic NF" (font-family-list))
-  (set-fontset-font t 'unicode (font-spec :family "UDEV Gothic NF") nil 'append)
-  (set-face-attribute 'default nil :family "UDEV Gothic NF" :height 110 :weight 'Regular))
+  (with-eval-after-load 'migemo
+    ;; orderlessをmigemo対応
+    (defun orderless-migemo (component)
+      (let ((pattern (downcase (migemo-get-pattern component))))
+        (condition-case nil
+            (progn (string-match-p pattern "") pattern)
+          (invalid-regexp nil))))
+    (add-to-list 'orderless-matching-styles 'orderless-migemo))
+
+  (with-eval-after-load 'corfu
+    (defun orderless-fast-dispatch (word index total)
+      (and (= index 0) (= total 1) (length< word 4)
+           'orderless-literal-prefix))
+
+    (orderless-define-completion-style orderless-fast
+      (orderless-style-dispatchers '(orderless-fast-dispatch))
+      (orderless-matching-styles '(orderless-flex)))
+
+    (defun my/setup-corfu-for-orderless ()
+      (setq-local corfu-auto-delay 0
+                  corfu-auto-prefix 1
+                  completion-styles '(orderless-fast)))
+
+    (add-hook 'corfu-mode-hook #'my/setup-corfu-for-orderless)))
+
+;; prescient
+(use-package prescient
+  :config
+  (setq prescient-aggressive-file-save t)
+  (prescient-persist-mode +1))
+;; vertico-prescient
+(use-package vertico-prescient
+  :config
+  (setq vertico-prescient-enable-filtering nil)
+  (vertico-prescient-mode +1))
+;; corfu-prescient
+(use-package corfu-prescient
+  :config
+  (setq corfu-prescient-enable-filtering nil)
+  (corfu-prescient-mode +1))
+
+;; consult
+;; Example configuration for Consult
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (;; C-c bindings (mode-specific-map)
+         ("C-c h" . consult-history)
+         ("C-c m" . consult-mode-command)
+         ("C-c k" . consult-kmacro)
+         ;; C-x bindings (ctl-x-map)
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ([remap switch-to-buffer] . consult-buffer)                ;; orig. switch-to-buffer
+         ([remap switch-to-buffer-other-window] . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ([remap bookmark-jump] . consult-bookmark)            ;; orig. bookmark-jump
+         ([remap project-switch-to-buffer] . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ("<help> a" . consult-apropos)            ;; orig. apropos-command
+         :map goto-map
+         ("e" . consult-compile-error)
+         ("f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g" . consult-goto-line)           ;; orig. goto-line
+         ("o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("m" . consult-mark)
+         ("k" . consult-global-mark)
+         ("i" . consult-imenu)
+         ("I" . consult-imenu-multi)
+         :map search-map
+         ("d" . consult-fd)
+         ("D" . consult-locate)
+         ("g" . consult-grep)
+         ("G" . consult-git-grep)
+         ("r" . consult-ripgrep)
+         ("l" . consult-line)
+         ("L" . consult-line-multi)
+         ("m" . consult-multi-occsur)
+         ("k" . consult-keep-lines)
+         ("u" . consult-focus-lines)
+         ("e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-hisstory)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key (kbd "M-."))
+  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 1.0 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; By default `consult-project-function' uses `project-root' from project.el.
+  ;; Optionally configure a different project root function.
+  ;; There are multiple reasonable alternatives to chose from.
+    ;;;; 1. project.el (the default)
+  ;; (setq consult-project-function #'consult--default-project--function)
+    ;;;; 2. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+    ;;;; 3. vc.el (vc-root-dir)
+  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+    ;;;; 4. locate-dominating-file
+  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+  )
+
+;; marginalia
+(use-package marginalia
+  :init
+  (marginalia-mode +1))
+
+;; embark
+(use-package embark
+  :bind (("C-." . embark-act)         ;; pick some comfortable binding
+         ("C-;" . embark-dwim)        ;; good alternative: M-.
+         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+;; embark-consult
+(use-package embark-consult
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+;; tempel
+(use-package tempel
+  :demand t
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert)))
+;; tempel-collection
+(use-package tempel-collection
+  :after tempel)
+
+;; git
+;; magit
+(use-package magit
+  :config
+  (when IS-WINDOWS
+    (setq magit-refresh-status-buffer nil)
+    (setq auto-revert-buffer-list-filter
+          'magit-auto-revert-repository-buffer-p)
+    (remove-hook 'magit-refs-sections-hook 'magit-insert-tags)
+    (remove-hook 'server-switch-hook 'magit-commit-diff)
+    (remove-hook 'with-editor-filter-visit-hook 'magit-commit-diff)))
+
+;; diff-hl
+(use-package diff-hl
+  :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh)
+         (dired-mode . diff-hl-dired-mode))
+  :init
+  (global-diff-hl-mode +1)
+  (global-diff-hl-show-hunk-mouse-mode +1)
+  (diff-hl-margin-mode +1))
+;; difftastic.el
+(use-package difftastic
+  :demand t
+  :bind (:map magit-blame-read-only-mode-map
+              ("D" . difftastic-magit-show)
+              ("S" . difftastic-magit-show))
+  :config
+  (eval-after-load 'magit-diff
+    '(transient-append-suffix 'magit-diff '(-1 -1)
+       [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
+        ("S" "Difftastic show" difftastic-magit-show)])))
+
+;;whick-key
+(use-package which-key
+  :config
+  (which-key-mode +1))
+
+;; undo
+;; undo-fu
+(use-package undo-fu)
+;; undo-fu-session
+(use-package undo-fu-session
+  :config
+  (undo-fu-session-global-mode +1))
+;; vundo
+;; https://github.com/casouri/vundo
+(use-package vundo)
+
+;; rg
+(use-package rg
+  :defer t)
+
+;; apheleia
+(use-package apheleia
+  :config
+  (when IS-WINDOWS
+    (add-to-list 'apheleia-formatters
+                 '(prettier-css
+                   . (npx "prettier" "--stdin-filepath" filepath "--parser=css"
+                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
+    (add-to-list 'apheleia-formatters
+                 '(prettier-html
+                   . (npx "prettier" "--stdin-filepath" filepath "--parser=html"
+                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
+    (add-to-list 'apheleia-formatters
+                 '(prettier-json
+                   . (npx "prettier" "--stdin-filepath" filepath "--parser=json"
+                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
+    (add-to-list 'apheleia-formatters
+                 '(prettier-typescript
+                   . (npx "prettier" "--stdin-filepath" filepath "--parser=typescript"
+                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width")))))
+
+  (apheleia-global-mode +1))
+
+;; theme
+;; ef-themes
+(use-package ef-themes
+  :config
+  (setq ef-themes-mixed-fonts t
+        ef-themes-variable-pitch-ui t)
+  (load-theme 'ef-melissa-light t))
+;; modus-themes
+(use-package modus-themes
+  :config
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-mixed-fonts t
+        modus-themes-variable-pitch-ui t
+        modus-themes-disable-other-themes t)
+
+  (setq modus-themes-completions
+        '((t . (underline))))
+
+  (setq modus-themes-common-palette-overrides
+        '((fg-completion-match-0 blue)
+          (fg-completion-match-1 magenta-warmer)
+          (fg-completion-match-2 cyan)
+          (fg-completion-match-3 red)
+          (bg-completion-match-0 bg-blue-nuanced)
+          (bg-completion-match-1 bg-magenta-nuanced)
+          (bg-completion-match-2 bg-cyan-nuanced)
+          (bg-completion-match-3 bg-red-nuanced)))
+
+  ;; (load-theme 'modus-operandi-tinted t)
+  )
+
+;; puni
+(use-package puni
+  :config
+  (puni-global-mode +1))
+
+;; string-inflection
+(use-package string-inflection
+  :bind ( :map my-string-inflection-map
+          ("a" . string-inflection-all-cycle)
+          ("_" . string-inflection-underscore)
+          ("p" . string-inflection-pascal-case)
+          ("c" . string-inflection-camelcase)
+          ("u" . string-inflection-upcase)
+          ("k" . string-inflection-kebab-case)
+          ("C" . string-inflection-capital-underscore))
+  :init
+  (defvar my-string-inflection-map (make-keymap)))
+
+;; go-translate
+(use-package go-translate
+  :init
+  (setq gts-translate-list '(("en" "ja"))))
+
+;; avy
+(use-package avy)
+
+;; ace-window
+(use-package ace-window)
+
+;; lin
+(use-package lin
+  :init
+  (setq lin-face 'lin-red)
+  (lin-global-mode +1))
+
+;; pulsar
+(use-package pulsar
+  :config
+  (pulsar-global-mode +1))
+
+;; goggles
+(use-package goggles
+  :hook ((prog-mode text-mode) . goggles-mode)
+  :config
+  (setq-default goggles-pulse t)) ;; set to nil to disable pulsing
+
+;; spacious-padding
+(use-package spacious-padding
+  :config
+  (setq spacious-padding-widths
+        '( :internal-border-width 15
+           :header-line-width 4
+           :mode-line-width 6
+           :tab-width 4
+           :right-divider-width 30
+           :scroll-bar-width 8))
+
+  ;; Read the doc string of `spacious-padding-subtle-mode-line' as it
+  ;; is very flexible and provides several examples.
+  (setq spacious-padding-subtle-mode-line
+        `( :mode-line-active 'default
+           :mode-line-inactive vertical-border))
+
+  (spacious-padding-mode +1))
+
+;; beframe
+(use-package beframe
+  :config
+  (defvar consult-buffer-sources)
+  (declare-function consult--buffer-state "consult")
+
+  (with-eval-after-load 'consult
+    (defface beframe-buffer
+      '((t :inherit font-lock-string-face))
+      "Face for `consult' framed buffers.")
+
+    (defvar beframe-consult-source
+      `( :name     "Frame-specific buffers (current frame)"
+         :narrow   ?F
+         :category buffer
+         :face     beframe-buffer
+         :history  beframe-history
+         :items    ,#'beframe-buffer-names
+         :action   ,#'switch-to-buffer
+         :state    ,#'consult--buffer-state))
+
+    (add-to-list 'consult-buffer-sources 'beframe-consult-source))
+
+  (beframe-mode +1))
+
+;; aggressive-indent
+(use-package aggressive-indent
+  :hook (emacs-lisp-mode . aggressive-indent-mode))
+
+;; perfect-mergin
+(use-package perfect-margin
+  :config
+  (setq perfect-margin-ignore-filters nil)
+  (perfect-margin-mode +1))
+
+;; breadcrumb
+(use-package breadcrumb
+  :vc ( :fetcher github :repo "joaotavora/breadcrumb")
+  :config
+  (breadcrumb-mode +1))
+
+;; rainbow-delimiters
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;; imenu-list
+(use-package imenu-list
+  :bind ( :map my-toggle-map
+          ("i" . imenu-list-smart-toggle))
+  :init
+  (setq imenu-list-position 'left))
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -201,39 +759,86 @@
   :defer 3
   :hook (after-init . global-auto-revert-mode))
 
-;; hungry-delete
-(use-package hungry-delete
-  :defer 3
-  :hook
-  (after-init . global-hungry-delete-mode)
-  :config
-  (setq hungry-delete-chars-to-skip " \t\f\v"))
-
-;; dired-sidebar
-;; dired-sidebar-20240522.2316 or later
-(use-package dired-sidebar
-  :after all-the-icons
-  :commands (dired-sidebar-toggle-sidebar)
-  :init
-  (add-hook 'dired-sidebar-mode-hook
-            (lambda ()
-              (unless (file-remote-p default-directory)
-                (auto-revert-mode))))
-  :config
-  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-  (setq dired-sidebar-use-term-integration t)
-  (setq dired-sidebar-use-custom-font t)
-  (setq dired-sidebar-theme 'icons)
-  (setq dired-sidebar-resize-on-open t)
-  (setq dired-sidebar-window-fixed nil)
-  (setq dired-sidebar-width 60)
-  :bind
-  (("C-x C-n" . dired-sidebar-toggle-sidebar)))
-
 ;;
 ;; programing language config
 ;;
+
+;; elisp
+;; highlight-defined
+(use-package highlight-defined
+  :hook (emacs-lisp-mode . highlight-defined-mode))
+;; highlight-quoted
+(use-package highlight-quoted
+  :hook (emacs-lisp-mode . highlight-quoted-mode))
+;; web
+;; typescript-mode
+(use-package typescript-mode)
+;; jtsx
+(use-package jtsx
+  :ensure t
+  :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
+         ("\\.tsx\\'" . jtsx-tsx-mode)
+         ("\\.ts\\'" . jtsx-typescript-mode))
+  :commands jtsx-install-treesit-language
+  :hook ((jtsx-jsx-mode . hs-minor-mode)
+         (jtsx-tsx-mode . hs-minor-mode)
+         (jtsx-typescript-mode . hs-minor-mode))
+  :custom
+  ;; Optional customizations
+  ;; (js-indent-level 2)
+  ;; (typescript-ts-mode-indent-offset 2)
+  ;; (jtsx-switch-indent-offset 0)
+  (jtsx-indent-statement-block-regarding-standalone-parent nil)
+  (jtsx-jsx-element-move-allow-step-out t)
+  (jtsx-enable-jsx-electric-closing-element t)
+  (jtsx-enable-electric-open-newline-between-jsx-element-tags t)
+  (jtsx-enable-jsx-element-tags-auto-sync t)
+  (jtsx-enable-all-syntax-highlighting-features t)
+  :config
+  (defun jtsx-bind-keys-to-mode-map (mode-map)
+    "Bind keys to MODE-MAP."
+    (define-key mode-map (kbd "C-c C-j") 'jtsx-jump-jsx-element-tag-dwim)
+    (define-key mode-map (kbd "C-c j o") 'jtsx-jump-jsx-opening-tag)
+    (define-key mode-map (kbd "C-c j c") 'jtsx-jump-jsx-closing-tag)
+    (define-key mode-map (kbd "C-c j r") 'jtsx-rename-jsx-element)
+    (define-key mode-map (kbd "C-c <down>") 'jtsx-move-jsx-element-tag-forward)
+    (define-key mode-map (kbd "C-c <up>") 'jtsx-move-jsx-element-tag-backward)
+    (define-key mode-map (kbd "C-c C-<down>") 'jtsx-move-jsx-element-forward)
+    (define-key mode-map (kbd "C-c C-<up>") 'jtsx-move-jsx-element-backward)
+    (define-key mode-map (kbd "C-c C-S-<down>") 'jtsx-move-jsx-element-step-in-forward)
+    (define-key mode-map (kbd "C-c C-S-<up>") 'jtsx-move-jsx-element-step-in-backward)
+    (define-key mode-map (kbd "C-c j w") 'jtsx-wrap-in-jsx-element)
+    (define-key mode-map (kbd "C-c j u") 'jtsx-unwrap-jsx)
+    (define-key mode-map (kbd "C-c j d") 'jtsx-delete-jsx-node))
+
+  (defun jtsx-bind-keys-to-jtsx-jsx-mode-map ()
+    (jtsx-bind-keys-to-mode-map jtsx-jsx-mode-map))
+
+  (defun jtsx-bind-keys-to-jtsx-tsx-mode-map ()
+    (jtsx-bind-keys-to-mode-map jtsx-tsx-mode-map))
+
+  (add-hook 'jtsx-jsx-mode-hook 'jtsx-bind-keys-to-jtsx-jsx-mode-map)
+  (add-hook 'jtsx-tsx-mode-hook 'jtsx-bind-keys-to-jtsx-tsx-mode-map))
+;; emmet-mode
+(use-package emmet-mode
+  :hook ((html-mode
+          css-mode
+          js-mode
+          typescript-mode) . emmet-mode))
+;; web-beautify
+(use-package web-beautify
+  :defer t)
+;; common-lisp
+(use-package slime
+  :defer t
+  :init
+  (setq inferior-lisp-program "sbcl"))
+;; slime-company
+(use-package slime-company
+  :after (slime company)
+  :config
+  (setq slime-company-completion 'fuzzy
+        slime-company-after-completion 'slime-company-just-one-space))
 
 ;; c/c++ mode
 (use-package cc-mode
@@ -277,89 +882,127 @@
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
-;; c/c++ ts mode indent style
-;; NOTE : When applying custom indentation rules in c-ts-mode,
-;;        a reference to the function must be passed in c-ts-mode-set-style.
-(defun my-c-ts-indent-style ()
-  "Custom indentation style for C/C++ using c-ts-mode."
-  (message "Applying custom indent style")
-  ;; Return the indent rule list
-  `(;; do not indent preprocessor
-    ((node-is "preproc") column-0 0)
-    ;; do not indent namespace children
-    ((n-p-gp nil nil "namespace_definition") grand-parent 0)
-    ;; If the element is a constructor initialization list, default indentation is performed.
-    ((node-is "field_initializer_list") parent-bol c-ts-mode-indent-offset)
-    ;; Adjust indentation in case of range for.
-    ((match "compound_statement" "for_range_loop") standalone-parent 0)
-    ;; Adjust indentation of wave brackets and elements used in lambda expressions.
-    ((match "compound_statement" "lambda_expression") standalone-parent 0)
-    ;; Add the indent rule of bsd
-    ,@(alist-get 'bsd (c-ts-mode--indent-styles 'cpp))))
-
 ;; eglot
-(progn
-  (customize-set-variable 'eglot-autoshutdown t)
-  (customize-set-variable 'eglot-extend-to-xref t)
-  (customize-set-variable 'eglot-ignored-server-capabilities
-                          (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
+(use-package eglot
+  :bind ( :map eglot-mode-map
+          ("C-c r" . eglot-rename)
+          ("C-c o" . eglot-code-action-organize-imports)
+          ("C-c a" . eglot-code-actions)
+          ("C-c h" . eldoc)
+          ("<f6>" . xref-find-definitions))
+  :init
+  (setq eglot-events-buffer-config '(:size 0  :format short)
+        eglot-ignored-server-capabilities '(:documentHighlightProvider)
+        eglot-stay-out-of '(flymake)
+        eglot-send-changes-idle-time 1.0)
 
-  (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs
-                 '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
-                   . ("clangd"
-                      "-j=2"
-                      "--log=error"
-                      "--background-index=false"
-                      "--clang-tidy"
-                      "--cross-file-rename"
-                      "--completion-style=detailed"
-                      "--pch-storage=disk"
-                      "--header-insertion=never"
-                      "--header-insertion-decorators=0"))))
+  (defun my/add-directory-to-exec-path-recursively (dir)
+    "Recursively add directories and their subdirectories to `exec-path`."
+    (add-to-list 'exec-path dir)
+    (dolist (entry (directory-files dir t "^[^.]" t))
+      (when (file-directory-p entry)
+        (my/add-directory-to-exec-path-recursively entry))))
 
-  (with-eval-after-load 'flymake
-    (define-key flymake-mode-map (kbd "C-c ! n") nil)
-    (define-key flymake-mode-map (kbd "C-c ! p") nil)
-    (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
-    (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
+  (defun my/load-lsp-exec-path ()
+    (interactive)
+    (my/add-directory-to-exec-path-recursively "~/.emacs.d/.cache/"))
 
-  (add-hook 'c++-ts-mode-hook
-            (lambda ()
-              (eglot-ensure)
-              (message "called c++-ts-mode-hook")
-              (setq-local indent-tabs-mode nil)
-              (setq-local c-tab-always-indent nil)
-              (setq-local c-ts-mode-indent-offset 2)
-              ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
-              (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
-              (setq treesit--indent-verbose t) ;; Debug mode
-              ))
-  (add-hook 'c-ts-mode-hook
-            (lambda ()
-              (eglot-ensure)
-              (message "called c-ts-mode-hook")
-              (setq-local indent-tabs-mode nil)
-              (setq-local c-tab-always-indent nil)
-              (setq-local c-ts-mode-indent-offset 2)
-              ;(c-ts-mode-set-style 'bsd) ;; c-ts-mode-set-style is function.
-              (c-ts-mode-set-style #'my-c-ts-indent-style) ;; Adjust custom indent rule based by bsd
-              (setq treesit--indent-verbose t) ;; Debug mode
-              ))
-  )
-
-;; tree-sitter
-(when (and (fboundp 'treesit-available-p)
-           (treesit-available-p))
-  (setq treesit-font-lock-level 4))
-(use-package treesit-auto
-  :ensure t
-  :defer 2
-  :custom
-  (treesit-auto-install 'prompt)
+  (my/load-lsp-exec-path))
+;; eglot-tempel
+(use-package eglot-tempel
+  :after (eglot tempel)
+  :hook (eglot-managed-mode . eglot-tempel-mode))
+;; consult-eglot
+(use-package consult-eglot
+  :after eglot
+  :bind ( :map eglot-mode-map
+          ("C-c s" . consult-eglot-symbols)))
+;; jsonrpc
+(use-package jsonrpc
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+  (setq jsonrpc-default-request-timeout 3000)
+  (fset #'jsonrpc--log-event #'ignore))
+;; eglot-booster
+(use-package eglot-booster
+  :after eglot
+  :vc ( :fetcher github :repo "jdtsmith/eglot-booster")
+  :config
+  (eglot-booster-mode +1))
+;; eglot-x
+(use-package eglot-x
+  :vc ( :fetcher github :repo "nemethf/eglot-x")
+  :after eglot
+  :config
+  (eglot-x-setup))
+;; eldoc-box
+(use-package eldoc-box
+  :hook (eglot-managed-mode . eldoc-box-hover-mode))
+;; eglot-signature-eldoc-talkative
+(use-package eglot-signature-eldoc-talkative
+  :after eldoc-box
+  :config
+  (advice-add #'eglot-signature-eldoc-function
+              :override #'eglot-signature-eldoc-talkative))
+
+;; lsp-mode
+(use-package lsp-mode
+  ;; :hook (((typescript-ts-mode
+  ;;          tsx-ts-mode
+  ;;          html-ts-mode
+  ;;          css-ts-mode
+  ;;          json-ts-mode) . lsp))
+  :init
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-keymap-prefix "M-l")
+  (setq lsp-headerline-breadcrumb-enable nil
+        lsp-enable-file-watchers nil
+        lsp-enable-folding nil
+        lsp-enable-symbol-highlighting nil
+        lsp-enable-text-document-color nil
+        lsp-enable-indentation nil
+        lsp-enable-on-type-formatting nil
+        lsp-auto-execute-action nil
+        lsp-before-save-edits nil))
+;; symbol-overlay
+(use-package symbol-overlay
+  :hook (prog-mode . symbol-overlay-mode))
+;; lsp-snippet
+(use-package lsp-snippet
+  :vc ( :fetcher github :repo "svaante/lsp-snippet")
+  :config
+  (when (featurep 'lsp)
+    (lsp-snippet-tempel-lsp-mode-init)))
+;; emacs-lsp-booster
+(progn
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+         (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+  (advice-add (if (progn (require 'json)
+                         (fboundp 'json-parse-buffer))
+                  'json-parse-buffer
+                'json-read)
+              :around
+              #'lsp-booster--advice-json-parse)
+
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?)                             ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+        orig-result)))
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
 
 ;;
 ;; Custom functions
@@ -450,99 +1093,16 @@
   (setq migemo-user-dictionary nil)
   (setq migemo-regex-dictionary nil))
 
-;; Vertico
-(use-package vertico
-  :ensure t
-  :defer 2
-  :init
-  (vertico-mode)
-  :bind (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
-  :custom
-  (vertico-cycle t)) ;; 候補リストを循環する
-
-;; Consult
-(use-package consult
-  :ensure t
-  :defer 2
-  :bind
-  (("C-c M-x" . consult-mode-command)
-   ("C-x C-r" . consult-recent-file)
-   ("C-x b" . consult-buffer)
-   ("C-s" . consult-line)  ;; Swiperの代替として
-   ("M-s g" . consult-grep)
-   ("M-s G" . consult-git-grep)
-   ("M-s r" . consult-ripgrep)
-   )
-  :config
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-  ;; M-y (yank-pop) でconsult-yank-from-kill-ringを使用
-  (advice-add #'yank-pop :override #'consult-yank-pop))
-
-;; find-fileでプレビュー
-(setq read-file-name-function #'consult-find-file-with-preview)
-(defun consult-find-file-with-preview (prompt &optional dir default mustmatch initial pred)
-  (interactive)
-  (let ((default-directory (or dir default-directory))
-        (minibuffer-completing-file-name t))
-    (consult--read #'read-file-name-internal :state (consult--file-preview)
-                   :prompt prompt
-                   :initial initial
-                   :require-match mustmatch
-                   :predicate pred)))
-
-;; Marginalia
-(use-package marginalia
-  :ensure t
-  :defer 2
-  :init
-  (marginalia-mode))
-
-;; Use orderless. Config is top.
-
-;; Embark
-(use-package embark
-  :ensure t
-  :defer 2
-  :bind
-  (("C-'" . embark-act)         ;; コンテキストメニュー
-   ("C-;" . embark-dwim)        ;; 項目を実行
-   ("C-x B" . embark-bindings)) ;; Embarkのキーバインド一覧
-  :init
-  ;; Embarkからの非推奨のミニバッファインターフェイスのサポートを無効化
-  (setq prefix-help-command #'embark-prefix-help-command))
-
-;; EmbarkとConsultの統合
-(use-package embark-consult
-  :ensure t
-  :after (embark consult)
-  :demand t
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
-
 ;; 保存されたコマンドの履歴を使うための設定
 (use-package savehist
   :init
   (savehist-mode))
 
-;; Setting completion style
-(use-package emacs
-  :init
-  (setq completion-styles '(orderless basic) ;; orderlessスタイルを使用
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))
-        read-extended-command-predicate #'command-completion-default-include-p
-        enable-recursive-minibuffers t
-        completion-in-region-function #'consult-completion-in-region))
-
 ;;
 ;; Hydra config
 ;;
 
-;; helper func to hydra menu
+                                        ; helper func to hydra menu
 (defun my/hydra-disable-dimmer ()
   (when (bound-and-true-p dimmer-mode)
     (dimmer-mode -1)))
@@ -647,54 +1207,7 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
   (add-to-list 'auto-mode-alist '("\.hlsl$" . hlsl-mode))
   (setq frame-background-mode 'dark)
   (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
-
-;;
-;; Centaur-tabs config
-;;
-
-;; centaur-tabs
-(use-package centaur-tabs
-  :defer 0.03
-  :demand
-  :config
-  (setq centaur-tabs-style "bar")
-  (setq centaur-tabs-height 32)
-  (setq centaur-tabs-set-icons t)
-  (setq centaur-tabs-set-bar 'over)
-  (setq centaur-tabs-set-modified-marker t)
-  (setq centaur-tabs-modified-marker " **")
-  (setq centaur-tabs-set-close-button t)
-  (setq centaur-tabs-close-button " ×")
-  (setq centaur-tabs-label-fixed-length 40)
-  (when (member "UDEV Gothic NF" (font-family-list))
-    (centaur-tabs-change-fonts "UDEV Gothic NF" 100))
-  (centaur-tabs-headline-match)
-  (centaur-tabs-mode t)
-  :bind
-  ("C-," . centaur-tabs-backward)
-  ("C-." . centaur-tabs-forward))
-
-;; Re-implementation of centaur-tabs-buffer-tab-label.
-;; Omit the middle of long filenames, as in Visual Studio.
-(defun my/centaur-tabs-buffer-tab-label (tab)
-  "Return a label for TAB.
-That is, a string used to represent it on the tab bar, truncating the middle if it's too long."
-  ;; Render tab.
-  (format " %s"
-          (let* ((bufname (if centaur-tabs--buffer-show-groups
-                              (centaur-tabs-tab-tabset tab)
-                            (buffer-name (car tab))))
-                 (maxlen centaur-tabs-label-fixed-length))
-            (if (> (length bufname) maxlen)
-                (let ((start (substring bufname 0 (/ maxlen 3)))
-                      (end (substring bufname (- (length bufname) (/ maxlen 3)))))
-                  (concat start "..." end))
-              bufname))))
-
-;; Set up your own function after centaur-tabs loading is complete.
-(with-eval-after-load 'centaur-tabs
-  (setq centaur-tabs-tab-label-function #'my/centaur-tabs-buffer-tab-label))
-
+                                        ;
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)
@@ -702,12 +1215,10 @@ That is, a string used to represent it on the tab bar, truncating the middle if 
 (setq-default display-fill-column-indicator-column 100)
 (global-display-fill-column-indicator-mode)
 
-;; A little transparent.
-(set-frame-parameter (selected-frame) 'alpha '(0.85))
-
 ;; profile
 ;;(profiler-report)
 ;;(profiler-stop)
 
 (provide 'init)
+
 

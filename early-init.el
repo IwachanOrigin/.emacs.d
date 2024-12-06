@@ -116,7 +116,7 @@
 ;; Set ff-find-other-file to work with Meta+t
 (global-set-key "\M-t" 'ff-find-other-file)
 ;; Change "Ctrl + h" to backspace
-(global-set-key "\C-h" `delete-backward-char)
+;(global-set-key "\C-h" `delete-backward-char)
 ;; Delete an entire line with c-k
 (setq kill-whole-line t)
 
@@ -129,9 +129,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; if emacs-version more than 28, load-theme is modus-vivendi.
 ;; if not emacs-version more than 28, load-theme is wonbat. 
-(if (version<= "28.0.00" emacs-version)
-    (load-theme 'modus-vivendi t)
-  (load-theme 'wombat t))
+;(if (version<= "28.0.00" emacs-version)
+;    (load-theme 'modus-vivendi t)
+;  (load-theme 'wombat t))
 
 ;; Set scratch buffer screen
 (setq initial-scratch-message
