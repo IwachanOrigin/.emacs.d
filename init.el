@@ -128,11 +128,13 @@
 
 ;; org-indent
 (use-package org-indent
+  :after org
   :ensure nil
   :hook (org-mode . org-indent-mode))
 
 ;; org-modern
 (use-package org-modern
+  :after org
   :config
   (setopt
    ;; Edit settings
@@ -164,6 +166,7 @@
 
 ;; org-modern-indent
 (use-package org-modern-indent
+  :after org
   :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
@@ -211,7 +214,6 @@
 ;; useful to IME
 (when (eq window-system 'w32)
   (use-package tr-ime
-    :defer 0.01
     :config
     (tr-ime-standard-install)
     (setq default-input-method "W32-IME")
@@ -233,7 +235,6 @@
 
 ;; dashboard
 (use-package dashboard
-  :defer 0.02
   :config
   (setq dashboard-banner-logo-title "Welcome to EmacStraylight Dashboard")
   (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/emacstraylight.txt"))
@@ -355,6 +356,7 @@
         (concat "    " cand)))))
 ;; vertico-truncate
 (use-package vertico-truncate
+  :after vertico
   :vc ( :fetcher github :repo "jdtsmith/vertico-truncate")
   :config
   (vertico-truncate-mode +1))
@@ -398,11 +400,13 @@
   (prescient-persist-mode +1))
 ;; vertico-prescient
 (use-package vertico-prescient
+  after: vertico prescient
   :config
   (setq vertico-prescient-enable-filtering nil)
   (vertico-prescient-mode +1))
 ;; corfu-prescient
 (use-package corfu-prescient
+  :after corfu prescient
   :config
   (setq corfu-prescient-enable-filtering nil)
   (corfu-prescient-mode +1))
@@ -533,7 +537,7 @@
 (use-package embark
   :bind (("C-." . embark-act)         ;; pick some comfortable binding
          ("C-;" . embark-dwim)        ;; good alternative: M-.
-         ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+         )
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
 
@@ -545,10 +549,12 @@
                  (window-parameters (mode-line-format . none)))))
 ;; embark-consult
 (use-package embark-consult
+  :after embark consult
   :hook (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; tempel
 (use-package tempel
+  :defer 0.01
   :demand t
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
          ("M-*" . tempel-insert)))
@@ -607,7 +613,8 @@
 
 ;; rg
 (use-package rg
-  :defer t)
+  :defer t
+  )
 
 ;; apheleia
 (use-package apheleia
@@ -688,10 +695,12 @@
   (setq gts-translate-list '(("en" "ja"))))
 
 ;; avy
-(use-package avy)
+(use-package avy
+  )
 
 ;; ace-window
-(use-package ace-window)
+(use-package ace-window
+  )
 
 ;; lin
 (use-package lin
@@ -800,7 +809,8 @@
   :hook (emacs-lisp-mode . highlight-quoted-mode))
 ;; web
 ;; typescript-mode
-(use-package typescript-mode)
+(use-package typescript-mode
+  )
 ;; jtsx
 (use-package jtsx
   :ensure t
@@ -870,7 +880,7 @@
 
 ;; c/c++ mode
 (use-package cc-mode
-  :defer 1
+  :defer t
   :config
   (setq c-default-style "bsd")
   (setq c-basic-offset 2) ;; basic indent value
@@ -881,14 +891,14 @@
 
 ;; glsl-mode
 (use-package glsl-mode
-  :defer 5
+  :defer t
   :config
   (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; markdown
 (use-package markdown-mode
-  :defer 3
+  :ensure t
   :mode ("\\.md\\'" . gfm-mode)
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
@@ -905,13 +915,14 @@
 
 ;; editorconfig
 (use-package editorconfig
-  :defer 2
+  :defer t
   :config
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
 ;; eglot
 (use-package eglot
+  :defer t
   :bind ( :map eglot-mode-map
           ("C-c r" . eglot-rename)
           ("C-c o" . eglot-code-action-organize-imports)

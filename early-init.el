@@ -116,7 +116,7 @@
 ;; Set ff-find-other-file to work with Meta+t
 (global-set-key "\M-t" 'ff-find-other-file)
 ;; Change "Ctrl + h" to backspace
-;(global-set-key "\C-h" `delete-backward-char)
+(global-set-key "\C-h" `delete-backward-char)
 ;; Delete an entire line with c-k
 (setq kill-whole-line t)
 
@@ -136,7 +136,7 @@
 ;; Set scratch buffer screen
 (setq initial-scratch-message
       ";;
-;; Setup finished.
+;; Initialize dashboard...
 ;;
 ")
 
