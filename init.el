@@ -71,7 +71,32 @@
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
 
+;; useful to IME
+(when (eq window-system 'w32)
+  (use-package tr-ime
+    :defer 0.01
+    :config
+    (tr-ime-standard-install)
+    (setq default-input-method "W32-IME")
+    (w32-ime-initialize)
+    ;; IME のモードライン表示設定
+    (setq-default w32-ime-mode-line-state-indicator "[--]")
+    (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
+    ;; IME Init
+    (w32-ime-initialize)
+    ;; IME Control (Turn off IME when typing yes/no, etc)
+    (wrap-function-to-control-ime 'universal-argument t nil)
+    (wrap-function-to-control-ime 'read-string nil nil)
+    (wrap-function-to-control-ime 'read-char nil nil)
+    (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
+    (wrap-function-to-control-ime 'y-or-n-p nil nil)
+    (wrap-function-to-control-ime 'yes-or-no-p nil nil)
+    (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
+    (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
+
 ;; so-long
+;; 長い行を含むファイルの最適化
+;; https://ayatakesi.github.io/emacs/28.1/html/Long-Lines.html
 (use-package so-long
   :init
   (global-so-long-mode +1))
@@ -79,12 +104,12 @@
 ;; Optimizing performance
 ;; https://ayatakesi.github.io/lispref/25.2/html/Output-from-Processes.html
 (setq process-adaptive-read-buffering t)
-;; protesilaos
+;; from protesilaos
 ;; 閉じ括弧を入力しても点滅させない
 (setq blink-matching-paren nil)
 ;; vcのバックエンドをGitのみに変更
 (setq vc-handled-backends '(Git))
-;; doomemacs
+;; from doomemacs
 ;; ファイル検索を2回行わないようにする
 (setq auto-mode-case-fold nil)
 ;; 双方向の並び替えを抑制する
@@ -107,7 +132,7 @@
   (setq w32-get-true-file-attributes nil
         w32-pipe-read-delay 0
         w32-pipe-buffer-size (* 64 1024)))
-;; Centaur Emacs
+;; from Centaur Emacs
 ;; 各OSの最適化
 (when IS-WINDOWS
   (setq w32-use-native-image-API t))
@@ -116,63 +141,10 @@
 (unless IS-LINUX
   (setq command-line-x-option-alist nil))
 
-;; Org
-(use-package org
-  :init
-  (setq org-return-follows-link t  ; Returnキーでリンク先を開く
-        org-mouse-1-follows-link t ; マウスクリックでリンク先を開く
-        ))
-;; アンダースコアを入力しても下付き文字にならないようにする
-(setq org-use-sub-superscripts '{}
-      org-export-with-sub-superscripts nil)
-
-;; org-indent
-(use-package org-indent
-  :after org
-  :ensure nil
-  :hook (org-mode . org-indent-mode))
-
-;; org-modern
-(use-package org-modern
-  :after org
-  :config
-  (setopt
-   ;; Edit settings
-   org-auto-align-tags nil
-   org-tags-column 0
-   org-catch-invisible-edits 'show-and-error
-   org-special-ctrl-a/e t
-   org-insert-heading-respect-content t
-
-   ;; Org styling, hide markup etc.
-   org-hide-emphasis-markers t
-   org-pretty-entities t
-
-   ;; Agenda styling
-   org-agenda-tags-column 0
-   org-agenda-block-separator ?─
-   org-agenda-time-grid
-   '((daily today require-timed)
-     (800 1000 1200 1400 1600 1800 2000)
-     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-   org-agenda-current-time-string
-   "◀── now ─────────────────────────────────────────────────")
-
-  ;; Ellipsis styling
-  (setopt org-ellipsis "…")
-  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
-
-  (global-org-modern-mode))
-
-;; org-modern-indent
-(use-package org-modern-indent
-  :after org
-  :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
-  :config
-  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-
 ;; fontaine
+;; フォントの設定
 (use-package fontaine
+  :defer 1
   :config
   (cond (IS-LINUX
          (setq fontaine-presets
@@ -200,41 +172,21 @@
   (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
 
 ;; icons
-(use-package nerd-icons)
+(use-package nerd-icons
+  :defer 1)
 (use-package nerd-icons-completion
   :hook (after-init . nerd-icons-completion-mode))
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode))
 (use-package nerd-icons-corfu
   :vc ( :fetcher github :repo "LuigiPiucco/nerd-icons-corfu")
-  :after corfu nerd-icons
+  :after (corfu nerd-icons)
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-;; useful to IME
-(when (eq window-system 'w32)
-  (use-package tr-ime
-    :config
-    (tr-ime-standard-install)
-    (setq default-input-method "W32-IME")
-    (w32-ime-initialize)
-    ;; IME のモードライン表示設定
-    (setq-default w32-ime-mode-line-state-indicator "[--]")
-    (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
-    ;; IME Init
-    (w32-ime-initialize)
-    ;; IME Control (Turn off IME when typing yes/no, etc)
-    (wrap-function-to-control-ime 'universal-argument t nil)
-    (wrap-function-to-control-ime 'read-string nil nil)
-    (wrap-function-to-control-ime 'read-char nil nil)
-    (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
-    (wrap-function-to-control-ime 'y-or-n-p nil nil)
-    (wrap-function-to-control-ime 'yes-or-no-p nil nil)
-    (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
-    (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
-
 ;; dashboard
 (use-package dashboard
+  :defer 0.1
   :config
   (setq dashboard-banner-logo-title "Welcome to EmacStraylight Dashboard")
   (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/emacstraylight.txt"))
@@ -246,6 +198,7 @@
 
 ;; corfu
 (use-package corfu
+  :defer 1
   :demand t
   :hook (prog-mode . (lambda ()
                        (global-set-key [remap c-indent-line-or-region] #'indent-for-tab-command)))
@@ -293,11 +246,11 @@
                                     'corfu-reset)))
     "If we made a selection during `corfu' completion, cancel it.")
   (define-key corfu-map (kbd "DEL") corfu-magic-cancel-or-backspace)
-  (define-key corfu-map (kbd "<backspace") corfu-magic-cancel-or-backspace)
-  )
+  (define-key corfu-map (kbd "<backspace") corfu-magic-cancel-or-backspace))
 
 ;; cape
 (use-package cape
+  :defer 1
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
@@ -316,8 +269,10 @@
 ;; TABで補完を表示する
 (setq tab-always-indent 'complete)
 
+
 ;; vertico
 (use-package vertico
+  :defer 1
   :init
   (setq vertico-cycle t)
   (vertico-mode +1))
@@ -335,6 +290,7 @@
 ;; vertico-buffer
 (use-package vertico-buffer
   :ensure nil
+  :after vertico
   :config
   (setq vertico-buffer-display-action '(display-buffer-at-bottom))
   (vertico-buffer-mode +1))
@@ -363,6 +319,7 @@
 
 ;; orderless
 (use-package orderless
+  :defer 1
   :config
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil
@@ -395,37 +352,40 @@
 
 ;; prescient
 (use-package prescient
+  :defer 1
   :config
   (setq prescient-aggressive-file-save t)
   (prescient-persist-mode +1))
 ;; vertico-prescient
 (use-package vertico-prescient
-  after: vertico prescient
+  :after (vertico prescient)
   :config
   (setq vertico-prescient-enable-filtering nil)
   (vertico-prescient-mode +1))
 ;; corfu-prescient
 (use-package corfu-prescient
-  :after corfu prescient
+  :after (corfu prescient)
   :config
   (setq corfu-prescient-enable-filtering nil)
   (corfu-prescient-mode +1))
 
+
 ;; consult
 ;; Example configuration for Consult
 (use-package consult
+  :defer 1
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings (mode-specific-map)
          ("C-c h" . consult-history)
          ("C-c m" . consult-mode-command)
          ("C-c k" . consult-kmacro)
          ;; C-x bindings (ctl-x-map)
-         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-         ([remap switch-to-buffer] . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x M-:" . consult-complex-command)                                 ;; orig. repeat-complex-command
+         ([remap switch-to-buffer] . consult-buffer)                           ;; orig. switch-to-buffer
          ([remap switch-to-buffer-other-window] . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-         ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-         ([remap bookmark-jump] . consult-bookmark)            ;; orig. bookmark-jump
-         ([remap project-switch-to-buffer] . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)   ;; orig. switch-to-buffer-other-frame
+         ([remap bookmark-jump] . consult-bookmark)                            ;; orig. bookmark-jump
+         ([remap project-switch-to-buffer] . consult-project-buffer)           ;; orig. project-switch-to-buffer
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
@@ -433,6 +393,7 @@
          ;; Other custom bindings
          ("M-y" . consult-yank-pop)                ;; orig. yank-pop
          ("<help> a" . consult-apropos)            ;; orig. apropos-command
+         ;; M-g
          :map goto-map
          ("e" . consult-compile-error)
          ("f" . consult-flymake)               ;; Alternative: consult-flycheck
@@ -443,6 +404,7 @@
          ("k" . consult-global-mark)
          ("i" . consult-imenu)
          ("I" . consult-imenu-multi)
+         ;; M-s
          :map search-map
          ("d" . consult-fd)
          ("D" . consult-locate)
@@ -456,9 +418,8 @@
          ("u" . consult-focus-lines)
          ("e" . consult-isearch-history)
          :map isearch-mode-map
-         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
          ("M-s e" . consult-isearch-hisstory)       ;; orig. isearch-edit-string
-         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s l" . consult-line)                   ;; needed by consult-line to detect isearch
          ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
          ;; Minibuffer history
          :map minibuffer-local-map
@@ -512,29 +473,20 @@
 
   ;; Optionally make narrowing help available in the minibuffer.
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
-  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+  (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help))
 
-  ;; By default `consult-project-function' uses `project-root' from project.el.
-  ;; Optionally configure a different project root function.
-  ;; There are multiple reasonable alternatives to chose from.
-    ;;;; 1. project.el (the default)
-  ;; (setq consult-project-function #'consult--default-project--function)
-    ;;;; 2. projectile.el (projectile-project-root)
-  ;; (autoload 'projectile-project-root "projectile")
-  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
-    ;;;; 3. vc.el (vc-root-dir)
-  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-    ;;;; 4. locate-dominating-file
-  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-  )
 
 ;; marginalia
+;; vertico の候補に情報を追加する。
 (use-package marginalia
+  :defer 1
   :init
   (marginalia-mode +1))
 
 ;; embark
+;; vertico の候補等に様々なアクションを提供してくれます。
 (use-package embark
+  :defer 1
   :bind (("C-." . embark-act)         ;; pick some comfortable binding
          ("C-;" . embark-dwim)        ;; good alternative: M-.
          )
@@ -549,12 +501,13 @@
                  (window-parameters (mode-line-format . none)))))
 ;; embark-consult
 (use-package embark-consult
-  :after embark consult
+  :after (embark consult)
   :hook (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; tempel
+;; tempelはEmacs用のテンプレートパッケージ
 (use-package tempel
-  :defer 0.01
+  :defer 1
   :demand t
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
          ("M-*" . tempel-insert)))
@@ -565,6 +518,7 @@
 ;; git
 ;; magit
 (use-package magit
+  :defer 1
   :config
   (when IS-WINDOWS
     (setq magit-refresh-status-buffer nil)
@@ -575,7 +529,9 @@
     (remove-hook 'with-editor-filter-visit-hook 'magit-commit-diff)))
 
 ;; diff-hl
+;; ウィンドウの左側にコミットされていない箇所を強調表示してくれます.
 (use-package diff-hl
+  :defer 2
   :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh)
          (dired-mode . diff-hl-dired-mode))
@@ -584,7 +540,9 @@
   (global-diff-hl-show-hunk-mouse-mode +1)
   (diff-hl-margin-mode +1))
 ;; difftastic.el
+;; Emacsでdifftasticを使用できるようにします。通常のコマンドとしても使用でき、magitにも統合させています。
 (use-package difftastic
+  :defer 2
   :demand t
   :bind (:map magit-blame-read-only-mode-map
               ("D" . difftastic-magit-show)
@@ -596,58 +554,45 @@
         ("S" "Difftastic show" difftastic-magit-show)])))
 
 ;;whick-key
+;; キーバインドの可視化
 (use-package which-key
+  :defer 1
   :config
   (which-key-mode +1))
 
 ;; undo
 ;; undo-fu
-(use-package undo-fu)
+;; Emacsのundoとredoを強化するパッケージです
+(use-package undo-fu
+  :defer 2)
 ;; undo-fu-session
+;; undo情報をEmacs終了後も保持してくれるようになります。
 (use-package undo-fu-session
+  :defer 2
   :config
   (undo-fu-session-global-mode +1))
 ;; vundo
+;; undo履歴を視覚的に分かりやすく表示してくれます。
 ;; https://github.com/casouri/vundo
-(use-package vundo)
+(use-package vundo
+  :defer 2)
 
 ;; rg
 (use-package rg
-  :defer t
+  :defer 2
   )
-
-;; apheleia
-(use-package apheleia
-  :config
-  (when IS-WINDOWS
-    (add-to-list 'apheleia-formatters
-                 '(prettier-css
-                   . (npx "prettier" "--stdin-filepath" filepath "--parser=css"
-                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
-    (add-to-list 'apheleia-formatters
-                 '(prettier-html
-                   . (npx "prettier" "--stdin-filepath" filepath "--parser=html"
-                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
-    (add-to-list 'apheleia-formatters
-                 '(prettier-json
-                   . (npx "prettier" "--stdin-filepath" filepath "--parser=json"
-                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width"))))
-    (add-to-list 'apheleia-formatters
-                 '(prettier-typescript
-                   . (npx "prettier" "--stdin-filepath" filepath "--parser=typescript"
-                          (apheleia-formatters-js-indent "--use-tabs" "--tab-width")))))
-
-  (apheleia-global-mode +1))
 
 ;; theme
 ;; ef-themes
 (use-package ef-themes
+  :defer 1
   :config
   (setq ef-themes-mixed-fonts t
         ef-themes-variable-pitch-ui t)
   (load-theme 'ef-melissa-light t))
 ;; modus-themes
 (use-package modus-themes
+  :defer 1
   :config
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs nil
@@ -672,12 +617,16 @@
   )
 
 ;; puni
+;; 括弧等の構造を操作するパッケージです。
 (use-package puni
+  :defer 1
   :config
   (puni-global-mode +1))
 
 ;; string-inflection
+;; カーソル直下の単語をunderscore -> UPCASE -> CamelCase に変換してくれます。
 (use-package string-inflection
+  :defer 1
   :bind ( :map my-string-inflection-map
           ("a" . string-inflection-all-cycle)
           ("_" . string-inflection-underscore)
@@ -689,38 +638,43 @@
   :init
   (defvar my-string-inflection-map (make-keymap)))
 
-;; go-translate
-(use-package go-translate
-  :init
-  (setq gts-translate-list '(("en" "ja"))))
-
 ;; avy
 (use-package avy
-  )
+  :defer 1)
 
 ;; ace-window
 (use-package ace-window
-  )
+  :defer 1)
 
 ;; lin
+;; hl-line-mode を強化するパッケージです。
 (use-package lin
+  :defer 1
   :init
   (setq lin-face 'lin-red)
   (lin-global-mode +1))
 
 ;; pulsar
+;; カーソルの移動を視覚的に分かりやすくしてくれます。
 (use-package pulsar
+  :defer 1
   :config
   (pulsar-global-mode +1))
 
 ;; goggles
+;; https://github.com/minad/goggles
+;; 何処に貼り付けたのかとか、視覚的に目立ちやすくする
 (use-package goggles
+  :defer 1
   :hook ((prog-mode text-mode) . goggles-mode)
   :config
   (setq-default goggles-pulse t)) ;; set to nil to disable pulsing
 
 ;; spacious-padding
+;; https://github.com/protesilaos/spacious-padding?tab=readme-ov-file
+;; スペースを設定して、見やすくする
 (use-package spacious-padding
+  :defer 1
   :config
   (setq spacious-padding-widths
         '( :internal-border-width 15
@@ -739,7 +693,11 @@
   (spacious-padding-mode +1))
 
 ;; beframe
+;; https://github.com/protesilaos/beframe
+;; フレーム毎に異なるバッファセットを持つことが可能になるパッケージ
+;; 作業内容やプロジェクトごとにフレームを分けて作業が出来るらしい
 (use-package beframe
+  :defer 1
   :config
   (defvar consult-buffer-sources)
   (declare-function consult--buffer-state "consult")
@@ -764,31 +722,37 @@
   (beframe-mode +1))
 
 ;; aggressive-indent
+;; インデントを自動的に整えてくれるパッケージ
 (use-package aggressive-indent
   :hook (emacs-lisp-mode . aggressive-indent-mode))
 
 ;; perfect-mergin
 (use-package perfect-margin
+  :defer 1
   :config
   (setq perfect-margin-ignore-filters nil)
   (perfect-margin-mode +1))
 
 ;; breadcrumb
+;; バッファ上部にパンくずリストを表示してくれます。
 (use-package breadcrumb
+  :defer 1
   :vc ( :fetcher github :repo "joaotavora/breadcrumb")
   :config
   (breadcrumb-mode +1))
 
 ;; rainbow-delimiters
 (use-package rainbow-delimiters
+  :defer 1
   :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; imenu-list
 (use-package imenu-list
-  :bind ( :map my-toggle-map
-          ("i" . imenu-list-smart-toggle))
+  :defer 1
   :init
   (setq imenu-list-position 'left))
+
+
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -796,91 +760,21 @@
   :defer 3
   :hook (after-init . global-auto-revert-mode))
 
+;; hungry-delete
+(use-package hungry-delete
+  :defer 3
+  :hook
+  (after-init . global-hungry-delete-mode)
+  :config
+  (setq hungry-delete-chars-to-skip " \t\f\v"))
+
 ;;
 ;; programing language config
 ;;
 
-;; elisp
-;; highlight-defined
-(use-package highlight-defined
-  :hook (emacs-lisp-mode . highlight-defined-mode))
-;; highlight-quoted
-(use-package highlight-quoted
-  :hook (emacs-lisp-mode . highlight-quoted-mode))
-;; web
-;; typescript-mode
-(use-package typescript-mode
-  )
-;; jtsx
-(use-package jtsx
-  :ensure t
-  :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
-         ("\\.tsx\\'" . jtsx-tsx-mode)
-         ("\\.ts\\'" . jtsx-typescript-mode))
-  :commands jtsx-install-treesit-language
-  :hook ((jtsx-jsx-mode . hs-minor-mode)
-         (jtsx-tsx-mode . hs-minor-mode)
-         (jtsx-typescript-mode . hs-minor-mode))
-  :custom
-  ;; Optional customizations
-  ;; (js-indent-level 2)
-  ;; (typescript-ts-mode-indent-offset 2)
-  ;; (jtsx-switch-indent-offset 0)
-  (jtsx-indent-statement-block-regarding-standalone-parent nil)
-  (jtsx-jsx-element-move-allow-step-out t)
-  (jtsx-enable-jsx-electric-closing-element t)
-  (jtsx-enable-electric-open-newline-between-jsx-element-tags t)
-  (jtsx-enable-jsx-element-tags-auto-sync t)
-  (jtsx-enable-all-syntax-highlighting-features t)
-  :config
-  (defun jtsx-bind-keys-to-mode-map (mode-map)
-    "Bind keys to MODE-MAP."
-    (define-key mode-map (kbd "C-c C-j") 'jtsx-jump-jsx-element-tag-dwim)
-    (define-key mode-map (kbd "C-c j o") 'jtsx-jump-jsx-opening-tag)
-    (define-key mode-map (kbd "C-c j c") 'jtsx-jump-jsx-closing-tag)
-    (define-key mode-map (kbd "C-c j r") 'jtsx-rename-jsx-element)
-    (define-key mode-map (kbd "C-c <down>") 'jtsx-move-jsx-element-tag-forward)
-    (define-key mode-map (kbd "C-c <up>") 'jtsx-move-jsx-element-tag-backward)
-    (define-key mode-map (kbd "C-c C-<down>") 'jtsx-move-jsx-element-forward)
-    (define-key mode-map (kbd "C-c C-<up>") 'jtsx-move-jsx-element-backward)
-    (define-key mode-map (kbd "C-c C-S-<down>") 'jtsx-move-jsx-element-step-in-forward)
-    (define-key mode-map (kbd "C-c C-S-<up>") 'jtsx-move-jsx-element-step-in-backward)
-    (define-key mode-map (kbd "C-c j w") 'jtsx-wrap-in-jsx-element)
-    (define-key mode-map (kbd "C-c j u") 'jtsx-unwrap-jsx)
-    (define-key mode-map (kbd "C-c j d") 'jtsx-delete-jsx-node))
-
-  (defun jtsx-bind-keys-to-jtsx-jsx-mode-map ()
-    (jtsx-bind-keys-to-mode-map jtsx-jsx-mode-map))
-
-  (defun jtsx-bind-keys-to-jtsx-tsx-mode-map ()
-    (jtsx-bind-keys-to-mode-map jtsx-tsx-mode-map))
-
-  (add-hook 'jtsx-jsx-mode-hook 'jtsx-bind-keys-to-jtsx-jsx-mode-map)
-  (add-hook 'jtsx-tsx-mode-hook 'jtsx-bind-keys-to-jtsx-tsx-mode-map))
-;; emmet-mode
-(use-package emmet-mode
-  :hook ((html-mode
-          css-mode
-          js-mode
-          typescript-mode) . emmet-mode))
-;; web-beautify
-(use-package web-beautify
-  :defer t)
-;; common-lisp
-(use-package slime
-  :defer t
-  :init
-  (setq inferior-lisp-program "sbcl"))
-;; slime-company
-(use-package slime-company
-  :after (slime company)
-  :config
-  (setq slime-company-completion 'fuzzy
-        slime-company-after-completion 'slime-company-just-one-space))
-
 ;; c/c++ mode
 (use-package cc-mode
-  :defer t
+  :defer 1
   :config
   (setq c-default-style "bsd")
   (setq c-basic-offset 2) ;; basic indent value
@@ -891,14 +785,14 @@
 
 ;; glsl-mode
 (use-package glsl-mode
-  :defer t
+  :defer 5
   :config
   (add-to-list 'auto-mode-alist '("\.vsh$" . glsl-mode))
   (add-to-list 'auto-mode-alist '("\.fsh$" . glsl-mode)))
 
 ;; markdown
 (use-package markdown-mode
-  :ensure t
+  :defer 3
   :mode ("\\.md\\'" . gfm-mode)
   ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
   :config
@@ -915,68 +809,100 @@
 
 ;; editorconfig
 (use-package editorconfig
-  :defer t
+  :defer 2
   :config
   (editorconfig-mode)
   (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 
 ;; eglot
-(use-package eglot
-  :defer t
-  :bind ( :map eglot-mode-map
-          ("C-c r" . eglot-rename)
-          ("C-c o" . eglot-code-action-organize-imports)
-          ("C-c a" . eglot-code-actions)
-          ("C-c h" . eldoc)
-          ("<f6>" . xref-find-definitions))
-  :init
-  (setq eglot-events-buffer-config '(:size 0  :format short)
-        eglot-ignored-server-capabilities '(:documentHighlightProvider)
-        eglot-stay-out-of '(flymake)
-        eglot-send-changes-idle-time 1.0)
+(progn
+  (customize-set-variable 'eglot-autoshutdown t)
+  (customize-set-variable 'eglot-extend-to-xref t)
+  (customize-set-variable 'eglot-ignored-server-capabilities
+                          (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
 
-  (defun my/add-directory-to-exec-path-recursively (dir)
-    "Recursively add directories and their subdirectories to `exec-path`."
-    (add-to-list 'exec-path dir)
-    (dolist (entry (directory-files dir t "^[^.]" t))
-      (when (file-directory-p entry)
-        (my/add-directory-to-exec-path-recursively entry))))
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
+                   . ("clangd"
+                      "-j=2"
+                      "--log=error"
+                      "--background-index=false"
+                      "--clang-tidy"
+                      "--cross-file-rename"
+                      "--completion-style=detailed"
+                      "--pch-storage=disk"
+                      "--header-insertion=never"
+                      "--header-insertion-decorators=0"))))
 
-  (defun my/load-lsp-exec-path ()
-    (interactive)
-    (my/add-directory-to-exec-path-recursively "~/.emacs.d/.cache/"))
+  (with-eval-after-load 'flymake
+    (define-key flymake-mode-map (kbd "C-c ! n") nil)
+    (define-key flymake-mode-map (kbd "C-c ! p") nil)
+    (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
+    (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
-  (my/load-lsp-exec-path))
-;; eglot-tempel
-(use-package eglot-tempel
-  :after (eglot tempel)
-  :hook (eglot-managed-mode . eglot-tempel-mode))
-;; consult-eglot
-(use-package consult-eglot
-  :after eglot
-  :bind ( :map eglot-mode-map
-          ("C-c s" . consult-eglot-symbols)))
-;; jsonrpc
-(use-package jsonrpc
-  :config
-  (setq jsonrpc-default-request-timeout 3000)
-  (fset #'jsonrpc--log-event #'ignore))
+  (add-hook 'c++-mode-hook
+            (lambda ()
+              (eglot-ensure)
+              (message "called c++-mode-hook")
+              (setq c-default-style "bsd")
+              (setq c-basic-offset 2) ;; basic indent value
+              (setq tab-width 2)      ;; tab width
+              (setq indent-tabs-mode nil)  ;; indent use space.
+              (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
+              ))
+  (add-hook 'c-mode-hook
+            (lambda ()
+              (eglot-ensure)
+              (message "called c-mode-hook")
+              (setq c-default-style "bsd")
+              (setq c-basic-offset 2) ;; basic indent value
+              (setq tab-width 2)      ;; tab width
+              (setq indent-tabs-mode nil)  ;; indent use space.
+              (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
+              ))
+  )
+
 ;; eglot-booster
+;; https://github.com/jdtsmith/eglot-booster
+;; emacsとlspサーバ間の通信速度を向上させるプログラムらしい
+;; elispとは別で以下のリポジトリからバイナリファイルも必要になる
+;; ダウンロード後、配置したらパスを通す
+;; https://github.com/blahgeek/emacs-lsp-booster
 (use-package eglot-booster
   :after eglot
   :vc ( :fetcher github :repo "jdtsmith/eglot-booster")
   :config
   (eglot-booster-mode +1))
+;; consult-eglot
+;; https://github.com/mohkale/consult-eglot
+;; consultとeglotを統合するパッケージ。シンボルの検索が行えるようになる。
+(use-package consult-eglot
+  :after eglot
+  :bind
+  ("C-c s" . consult-eglot-symbols))
+;; jsonrpc
+;; jsonを扱うEmacsの標準パッケージ
+;; デフォルトのタイムアウト時間が短いため、タイムアウトしないように時間を延ばしている
+;; また、ログを無視するように設定し、パフォーマンスを向上させている。
+(use-package jsonrpc
+  :config
+  (setq jsonrpc-default-request-timeout 3000)
+  (fset #'jsonrpc--log-event #'ignore))
 ;; eglot-x
+;; eglotでサポートされる機能が増える
 (use-package eglot-x
   :vc ( :fetcher github :repo "nemethf/eglot-x")
   :after eglot
   :config
   (eglot-x-setup))
 ;; eldoc-box
+;; ミニバッファのeldocをposframeで表示してくれる
 (use-package eldoc-box
+  :defer 1
   :hook (eglot-managed-mode . eldoc-box-hover-mode))
 ;; eglot-signature-eldoc-talkative
+;; eldocの情報を追加する
 (use-package eglot-signature-eldoc-talkative
   :after eldoc-box
   :config
@@ -985,11 +911,7 @@
 
 ;; lsp-mode
 (use-package lsp-mode
-  ;; :hook (((typescript-ts-mode
-  ;;          tsx-ts-mode
-  ;;          html-ts-mode
-  ;;          css-ts-mode
-  ;;          json-ts-mode) . lsp))
+  :defer 1
   :init
   (setq read-process-output-max (* 1024 1024)) ;; 1mb
   (setq lsp-keymap-prefix "M-l")
@@ -1002,46 +924,54 @@
         lsp-enable-on-type-formatting nil
         lsp-auto-execute-action nil
         lsp-before-save-edits nil))
+
 ;; symbol-overlay
+;; emacsの組み込み関数を利用してシンボルをハイライトする
 (use-package symbol-overlay
+  :defer 1
   :hook (prog-mode . symbol-overlay-mode))
+
 ;; lsp-snippet
 (use-package lsp-snippet
+  :defer 1
   :vc ( :fetcher github :repo "svaante/lsp-snippet")
   :config
   (when (featurep 'lsp)
     (lsp-snippet-tempel-lsp-mode-init)))
+
 ;; emacs-lsp-booster
-(progn
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
+;; https://github.com/blahgeek/emacs-lsp-booster
+;; eglot-boosterの親. 高速化するらしい
+(defun lsp-booster--advice-json-parse (old-fn &rest args)
+  "Try to parse bytecode instead of json."
+  (or
+   (when (equal (following-char) ?#)
+     (let ((bytecode (read (current-buffer))))
+       (when (byte-code-function-p bytecode)
+         (funcall bytecode))))
+   (apply old-fn args)))
+(advice-add (if (progn (require 'json)
+                       (fboundp 'json-parse-buffer))
+                'json-parse-buffer
+              'json-read)
+            :around
+            #'lsp-booster--advice-json-parse)
 
-  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
-    (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
-        orig-result)))
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
-
+(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+  "Prepend emacs-lsp-booster command to lsp CMD."
+  (let ((orig-result (funcall old-fn cmd test?)))
+    (if (and (not test?)                             ;; for check lsp-server-present?
+             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+             lsp-use-plists
+             (not (functionp 'json-rpc-connection))  ;; native json-rpc
+             (executable-find "emacs-lsp-booster"))
+        (progn
+          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+            (setcar orig-result command-from-exec-path))
+          (message "Using emacs-lsp-booster for %s!" orig-result)
+          (cons "emacs-lsp-booster" orig-result))
+      orig-result)))
+(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
 ;;
 ;; Custom functions
@@ -1123,14 +1053,18 @@
   ;; The following description is the art of treating relative paths as absolute paths
   ;; (expand-file-name "~/.emacs.d/init.el")
   ;; dictionary path and charset encoding
-  (when (eq system-type 'windows-nt)
+  (when IS-WINDOWS
     (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/cp932/migemo-dict"))
     (setq migemo-coding-system 'cp932-unix))
-  (unless (eq system-type 'windows-nt)
+  (unless IS-WINDOWS
     (setq migemo-dictionary (expand-file-name "~/.emacs.d/cmigemo-default-win64/dict/utf-8/migemo-dict"))
     (setq migemo-coding-system 'utf-8-unix))
   (setq migemo-user-dictionary nil)
-  (setq migemo-regex-dictionary nil))
+  (setq migemo-regex-dictionary nil)
+
+  :config
+  (migemo-init))
+
 
 ;; 保存されたコマンドの履歴を使うための設定
 (use-package savehist
@@ -1141,7 +1075,7 @@
 ;; Hydra config
 ;;
 
-                                        ; helper func to hydra menu
+; helper func to hydra menu
 (defun my/hydra-disable-dimmer ()
   (when (bound-and-true-p dimmer-mode)
     (dimmer-mode -1)))
@@ -1246,7 +1180,7 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
   (add-to-list 'auto-mode-alist '("\.hlsl$" . hlsl-mode))
   (setq frame-background-mode 'dark)
   (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
-                                        ;
+
 ;; Vertical partitioning is preferred over horizontal partitioning
 (setq split-width-threshold 160)
 (setq split-height-threshold nil)

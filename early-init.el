@@ -124,14 +124,9 @@
 (setq show-paren-delay 0)
 (show-paren-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                 set color theme                  ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; if emacs-version more than 28, load-theme is modus-vivendi.
-;; if not emacs-version more than 28, load-theme is wonbat. 
-;(if (version<= "28.0.00" emacs-version)
-;    (load-theme 'modus-vivendi t)
-;  (load-theme 'wombat t))
+;; LSP-mode setting
+;; https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
+(setenv "LSP_USE_PLISTS" "true")
 
 ;; Set scratch buffer screen
 (setq initial-scratch-message

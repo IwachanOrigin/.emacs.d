@@ -4,7 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ef-themes apheleia rg vundo undo-fu-session undo-fu which-key difftastic diff-hl magit tempel-collection tempel lsp-snippet symbol-overlay lsp-mode eglot-signature-eldoc-talkative eldoc-box eglot-x eglot-booster consult-eglot eglot-tempel ace-window slime-company slime web-beautify emmet-mode jtsx typescript-mode highlight-quoted highlight-defined imenu-list rainbow-delimiters breadcrumb perfect-margin aggressive-indent beframe spacious-padding goggles pulsar lin avy go-translate string-inflection puni modus-themes corfu-prescient vertico-prescient prescient vertico-truncate nerd-icons-corfu nerd-icons-dired nerd-icons-completion nerd-icons org-modern-indent org-modern vc-use-package swiper faceup bind-key cl-generic cl-lib eglot eldoc erc external-completion flymake idlwave jsonrpc let-alist map nadvice ntlm xref olivetti cape embark-consult embark marginalia consult vertico orderless corfu migemo treesit-auto treesit tree-sitter-langs tree-sitter verilog-mode use-package tramp tr-ime svg soap-client so-long seq restart-emacs python projectile project org markdown-mode ivy-migemo hydra hungry-delete glsl-mode editorconfig dired-sidebar dashboard counsel company cmake-mode centaur-tabs all-the-icons))
+   '(lsp-snippet lsp-mode fontaine ef-themes apheleia rg vundo undo-fu-session undo-fu which-key difftastic diff-hl magit tempel-collection tempel symbol-overlay eglot-signature-eldoc-talkative eldoc-box eglot-x eglot-booster consult-eglot eglot-tempel ace-window slime-company slime web-beautify emmet-mode jtsx typescript-mode highlight-quoted highlight-defined imenu-list rainbow-delimiters breadcrumb perfect-margin aggressive-indent beframe spacious-padding goggles pulsar lin avy go-translate string-inflection puni modus-themes corfu-prescient vertico-prescient prescient vertico-truncate nerd-icons-corfu nerd-icons-dired nerd-icons-completion nerd-icons org-modern-indent org-modern vc-use-package swiper faceup bind-key cl-generic cl-lib eglot eldoc erc external-completion flymake idlwave jsonrpc let-alist map nadvice ntlm xref olivetti cape embark-consult embark marginalia consult vertico orderless corfu migemo treesit-auto treesit tree-sitter-langs tree-sitter verilog-mode use-package tramp tr-ime svg soap-client so-long seq restart-emacs python projectile project org markdown-mode ivy-migemo hydra hungry-delete glsl-mode editorconfig dired-sidebar dashboard counsel company cmake-mode centaur-tabs all-the-icons))
  '(package-vc-selected-packages
    '((lsp-snippet :vc-backend Git :url "https://github.com/svaante/lsp-snippet")
      (eglot-x :vc-backend Git :url "https://github.com/nemethf/eglot-x")
@@ -12,8 +12,8 @@
      (breadcrumb :vc-backend Git :url "https://github.com/joaotavora/breadcrumb")
      (vertico-truncate :vc-backend Git :url "https://github.com/jdtsmith/vertico-truncate")
      (nerd-icons-corfu :vc-backend Git :url "https://github.com/LuigiPiucco/nerd-icons-corfu")
-     (org-modern-indent :vc-backend Git :url "https://github.com/jdtsmith/org-modern-indent")
-     (vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package")))
+     (vc-use-package :vc-backend Git :url "https://github.com/slotThe/vc-use-package")
+     (org-modern-indent :vc-backend Git :url "https://github.com/jdtsmith/org-modern-indent")))
  '(sort-fold-case t t)
  '(warning-suppress-types '((use-package))))
 (custom-set-faces
