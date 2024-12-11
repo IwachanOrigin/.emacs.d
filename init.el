@@ -783,6 +783,17 @@
   (c-set-offset 'innamespace 0) ;; namespace indent pos is 0
   )
 
+;; clang-format
+;; 「.clang-format」はユーザーフォルダの直下にあれば良い様子
+(use-package clang-format
+  :commands (clang-format-buffer clang-format-on-save-mode)
+  :hook ((c-mode . clang-format-on-save-mode)
+         (c++-mode . clang-format-on-save-mode))
+  :config
+  (setq clang-format-style "file") ;; .clang-format を参照
+  (setq clang-format-fallback-style "none")) ;; .clang-format がない場合は何もしない
+
+
 ;; glsl-mode
 (use-package glsl-mode
   :defer 5
