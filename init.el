@@ -731,6 +731,7 @@
   :defer 1
   :config
   (setq perfect-margin-ignore-filters nil)
+  (setq perfect-margin-only-set-left-margin t)
   (perfect-margin-mode +1))
 
 ;; breadcrumb
