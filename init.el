@@ -985,6 +985,22 @@
       orig-result)))
 (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
+;; dap
+;; dape
+(use-package dape
+  :defer 1
+  :bind-keymap
+  ("C-x C-a" . dape-global-map)
+  :config
+  ;; Global bindings for setting breakpoints with mouse
+  (dape-breakpoint-global-mode))
+
+;; Enable repeat mode for more ergonomic `dape' use
+(use-package repeat
+  :after dape
+  :config
+  (repeat-mode))
+
 ;;
 ;; Custom functions
 ;;
@@ -1199,6 +1215,57 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
 ;; Display a bar that clearly indicates the number of characters per line
 (setq-default display-fill-column-indicator-column 100)
 (global-display-fill-column-indicator-mode)
+
+;; org
+(use-package org
+  :defer 1
+  :init
+  (setq org-return-follows-link t  ; Returnキーでリンク先を開く
+        org-mouse-1-follows-link t ; マウスクリックでリンク先を開く
+        ))
+;;  アンダースコアを入力しても下付き文字にならないようにする
+(setq org-use-sub-superscripts '{}
+      org-export-with-sub-superscripts nil)
+;; org-indent mode
+(use-package org-indent
+  :hook (org-mode . org-indent-mode))
+
+;; org-modern
+(use-package org-modern
+  :after org
+  :config
+  (setopt
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+
+   ;; Agenda styling
+   org-agenda-tags-column 0
+   org-agenda-block-separator ?─
+   org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+   org-agenda-current-time-string
+   "◀── now ─────────────────────────────────────────────────")
+
+  ;; Ellipsis styling
+  (setopt org-ellipsis "…")
+  (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
+
+  (global-org-modern-mode))
+;; org-modern-indent
+(use-package org-modern-indent
+  :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
+  :config
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
 ;; profile
 ;;(profiler-report)
