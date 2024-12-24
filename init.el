@@ -616,6 +616,21 @@
   ;; (load-theme 'modus-operandi-tinted t)
   )
 
+;; theme-buffet
+(use-package theme-buffet
+  :after (modus-themes ef-themes)  ; add your favorite themes here
+  :init
+  ;; variable below needs to be set when you just want to use the timers mins/hours
+  (setq theme-buffet-menu 'modus-ef) ; changing default value from built-in to modus-ef
+  :config
+  ;; one of the three below can be uncommented
+  (theme-buffet-modus-ef)
+  ;; (theme-buffet-built-in)
+  ;; (theme-buffet-end-user)
+  ;; two additional timers are available for theme change, both can be set
+  (theme-buffet-timer-mins 25)  ; change theme every 25m from now, similar below
+  (theme-buffet-timer-hours 2))
+
 ;; puni
 ;; 括弧等の構造を操作するパッケージです。
 (use-package puni
