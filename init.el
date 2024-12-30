@@ -1241,9 +1241,6 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
 ;;  アンダースコアを入力しても下付き文字にならないようにする
 (setq org-use-sub-superscripts '{}
       org-export-with-sub-superscripts nil)
-;; org-indent mode
-(use-package org-indent
-  :hook (org-mode . org-indent-mode))
 
 ;; org-modern
 (use-package org-modern
