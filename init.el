@@ -834,6 +834,10 @@
   :defer 1
   )
 
+;; Dart-mode
+(use-package dart-mode
+  :defer 1)
+
 ;; editorconfig
 (use-package editorconfig
   :defer 2
