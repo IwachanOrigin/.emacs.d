@@ -583,13 +583,6 @@
   )
 
 ;; theme
-;; ef-themes
-(use-package ef-themes
-  :defer 1
-  :config
-  (setq ef-themes-mixed-fonts t
-        ef-themes-variable-pitch-ui t)
-  (load-theme 'ef-melissa-light t))
 ;; modus-themes
 (use-package modus-themes
   :defer 1
@@ -613,23 +606,9 @@
           (bg-completion-match-2 bg-cyan-nuanced)
           (bg-completion-match-3 bg-red-nuanced)))
 
-  ;; (load-theme 'modus-operandi-tinted t)
+  ;;(load-theme 'modus-operandi-tinted t)
+  (load-theme 'modus-vivendi-tinted t)
   )
-
-;; theme-buffet
-(use-package theme-buffet
-  :after (modus-themes ef-themes)  ; add your favorite themes here
-  :init
-  ;; variable below needs to be set when you just want to use the timers mins/hours
-  (setq theme-buffet-menu 'modus-ef) ; changing default value from built-in to modus-ef
-  :config
-  ;; one of the three below can be uncommented
-  (theme-buffet-modus-ef)
-  ;; (theme-buffet-built-in)
-  ;; (theme-buffet-end-user)
-  ;; two additional timers are available for theme change, both can be set
-  (theme-buffet-timer-mins 25)  ; change theme every 25m from now, similar below
-  (theme-buffet-timer-hours 2))
 
 ;; puni
 ;; 括弧等の構造を操作するパッケージです。
@@ -659,7 +638,10 @@
 
 ;; ace-window
 (use-package ace-window
-  :defer 1)
+  :defer 1
+  :config
+  (global-set-key (kbd "M-o") 'ace-window)
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 
 ;; lin
 ;; hl-line-mode を強化するパッケージです。
@@ -695,7 +677,7 @@
         '( :internal-border-width 15
            :header-line-width 4
            :mode-line-width 6
-           :tab-width 4
+           :tab-width 2
            :right-divider-width 30
            :scroll-bar-width 8))
 
@@ -706,35 +688,6 @@
            :mode-line-inactive vertical-border))
 
   (spacious-padding-mode +1))
-
-;; beframe
-;; https://github.com/protesilaos/beframe
-;; フレーム毎に異なるバッファセットを持つことが可能になるパッケージ
-;; 作業内容やプロジェクトごとにフレームを分けて作業が出来るらしい
-(use-package beframe
-  :defer 1
-  :config
-  (defvar consult-buffer-sources)
-  (declare-function consult--buffer-state "consult")
-
-  (with-eval-after-load 'consult
-    (defface beframe-buffer
-      '((t :inherit font-lock-string-face))
-      "Face for `consult' framed buffers.")
-
-    (defvar beframe-consult-source
-      `( :name     "Frame-specific buffers (current frame)"
-         :narrow   ?F
-         :category buffer
-         :face     beframe-buffer
-         :history  beframe-history
-         :items    ,#'beframe-buffer-names
-         :action   ,#'switch-to-buffer
-         :state    ,#'consult--buffer-state))
-
-    (add-to-list 'consult-buffer-sources 'beframe-consult-source))
-
-  (beframe-mode +1))
 
 ;; aggressive-indent
 ;; インデントを自動的に整えてくれるパッケージ
@@ -767,8 +720,6 @@
   :defer 1
   :init
   (setq imenu-list-position 'left))
-
-
 
 ;; autorevert
 ;; Check for file updates and update buffers as well.
@@ -808,7 +759,6 @@
   :config
   (setq clang-format-style "file") ;; .clang-format を参照
   (setq clang-format-fallback-style "none")) ;; .clang-format がない場合は何もしない
-
 
 ;; glsl-mode
 (use-package glsl-mode
@@ -905,6 +855,7 @@
   :vc ( :fetcher github :repo "jdtsmith/eglot-booster")
   :config
   (eglot-booster-mode +1))
+
 ;; consult-eglot
 ;; https://github.com/mohkale/consult-eglot
 ;; consultとeglotを統合するパッケージ。シンボルの検索が行えるようになる。
@@ -912,6 +863,7 @@
   :after eglot
   :bind
   ("C-c s" . consult-eglot-symbols))
+
 ;; jsonrpc
 ;; jsonを扱うEmacsの標準パッケージ
 ;; デフォルトのタイムアウト時間が短いため、タイムアウトしないように時間を延ばしている
@@ -920,6 +872,7 @@
   :config
   (setq jsonrpc-default-request-timeout 3000)
   (fset #'jsonrpc--log-event #'ignore))
+
 ;; eglot-x
 ;; eglotでサポートされる機能が増える
 (use-package eglot-x
@@ -927,11 +880,13 @@
   :after eglot
   :config
   (eglot-x-setup))
+
 ;; eldoc-box
 ;; ミニバッファのeldocをposframeで表示してくれる
 (use-package eldoc-box
   :defer 1
   :hook (eglot-managed-mode . eldoc-box-hover-mode))
+
 ;; eglot-signature-eldoc-talkative
 ;; eldocの情報を追加する
 (use-package eglot-signature-eldoc-talkative
@@ -1063,15 +1018,15 @@
 
 ;; 
 (defun my-setup-frame-size-and-position ()
-  "プライマリモニターの解像度の70%に設定し、中央に配置します。"
+  "プライマリモニターの解像度の80%に設定し、中央に配置します。"
   (let* ((monitor-attrs (car (display-monitor-attributes-list)))  ; プライマリモニターの情報を取得
          (geometry (alist-get 'geometry monitor-attrs))           ; モニターのジオメトリ（位置とサイズ）
          (screen-width (nth 2 geometry))                          ; ディスプレイの幅（ピクセル）
          (screen-height (nth 3 geometry))                         ; ディスプレイの高さ（ピクセル）
          (char-width (frame-char-width))                          ; 1文字の幅（ピクセル）
          (char-height (frame-char-height))                        ; 1文字の高さ（ピクセル）
-         (frame-width (round (/ (* 0.7 screen-width) char-width))) ; フレーム幅（文字単位）
-         (frame-height (round (/ (* 0.7 screen-height) char-height))) ; フレーム高さ（文字単位）
+         (frame-width (round (/ (* 0.8 screen-width) char-width))) ; フレーム幅（文字単位）
+         (frame-height (round (/ (* 0.8 screen-height) char-height))) ; フレーム高さ（文字単位）
          (frame-left (round (/ (- screen-width (* frame-width char-width)) 2))) ; 左端位置
          (frame-top (round (/ (- screen-height (* frame-height char-height)) 2)))) ; 上端位置
     ;; default-frame-alistに設定を追加
@@ -1194,7 +1149,12 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
     :defer 0.01
     :config (server-start)
     ;; Assign kill buffer to C-x C-c
-    (global-set-key (kbd "C-x C-c") 'kill-this-buffer)
+    ;; NOTE : Until 29.4 I used [kill-this-buffer], but since 30.1 I can't turn off the buffer except via the menu.
+    ;; To solve this problem, [kill-current-buffer] is used.
+    ;; It was mentioned as a bug, but it was closed after the description to use [kill-current-buffer] was written in the document.
+    ;; https://emacs.stackexchange.com/a/55047
+    ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2024-06/msg00840.html
+    (global-set-key (kbd "C-x C-c") #'kill-current-buffer)
     ;; Allow Emacs to exit with M-x exit
     (defalias 'exit 'save-buffers-kill-emacs)
     ;; yes/no query on exit
