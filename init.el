@@ -33,7 +33,9 @@
 ;; Determine the DECODING setting of process-coding-system by determining the character encoding output by the process.
 (when IS-WINDOWS
   (setq-default default-process-coding-system '(utf-8-unix . japanese-cp932-dos)))
-
+;; 曜日/日付フォーマットは英語表示にしたい(org-scheduleなどで有効)
+;; >= emacs 28
+(setq system-time-locale "C")
 ;; native-compの警告を表示しない
 (setq native-comp-async-report-warnings-errors 'silent)
 
