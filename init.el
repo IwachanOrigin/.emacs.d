@@ -174,6 +174,7 @@
   (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
 
 ;; icons
+;; nerd-icons
 (use-package nerd-icons
   :defer 1)
 (use-package nerd-icons-completion
@@ -211,7 +212,7 @@
           corfu-auto-prefix 2
           corfu-on-exact-match 'show)
 
-  (global-corfu-mode +1)
+  (global-corfu-mode)
 
   (with-eval-after-load 'lsp-mode
     (setopt lsp-completion-provider :none))
@@ -220,7 +221,14 @@
     (defun my/orderless-for-corfu ()
       (setq-local orderless-matching-styles '(orderless-flex)))
 
-    (add-hook 'corfu-mode-hook #'my/orderless-for-corfu)))
+    (add-hook 'corfu-mode-hook #'my/orderless-for-corfu))
+  :custom
+  ;; https://github.com/minad/corfu?tab=readme-ov-file#configuration
+  ;; Emacs 30 and newer: Disable Ispell completion function. As an alternative,
+  ;; try `cape-dict'.
+  ;; 参考 : https://www.grugrut.net/posts/202408192021/
+  (text-mode-ispell-word-completion . nil))
+
 ;; corfu-popup
 (use-package corfu-popupinfo
   :ensure nil
@@ -357,20 +365,30 @@
   :defer 1
   :config
   (setq prescient-aggressive-file-save t)
-  (prescient-persist-mode +1))
+  (prescient-persist-mode))
+
 ;; vertico-prescient
 (use-package vertico-prescient
   :after (vertico prescient)
   :config
   (setq vertico-prescient-enable-filtering nil)
-  (vertico-prescient-mode +1))
+  (vertico-prescient-mode))
+
 ;; corfu-prescient
 (use-package corfu-prescient
   :after (corfu prescient)
   :config
   (setq corfu-prescient-enable-filtering nil)
-  (corfu-prescient-mode +1))
+  (corfu-prescient-mode))
 
+;; consult-line-migemo
+(defun consult-line-migemo ()
+  (interactive)
+  (let ((input (read-string "Consult-migemo: " nil)))
+    (consult-line (migemo-get-pattern input))))
+
+;;
+(global-set-key (kbd "C-s") #'consult-line-migemo)
 
 ;; consult
 ;; Example configuration for Consult
@@ -483,7 +501,7 @@
 (use-package marginalia
   :defer 1
   :init
-  (marginalia-mode +1))
+  (marginalia-mode))
 
 ;; embark
 ;; vertico の候補等に様々なアクションを提供してくれます。
@@ -501,6 +519,7 @@
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
                  (window-parameters (mode-line-format . none)))))
+
 ;; embark-consult
 (use-package embark-consult
   :after (embark consult)
@@ -513,6 +532,7 @@
   :demand t
   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
          ("M-*" . tempel-insert)))
+
 ;; tempel-collection
 (use-package tempel-collection
   :after tempel)
@@ -619,24 +639,38 @@
   :config
   (puni-global-mode +1))
 
+;; alert
+;; https://github.com/jwiegley/alert
+;; 通知機能を利用できるようにします。主に org-pomodoro で使用します。
+(use-package alert
+  :init
+  (setq alert-default-style 'libnotify))
+
+;; alert-toast
+;; https://github.com/gkowzan/alert-toast
+;; Windowsのtoast機能を使うための設定です。
+(use-package alert-toast
+  :if IS-WINDOWS
+  :init
+  (setq alert-default-style 'toast))
+
 ;; string-inflection
+;; https://github.com/akicho8/string-inflection
 ;; カーソル直下の単語をunderscore -> UPCASE -> CamelCase に変換してくれます。
 (use-package string-inflection
   :defer 1
-  :bind ( :map my-string-inflection-map
-          ("a" . string-inflection-all-cycle)
-          ("_" . string-inflection-underscore)
-          ("p" . string-inflection-pascal-case)
-          ("c" . string-inflection-camelcase)
-          ("u" . string-inflection-upcase)
-          ("k" . string-inflection-kebab-case)
-          ("C" . string-inflection-capital-underscore))
-  :init
-  (defvar my-string-inflection-map (make-keymap)))
+  :config
+  (global-set-key (kbd "C-c C-u") 'string-inflection-all-cycle))
 
 ;; avy
+;; https://github.com/abo-abo/avy
+;; 画面上の文字へ移動できるようになります。
 (use-package avy
-  :defer 1)
+  :defer 1
+  :config
+  (global-set-key (kbd "C-'") 'avy-goto-char-timer)
+  (global-set-key (kbd "C-:") 'avy-goto-line)
+  (setq avy-timeout-seconds 1.0))
 
 ;; ace-window
 (use-package ace-window
@@ -662,7 +696,7 @@
 
 ;; goggles
 ;; https://github.com/minad/goggles
-;; 何処に貼り付けたのかとか、視覚的に目立ちやすくする
+;; 何処に貼り付けたのかとか、視覚的に目立ちやすくします。
 (use-package goggles
   :defer 1
   :hook ((prog-mode text-mode) . goggles-mode)
@@ -671,7 +705,7 @@
 
 ;; spacious-padding
 ;; https://github.com/protesilaos/spacious-padding?tab=readme-ov-file
-;; スペースを設定して、見やすくする
+;; スペースを設定して、見やすくします。
 (use-package spacious-padding
   :defer 1
   :config
@@ -693,10 +727,13 @@
 
 ;; aggressive-indent
 ;; インデントを自動的に整えてくれるパッケージ
+;; emacs-list-modeの時のみ、自動インデントします。
 (use-package aggressive-indent
   :hook (emacs-lisp-mode . aggressive-indent-mode))
 
 ;; perfect-mergin
+;; https://github.com/mpwang/perfect-margin
+;; バッファが1つの時、中央に表示します。2つ以上の時は通常の表示に戻ります。
 (use-package perfect-margin
   :defer 1
   :config
@@ -712,7 +749,16 @@
   :config
   (breadcrumb-mode +1))
 
+;; page-break-lines
+;; https://github.com/purcell/page-break-lines
+;; https://www.emacswiki.org/emacs/PageBreaks
+;; ^Lの改ページ文字の表示を良くします。
+(use-package page-break-lines
+  :config
+  (page-break-lines-mode +1))
+
 ;; rainbow-delimiters
+;; かっこに色を付けて見やすくします。
 (use-package rainbow-delimiters
   :defer 1
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -783,12 +829,47 @@
 
 ;; cmake-mode
 (use-package cmake-mode
-  :defer 1
-  )
+  :defer 1)
 
 ;; Dart-mode
 (use-package dart-mode
   :defer 1)
+
+;; elisp
+;; highlight-defined
+;; https://github.com/Fanael/highlight-defined
+;; 既知のシンボルに色を付けてくれます。
+(use-package highlight-defined
+  :defer 1
+  :hook (emacs-lisp-mode . highlight-defined-mode))
+
+;; highlight-quoted
+;; https://github.com/Fanael/highlight-quoted
+;; 引用符と引用記号を色付けしてくれます。
+(use-package highlight-quoted
+  :defer 1
+  :hook (emacs-lisp-mode . highlight-quoted-mode))
+
+;; About Web
+;; typescript-mode
+(use-package typescript-mode
+  :defer 1)
+
+;; emmet-mode
+;; https://github.com/smihica/emmet-mode
+;; emmetとは？ => https://zenn.dev/miz_dev/articles/6cac5f2e32398d
+(use-package emmet-mode
+  :hook ((html-mode
+          css-mode
+          js-mode
+          typescript-mode) . emmet-mode))
+
+;; web-beautify
+;; https://github.com/yasuyk/web-beautify
+(use-package web-beautify
+  :defer 1)
+
+
 
 ;; editorconfig
 (use-package editorconfig
@@ -977,6 +1058,135 @@
   :config
   (repeat-mode))
 
+;; treemacs
+;; https://github.com/Alexander-Miller/treemacs
+;; 左側にディレクトリを表示し、ファイルを開いたりできます。
+;; perfect-marginと互換性があります。
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  (with-eval-after-load 'treemacs
+    (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay        0.5
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-eldoc-display                   'simple
+          treemacs-file-event-delay                2000
+          treemacs-file-extension-regex            treemacs-last-period-regex-value
+          treemacs-file-follow-delay               0.2
+          treemacs-file-name-transformer           #'identity
+          treemacs-follow-after-init               t
+          treemacs-expand-after-init               t
+          treemacs-find-workspace-method           'find-for-file-or-pick-first
+          treemacs-git-command-pipe                ""
+          treemacs-goto-tag-strategy               'refetch-index
+          treemacs-header-scroll-indicators        '(nil . "^^^^^^")
+          treemacs-hide-dot-git-directory          t
+          treemacs-indentation                     2
+          treemacs-indentation-string              " "
+          treemacs-is-never-other-window           nil
+          treemacs-max-git-entries                 5000
+          treemacs-missing-project-action          'ask
+          treemacs-move-files-by-mouse-dragging    t
+          treemacs-move-forward-on-expand          nil
+          treemacs-no-png-images                   nil
+          treemacs-no-delete-other-windows         t
+          treemacs-project-follow-cleanup          nil
+          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                        'left
+          treemacs-read-string-input               'from-child-frame
+          treemacs-recenter-distance               0.1
+          treemacs-recenter-after-file-follow      nil
+          treemacs-recenter-after-tag-follow       nil
+          treemacs-recenter-after-project-jump     'always
+          treemacs-recenter-after-project-expand   'on-distance
+          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+          treemacs-project-follow-into-home        nil
+          treemacs-show-cursor                     nil
+          treemacs-show-hidden-files               t
+          treemacs-silent-filewatch                nil
+          treemacs-silent-refresh                  nil
+          treemacs-sorting                         'alphabetic-asc
+          treemacs-select-when-already-in-treemacs 'move-back
+          treemacs-space-between-root-nodes        t
+          treemacs-tag-follow-cleanup              t
+          treemacs-tag-follow-delay                1.5
+          treemacs-text-scale                      nil
+          treemacs-user-mode-line-format           nil
+          treemacs-user-header-line-format         nil
+          treemacs-wide-toggle-width               70
+          treemacs-width                           35
+          treemacs-width-increment                 1
+          treemacs-width-is-initially-locked       t
+          treemacs-workspace-switch-cleanup        nil)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+;; treemacs-nerd-icons
+(use-package treemacs-nerd-icons
+  :config
+  (treemacs-load-theme "nerd-icons"))
+
+;; treemacs-projectile
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+;; treemacs-icons-dired
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+;; treemacs-magit
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+;; reemacs-persp
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+
+;; treemacs-tab-bar
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :ensure t
+  :config (treemacs-set-scope-type 'Tabs))
+
+
 ;;
 ;; Custom functions
 ;;
@@ -1068,7 +1278,6 @@
 
   :config
   (migemo-init))
-
 
 ;; 保存されたコマンドの履歴を使うための設定
 (use-package savehist
@@ -1208,6 +1417,28 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
 (setq org-use-sub-superscripts '{}
       org-export-with-sub-superscripts nil)
 
+;; org-agenda
+(use-package org-agenda
+  :ensure nil
+  :after org
+  :config
+  (setq org-agenda-files (file-expand-wildcards (concat org-directory "/*.org"))))
+
+;; org-indent
+(use-package org-indent
+  :ensure nil
+  :hook (org-mode . org-indent-mode))
+
+;; org-pomodoro
+;; https://github.com/marcinkoziej/org-pomodoro
+(use-package org-pomodoro
+  :after org)
+
+;; ox-qmd
+;; orgファイルをmarkdownファイルに変換してくれます。
+(use-package ox-qmd
+  :defer t)
+
 ;; org-modern
 (use-package org-modern
   :after org
@@ -1239,11 +1470,112 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
   (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
 
   (global-org-modern-mode))
+
 ;; org-modern-indent
 (use-package org-modern-indent
   :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+
+;; keycast
+;; https://github.com/tarsius/keycast
+;; https://protesilaos.com/emacs/dotemacs
+;; 5.3.1. The prot-emacs-modeline.el section about keycast
+(use-package keycast
+  :ensure t
+  :defer 1
+  :commands (keycast-mode-line-mode keycast-header-line-mode keycast-tab-bar-mode keycast-log-mode)
+  :init
+  (setq keycast-mode-line-format "%2s%k%c%R")
+  (setq keycast-mode-line-window-predicate 'mode-line-window-selected-p)
+  (setq keycast-mode-line-remove-tail-elements nil)
+  (keycast-mode-line-mode)
+  :config
+  (dolist (input '(self-insert-command org-self-insert-command))
+    (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
+
+  (dolist (event '( mouse-event-p mouse-movement-p mwheel-scroll handle-select-window
+                    mouse-set-point mouse-drag-region))
+    (add-to-list 'keycast-substitute-alist `(,event nil))))
+
+;; time
+;; https://github.com/emacs-mirror/emacs/blob/master/lisp/time.el
+;; https://protesilaos.com/emacs/dotemacs
+;; 5.2.16. The prot-emacs-essentials.el configurations for the date and time (display-time-mode)
+;;;; Display current time
+(use-package time
+  :ensure nil
+  :hook (after-init . display-time-mode)
+  :config
+  (setq display-time-format " %a %e %b, %H:%M ")
+  ;;;; Covered by `display-time-format'
+  ;; (setq display-time-24hr-format t)
+  ;; (setq display-time-day-and-date t)
+  (setq display-time-interval 60)
+  (setq display-time-default-load-average nil)
+  ;; NOTE 2022-09-21: For all those, I have implemented my own solution
+  ;; that also shows the number of new items, although it depends on
+  ;; notmuch: the `notmuch-indicator' package.
+  (setq display-time-mail-directory nil)
+  (setq display-time-mail-function nil)
+  (setq display-time-use-mail-icon nil)
+  (setq display-time-mail-string nil)
+  (setq display-time-mail-face nil)
+
+  ;; I don't need the load average and the mail indicator, so let this
+  ;; be simple:
+  (setq display-time-string-forms
+        '((propertize
+           (format-time-string display-time-format now)
+           'face 'display-time-date-and-time
+           'help-echo (format-time-string "%a %b %e, %Y" now))
+          " ")))
+
+
+;; World clock (M-x world-clock)
+;; https://protesilaos.com/emacs/dotemacs
+;; 5.2.17. The prot-emacs-essentials.el settings for the world-clock
+(use-package time
+  :ensure nil
+  :commands (world-clock)
+  :config
+  (setq display-time-world-list t)
+  (setq zoneinfo-style-world-list ; M-x shell RET timedatectl list-timezones
+        '(("America/Los_Angeles" "Los Angeles")
+          ("America/Vancouver" "Vancouver")
+          ("America/Chicago" "Chicago")
+          ("America/Toronto" "Toronto")
+          ("America/New_York" "New York")
+          ("UTC" "UTC")
+          ("Europe/Lisbon" "Lisbon")
+          ("Europe/Brussels" "Brussels")
+          ("Europe/Athens" "Athens")
+          ("Asia/Riyadh" "Riyadh")
+          ("Asia/Tbilisi" "Tbilisi")
+          ("Asia/Singapore" "Singapore")
+          ("Asia/Shanghai" "Shanghai")
+          ("Asia/Seoul" "Seoul")
+          ("Asia/Tokyo" "Tokyo")
+          ("Australia/Brisbane" "Brisbane")
+          ("Australia/Sydney" "Sydney")
+          ("Pacific/Auckland" "Auckland")))
+
+  ;; All of the following variables are for Emacs 28
+  (setq world-clock-list t)
+  (setq world-clock-time-format "%R	%z	%A %d %B")
+  (setq world-clock-buffer-name "*world-clock*") ; Placement handled by `display-buffer-alist'
+  (setq world-clock-timer-enable t)
+  (setq world-clock-timer-second 60))
+
+;; goto-chg
+;; https://github.com/emacs-evil/goto-chg/tree/master
+;; https://protesilaos.com/emacs/dotemacs
+;; 5.2.22. The prot-emacs-essentials.el section about goto-chg (go to change)
+(use-package goto-chg
+  :ensure t
+  :bind
+  (("C-(" . goto-last-change)
+   ("C-)" . goto-last-change-reverse)))
 
 ;; profile
 ;;(profiler-report)
