@@ -1469,6 +1469,22 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
   (setopt org-ellipsis "…")
   (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
 
+  ;; Choose some fonts
+  (set-face-attribute 'default nil :family "Iosevka NF")
+  (set-face-attribute 'variable-pitch nil :family "Iosevka NFP")
+  (set-face-attribute 'org-modern-symbol nil :family "Iosevka NF")
+
+  ;; Add frame borders and window dividers
+  (modify-all-frames-parameters
+   '((right-divider-width . 40)
+     (internal-border-width . 40)))
+  (dolist (face '(window-divider
+                  window-divider-first-pixel
+                  window-divider-last-pixel))
+    (face-spec-reset-face face)
+    (set-face-foreground face (face-attribute 'default :background)))
+  (set-face-background 'fringe (face-attribute 'default :background))
+
   (global-org-modern-mode))
 
 ;; org-modern-indent
