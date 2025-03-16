@@ -1408,11 +1408,24 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
 
 ;; org
 (use-package org
+  :ensure t
   :defer 1
   :init
-  (setq org-return-follows-link t  ; Returnキーでリンク先を開く
-        org-mouse-1-follows-link t ; マウスクリックでリンク先を開く
-        ))
+  (setq org-return-follows-link t) ;; Returnキーでリンク先を開く
+  (setq org-mouse-1-follows-link t) ;; マウスクリックでリンク先を開く
+
+  ;; org ファイルの格納先とorg-agendaで使うファイルの格納先
+  ;; 拡張子がorgのファイルをすべて読みだすはず
+  (setq org-directory "~/Documents/_personal/org_template")
+  (setq org-agenda-files (list org-directory))
+
+  (setq org-log-done 'time) ;; org-logを有効化し、タスクのステータスが変わった時間を記録する
+  (setq org-log-into-drawer t) ;; org-logの記録をドロワーで隠す
+  ;; Learn about the ! and more by reading the relevant section of the
+  ;; Org manual. Evaluate: (info "(org) Tracking TODO state changes")
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "WAIT(w!)" "|" "CANCEL(c!)" "DONE(d!)"))))
+
 ;;  アンダースコアを入力しても下付き文字にならないようにする
 (setq org-use-sub-superscripts '{}
       org-export-with-sub-superscripts nil)
@@ -1421,8 +1434,7 @@ _M-C-p_: 前の括弧始まりへ移動                                       _C
 (use-package org-agenda
   :ensure nil
   :after org
-  :config
-  (setq org-agenda-files (file-expand-wildcards (concat org-directory "/*.org"))))
+  )
 
 ;; org-indent
 (use-package org-indent
