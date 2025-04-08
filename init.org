@@ -1,6 +1,12 @@
 #+property: header-args :tangle "init.el"
 #+startup: content indent
 
+* .org to .el
+** コマンド
+org-babel-tangle
+** ショートカット
+C-c C-v t
+
 * My init el configure
 ** header
 #+begin_src emacs-lisp
