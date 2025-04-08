@@ -539,11 +539,20 @@ corfuで利用されている
 ** consult-line-migemo
 CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関数
 #+begin_src emacs-lisp
-  (defun consult-line-migemo ()
-    (interactive)
-    (let ((input (read-string "Consult-migemo: " nil)))
-      (consult-line (migemo-get-pattern input))))
-  (global-set-key (kbd "C-s") #'consult-line-migemo)
+  (with-eval-after-load 'consult
+    (defun consult--migemo-regexp-compiler (input type &rest _config)
+      (setq input (migemo-get-pattern input))
+      (cons (mapcar (lambda (x) (consult--convert-regexp x type))
+                    (split-string input " +" t))
+            (lambda (str)
+              (string-match-p input str))))
+
+    (defun consult-line-migemo ()
+      (interactive)
+      (let ((consult--regexp-compiler #'consult--migemo-regexp-compiler))
+        (consult-line)))
+
+    (global-set-key (kbd "C-s") #'consult-line-migemo))
 #+end_src
 
 ** consult
