@@ -309,7 +309,6 @@ nerd-iconsを使用している
 [[https://github.com/minad/corfu]]
 #+begin_src emacs-lisp
   (use-package corfu
-    :ensure nil
     :defer 1
     :demand t
     :hook (prog-mode . (lambda ()
@@ -344,7 +343,6 @@ nerd-iconsを使用している
 corfuに含まれている
 #+begin_src emacs-lisp
   (use-package corfu-popupinfo
-    :ensure nil
     :hook (corfu-mode . corfu-popupinfo-mode))
 #+end_src
 
@@ -420,7 +418,6 @@ corfuで利用されている
 **** vertico-repeat
 #+begin_src emacs-lisp
   (use-package vertico-repeat
-    :ensure nil
     :after vertico
     :hook (minibuffer-setup . vertico-repeat-save))
 #+end_src
@@ -428,7 +425,6 @@ corfuで利用されている
 **** vertico-directory
 #+begin_src emacs-lisp
   (use-package vertico-directory
-    :ensure nil
     :after vertico
     :bind ( :map vertico-map
             ("<backspace>" . vertico-directory-delete-char)))
@@ -437,7 +433,6 @@ corfuで利用されている
 **** vertico-buffer
 #+begin_src emacs-lisp
   (use-package vertico-buffer
-    :ensure nil
     :after vertico
     :config
     (setq vertico-buffer-display-action '(display-buffer-at-bottom))
@@ -475,7 +470,6 @@ corfuで利用されている
 ** orderless
 #+begin_src emacs-lisp
   (use-package orderless
-    :ensure nil
     :defer 1
     :config
     (setq completion-styles '(orderless basic)
@@ -511,7 +505,6 @@ corfuで利用されている
 ** prescient
 #+begin_src emacs-lisp
   (use-package prescient
-    :ensure nil
     :defer 1
     :config
     (setq prescient-aggressive-file-save t)
@@ -551,7 +544,6 @@ CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関�
 #+begin_src emacs-lisp
   ;; Example configuration for Consult
   (use-package consult
-    :ensure nil
     :defer 1
     ;; Replace bindings. Lazily loaded due by `use-package'.
     :bind (;; C-c bindings (mode-specific-map)
@@ -659,7 +651,6 @@ CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関�
 vertico の候補に情報を追加する.
 #+begin_src emacs-lisp
   (use-package marginalia
-    :ensure nil
     :defer 1
     :init
     (marginalia-mode))
@@ -687,7 +678,6 @@ vertico の候補等に様々なアクションを提供してくれます。
 **** embark-consult
 #+begin_src emacs-lisp
   (use-package embark-consult
-    :ensure nil
     :after (embark consult)
     :hook (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
@@ -711,7 +701,6 @@ tempelはEmacs用のテンプレートパッケージ
 ** magit
 #+begin_src emacs-lisp
   (use-package magit
-    :ensure nil
     :defer 1
     :config
     (when IS-WINDOWS
@@ -727,7 +716,6 @@ tempelはEmacs用のテンプレートパッケージ
 ウィンドウの左側にコミットされていない箇所を強調表示する
 #+begin_src emacs-lisp
   (use-package diff-hl
-    :ensure nil
     :defer 2
     :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
            (magit-post-refresh . diff-hl-magit-post-refresh)
@@ -792,7 +780,6 @@ undo履歴を視覚的に分かりやすく表示してくれる
 ** rg
 #+begin_src emacs-lisp
   (use-package rg
-    :ensure nil
     :defer 2)
 #+end_src
 
@@ -824,16 +811,6 @@ undo履歴を視覚的に分かりやすく表示してくれる
     (load-theme 'modus-vivendi-tinted t))
 #+end_src
 
-** puni
-括弧等の構造を操作するパッケージです。
-[[https://github.com/AmaiKinono/puni]]
-#+begin_src emacs-lisp
-;;  (use-package puni
-;;    :defer 1
-;;    :config
-;;    (puni-global-mode))
-#+end_src
-
 ** alert
 通知機能を利用できるようにする
 主に org-pomodoro で使用する
@@ -854,22 +831,11 @@ Windowsのtoast機能を使うための設定
     (setq alert-default-style 'toast))
 #+end_src
 
-** string-inflection
-カーソル直下の単語をunderscore -> UPCASE -> CamelCase に変換してくれます。
-[[https://github.com/akicho8/string-inflection]]
-#+begin_src emacs-lisp
-  (use-package string-inflection
-    :defer 1
-    :config
-    (global-set-key (kbd "C-c C-u") 'string-inflection-all-cycle))
-#+end_src
-
 ** avy
 画面上の文字へ移動できるようになる
 [[https://github.com/abo-abo/avy]]
 #+begin_src emacs-lisp
   (use-package avy
-    :ensure nil
     :defer 1
     :config
     (global-set-key (kbd "C-'") 'avy-goto-char-timer)
@@ -880,7 +846,6 @@ Windowsのtoast機能を使うための設定
 ** ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
-    :ensure nil
     :defer 1
     :config
     (global-set-key (kbd "M-o") 'ace-window)
@@ -891,7 +856,6 @@ Windowsのtoast機能を使うための設定
 hl-line-mode を強化するパッケージ
 #+begin_src emacs-lisp
   (use-package lin
-    :ensure nil
     :defer 1
     :init
     (setq lin-face 'lin-red)
@@ -955,7 +919,6 @@ emacs-list-modeの時のみ、自動インデントする
 [[https://github.com/mpwang/perfect-margin]]
 #+begin_src emacs-lisp
   (use-package perfect-margin
-    :ensure nil
     :defer 1
     :config
     (setq perfect-margin-ignore-filters nil)
@@ -994,7 +957,6 @@ emacs-list-modeの時のみ、自動インデントする
 ** imenu-list
 #+begin_src emacs-lisp
   (use-package imenu-list
-    :ensure nil
     :defer 1
     :init
     (setq imenu-list-position 'left))
@@ -1026,8 +988,7 @@ perfect-marginと互換性があります。
 [[https://github.com/Alexander-Miller/treemacs]]
 #+begin_src emacs-lisp
   (use-package treemacs
-    :ensure nil
-    :defer t
+    :defer 1
     :init
     (with-eval-after-load 'winum
       (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
@@ -1124,29 +1085,24 @@ perfect-marginと互換性があります。
 
   ;; treemacs-projectile
   (use-package treemacs-projectile
-    :after (treemacs projectile)
-    :ensure nil)
+    :after (treemacs projectile))
 
   ;; treemacs-icons-dired
   (use-package treemacs-icons-dired
-    :hook (dired-mode . treemacs-icons-dired-enable-once)
-    :ensure nil)
+    :hook (dired-mode . treemacs-icons-dired-enable-once))
 
   ;; treemacs-magit
   (use-package treemacs-magit
-    :after (treemacs magit)
-    :ensure nil)
+    :after (treemacs magit))
 
   ;; reemacs-persp
   (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
     :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-    :ensure nil
     :config (treemacs-set-scope-type 'Perspectives))
 
   ;; treemacs-tab-bar
   (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
     :after (treemacs)
-    :ensure nil
     :config (treemacs-set-scope-type 'Tabs))
 #+end_src
 
@@ -1202,14 +1158,12 @@ perfect-marginと互換性があります。
 ** cmake-mode
 #+begin_src emacs-lisp
   (use-package cmake-mode
-    :ensure nil
     :defer 1)
 #+end_src
 
 ** Dart-mode
 #+begin_src emacs-lisp
   (use-package dart-mode
-    :ensure nil
     :defer 1)
 #+end_src
 
@@ -1236,7 +1190,6 @@ perfect-marginと互換性があります。
 *** typescript-mode
 #+begin_src emacs-lisp
   (use-package typescript-mode
-    :ensure nil
     :defer 1)
 #+end_src
 
@@ -1255,7 +1208,6 @@ perfect-marginと互換性があります。
 [[https://github.com/yasuyk/web-beautify]]
 #+begin_src emacs-lisp
   (use-package web-beautify
-    :ensure nil
     :defer 1)
 #+end_src
 
@@ -1263,7 +1215,6 @@ perfect-marginと互換性があります。
 30.1から、editorconfigはemacs masterに統合されたらしい
 #+begin_src emacs-lisp
     (use-package editorconfig
-    :ensure nil
     :defer 2
     :config
     (editorconfig-mode)
@@ -1339,7 +1290,6 @@ consultとeglotを統合するパッケージ。シンボルの検索が行え�
 [[https://github.com/mohkale/consult-eglot]]
 #+begin_src emacs-lisp
   (use-package consult-eglot
-    :ensure nil
     :after eglot
     :bind
     ("C-c s" . consult-eglot-symbols))
@@ -1351,7 +1301,6 @@ jsonを扱うEmacsの標準パッケージ
 また、ログを無視するように設定し、パフォーマンスを向上させている。
 #+begin_src emacs-lisp
   (use-package jsonrpc
-    :ensure nil
     :config
     (setq jsonrpc-default-request-timeout 3000)
     (fset #'jsonrpc--log-event #'ignore))
@@ -1582,7 +1531,6 @@ We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.n
 Please add path cmigemo.exe.
 #+begin_src emacs-lisp
   (use-package migemo
-    :ensure nil
     :defer 1
     :config
     ;; use to C/Migemo
@@ -1627,7 +1575,6 @@ Please add path cmigemo.exe.
 *** hydra
 #+begin_src emacs-lisp
   (use-package hydra
-    :ensure nil
     :defer 2
     :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
 
@@ -1719,7 +1666,6 @@ org-directory と org-agenda-files は別の場所に設定している
 #+begin_src emacs-lisp
   ;; org
   (use-package org
-    :ensure nil
     :defer 1
     :init
     (setq org-return-follows-link t) ; Returnキーでリンク先を開く
@@ -1745,15 +1691,15 @@ org-directory と org-agenda-files は別の場所に設定している
 ** org-agenda
 #+begin_src emacs-lisp
   (use-package org-agenda
-    :ensure nil
-    :after org)
+    :after org
+    :ensure nil)
 #+end_src
 
 ** org-indent
 #+begin_src emacs-lisp
   (use-package org-indent
-    :ensure nil
-    :hook (org-mode . org-indent-mode))
+    :hook (org-mode . org-indent-mode)
+    :ensure nil)
 #+end_src
 
 ** org-pomodoro
@@ -1767,7 +1713,7 @@ org-directory と org-agenda-files は別の場所に設定している
 orgファイルをmarkdownファイルに変換してくれます。
 #+begin_src emacs-lisp
   (use-package ox-qmd
-    :defer t)
+    :after org)
 #+end_src
 
 ** org-modern
@@ -1835,7 +1781,6 @@ orgファイルをmarkdownファイルに変換してくれます。
 5.3.1. The prot-emacs-modeline.el section about keycast
 #+begin_src emacs-lisp
   (use-package keycast
-    :ensure nil
     :defer 1
     :commands (keycast-mode-line-mode keycast-header-line-mode keycast-tab-bar-mode keycast-log-mode)
     :init
@@ -1859,7 +1804,6 @@ orgファイルをmarkdownファイルに変換してくれます。
 5.2.16. The prot-emacs-essentials.el configurations for the date and time (display-time-mode)
 #+begin_src emacs-lisp
   (use-package time
-    :ensure nil
     :hook (after-init . display-time-mode)
     :config
     (setq display-time-format " %a %e %b, %H:%M ")
@@ -1893,7 +1837,6 @@ orgファイルをmarkdownファイルに変換してくれます。
 5.2.17. The prot-emacs-essentials.el settings for the world-clock
 #+begin_src emacs-lisp
   (use-package time
-    :ensure nil
     :commands (world-clock)
     :config
     (setq display-time-world-list t)
@@ -1932,7 +1875,6 @@ orgファイルをmarkdownファイルに変換してくれます。
 5.2.22. The prot-emacs-essentials.el section about goto-chg (go to change)
 #+begin_src emacs-lisp
   (use-package goto-chg
-    :ensure nil
     :bind
     (("C-(" . goto-last-change)
      ("C-)" . goto-last-change-reverse)))
