@@ -5,10 +5,18 @@
 .cache/*
 .extension/*
 /tree-sitter/*
+org-persist/
+transient/
+var/
 
 recentf
 *.elc
 .dap-breakpoints
 projectile-bookmarks.eld
 custom.el
+init.el
+bookmarks
+history
+projects
+tramp
 
