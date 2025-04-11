@@ -346,9 +346,12 @@ nerd-iconsを使用している
 
 ** corfu-popup
 [[https://github.com/minad/corfu/blob/main/extensions/corfu-popupinfo.el]]
-corfuに含まれている
+corfuに含まれています
+「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
+結果、パッケージが見つからないエラーを出力するので注意が必要です
 #+begin_src emacs-lisp
   (use-package corfu-popupinfo
+    :ensure nil
     :hook (corfu-mode . corfu-popupinfo-mode))
 #+end_src
 
@@ -422,23 +425,38 @@ corfuで利用されている
 #+end_src
 
 **** vertico-repeat
+https://github.com/minad/vertico/blob/main/extensions/vertico-repeat.el
+verticoに含まれています
+「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
+結果、パッケージが見つからないエラーを出力するので注意が必要です
 #+begin_src emacs-lisp
   (use-package vertico-repeat
+    :ensure nil
     :after vertico
     :hook (minibuffer-setup . vertico-repeat-save))
 #+end_src
 
 **** vertico-directory
+https://github.com/minad/vertico/blob/main/extensions/vertico-directory.el
+verticoに含まれています
+「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
+結果、パッケージが見つからないエラーを出力するので注意が必要です
 #+begin_src emacs-lisp
   (use-package vertico-directory
+    :ensure nil
     :after vertico
     :bind ( :map vertico-map
             ("<backspace>" . vertico-directory-delete-char)))
 #+end_src
 
 **** vertico-buffer
+https://github.com/minad/vertico/blob/main/extensions/vertico-buffer.el
+verticoに含まれています
+「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
+結果、パッケージが見つからないエラーを出力するので注意が必要です
 #+begin_src emacs-lisp
   (use-package vertico-buffer
+    :ensure nil
     :after vertico
     :config
     (setq vertico-buffer-display-action '(display-buffer-at-bottom))
