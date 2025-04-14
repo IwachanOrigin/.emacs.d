@@ -1929,6 +1929,13 @@ orgファイルをmarkdownファイルに変換してくれます。
   (global-display-fill-column-indicator-mode)
 #+end_src
 
+** bufferlistのひとつ前 or 次 へ移動するキーバインド
+現在のバッファからひとつ前、ひとつ後へ移動する
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-[") 'switch-to-prev-buffer)
+(global-set-key (kbd "M-]") 'switch-to-next-buffer)
+#+end_src
+
 ** footer
 #+begin_src emacs-lisp
   ;;(profiler-report)
