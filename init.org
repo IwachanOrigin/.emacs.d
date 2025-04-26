@@ -1200,6 +1200,13 @@ perfect-marginと互換性があります。
     :defer 1)
 #+end_src
 
+** Java
+#+begin_src emacs-lisp
+  (use-package eglot-java
+    :ensure t
+    :after eglot)
+#+end_src
+
 ** elisp
 *** highlight-defined
 既知のシンボルに色を付けてくれます。
@@ -1254,7 +1261,8 @@ perfect-marginと互換性があります。
     (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 #+end_src
 
-** eglot
+** eglot config
+*** eglot
 #+begin_src emacs-lisp
   (progn
     (customize-set-variable 'eglot-autoshutdown t)
@@ -1263,6 +1271,7 @@ perfect-marginと互換性があります。
                             (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
 
     (with-eval-after-load 'eglot
+      ;; c/c++
       (add-to-list 'eglot-server-programs
                    '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
                      . ("clangd"
@@ -1274,7 +1283,35 @@ perfect-marginと互換性があります。
                         "--completion-style=detailed"
                         "--pch-storage=disk"
                         "--header-insertion=never"
-                        "--header-insertion-decorators=0"))))
+                        "--header-insertion-decorators=0")))
+      ;; Java
+      ;; -data に渡しているworkspace-dirにはプロジェクト毎のディレクトリを作成している
+      ;; project-current 関数はemacs標準のproject.elに定義されており、.gitを探してくれる
+      ;; project.elはemacs標準のvc.elを使ってgitを検索している
+      ;; (locate-dominating-file default-directory ".git")
+      ;; 上述のS式をjavaファイルなどを開いているバッファで実行(M-:)すると、ルートディレクトリが分かる
+      (add-to-list 'eglot-server-programs
+                   `(java-mode . ,(lambda (_project)
+                              (let* ((root (if-let ((pr (project-current)))
+                                           (car (project-roots pr))
+                                         default-directory))
+                                     (workspace-dir (expand-file-name
+                                                     (concat "~/.emacs.d/jdtls-workspace/"
+                                                             (md5 (expand-file-name root))))))
+                                (list "java"
+                                      "-Declipse.application=org.eclipse.jdt.ls.core.id1"
+                                      "-Dosgi.bundles.defaultStartLevel=4"
+                                      "-Declipse.product=org.eclipse.jdt.ls.core.product"
+                                      "-Dlog.level=ALL"
+                                      "-noverify"
+                                      "-Xms1G"
+                                      "-Xmx2G"
+                                      "-jar" "C:/software/jdt-language-server/plugins/org.eclipse.equinox.launcher_1.7.0.v20250404-1055.jar"
+                                      "-configuration" "C:/software/jdt-language-server/config_win"
+                                      "-data" workspace-dir)))))
+
+      ;; Language Serverからの進捗を表示するか否か
+      (setq eglot-report-progress nil))
 
     (with-eval-after-load 'flymake
       (define-key flymake-mode-map (kbd "C-c ! n") nil)
@@ -1301,6 +1338,11 @@ perfect-marginと互換性があります。
                 (setq tab-width 2)              ; tab width
                 (setq indent-tabs-mode nil)     ; indent use space.
                 (c-set-offset 'innamespace 0)   ; namespace indent pos is 0
+                ))
+    (add-hook 'java-mode-hook
+              (lambda ()
+                (eglot-ensure)
+                (message "called java-mode-hook")
                 )))
 #+end_src
 
