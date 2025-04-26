@@ -8,6 +8,7 @@
 org-persist/
 transient/
 var/
+jdtls-workspace/
 
 recentf
 *.elc
