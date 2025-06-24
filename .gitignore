@@ -8,7 +8,10 @@
 org-persist/
 transient/
 var/
-jdtls-workspace/
+eglot-java-eclipse-jdt-cache/
+eln-cache/
+share/
+undu-fu-session/
 
 recentf
 *.elc
@@ -20,4 +23,6 @@ bookmarks
 history
 projects
 tramp
+lombok.jar
+fontaine-latest-state.eld
 
