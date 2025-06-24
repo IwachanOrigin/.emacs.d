@@ -1201,10 +1201,26 @@ perfect-marginと互換性があります。
 #+end_src
 
 ** Java
+eglotよりも先に読み込む必要があるっぽいです。
+eglot単体の場合、jdtlsをPATHから探します。
+eglot-javaが読み込まれていると上述処理を上書きし、jdtlsの最新バージョンをダウンロードしてくれます。
 #+begin_src emacs-lisp
   (use-package eglot-java
     :ensure t
-    :after eglot)
+    :demand t
+    :config
+    (eglot-java-mode))
+#+end_src
+
+eglot-javaがjdtlsを起動する際にlombok.jarを引数として追加します。
+vcパラメータ等が上手く動かなかったのでダウンロードして配置しました。
+参考: https://github.com/ltylty/eglot-java-lombok
+#+begin_src emacs-lisp
+  (use-package eglot-java-lombok
+    :demand t
+    :load-path "~/.emacs.d/external/eglot-java-lombok"
+    :config
+    (eglot-java-lombok/init))
 #+end_src
 
 ** elisp
@@ -1271,6 +1287,9 @@ perfect-marginと互換性があります。
                             (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
 
     (with-eval-after-load 'eglot
+      ;; timeout
+      (setq eglot-connect-timeout 120)
+
       ;; c/c++
       (add-to-list 'eglot-server-programs
                    '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
@@ -1285,30 +1304,13 @@ perfect-marginと互換性があります。
                         "--header-insertion=never"
                         "--header-insertion-decorators=0")))
       ;; Java
-      ;; -data に渡しているworkspace-dirにはプロジェクト毎のディレクトリを作成している
-      ;; project-current 関数はemacs標準のproject.elに定義されており、.gitを探してくれる
       ;; project.elはemacs標準のvc.elを使ってgitを検索している
       ;; (locate-dominating-file default-directory ".git")
       ;; 上述のS式をjavaファイルなどを開いているバッファで実行(M-:)すると、ルートディレクトリが分かる
-      (add-to-list 'eglot-server-programs
-                   `(java-mode . ,(lambda (_project)
-                              (let* ((root (if-let ((pr (project-current)))
-                                           (car (project-roots pr))
-                                         default-directory))
-                                     (workspace-dir (expand-file-name
-                                                     (concat "~/.emacs.d/jdtls-workspace/"
-                                                             (md5 (expand-file-name root))))))
-                                (list "java"
-                                      "-Declipse.application=org.eclipse.jdt.ls.core.id1"
-                                      "-Dosgi.bundles.defaultStartLevel=4"
-                                      "-Declipse.product=org.eclipse.jdt.ls.core.product"
-                                      "-Dlog.level=ALL"
-                                      "-noverify"
-                                      "-Xms1G"
-                                      "-Xmx2G"
-                                      "-jar" "C:/software/jdt-language-server/plugins/org.eclipse.equinox.launcher_1.7.0.v20250404-1055.jar"
-                                      "-configuration" "C:/software/jdt-language-server/config_win"
-                                      "-data" workspace-dir)))))
+      ;; Gradle/Maven の自動 import を止め、初期化を軽量化します。
+      (setq eglot-java-jdtls-settings
+      '((java.import.gradle.enabled . :json-false)
+        (java.import.maven.enabled  . :json-false)))
 
       ;; Language Serverからの進捗を表示するか否か
       (setq eglot-report-progress nil))
