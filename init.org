@@ -294,21 +294,28 @@ nerd-iconsを使用している
 無限ループへと落ち、dashboardが表示されないこともある.
 [[https://github.com/emacs-dashboard/emacs-dashboard?tab=readme-ov-file]]
 #+begin_src emacs-lisp
-  (use-package dashboard
-    :defer 1
-    :after nerd-icons
+  (use-package welcome-dashboard
+    :vc ( :fetcher github :repo "konrad1977/welcome-dashboard")
     :config
-    (setq dashboard-banner-logo-title "Welcome to EmacStraylight Dashboard")
-    (setq dashboard-startup-banner (cons "~/.emacs.d/logo/straylight_mark.png" "~/.emacs.d/logo/emacstraylight.txt"))
-    (setq dashboard-center-content t)
-    (setq dashboard-vertically-center-content t)
-    (setq dashboard-display-icons-p t) 
-    (setq dashboard-icon-type 'nerd-icons)
-    (setq dashboard-items '((recents   . 5)
-                            (projects  . 5)
-                            (agenda    . 5)))
-    (dashboard-setup-startup-hook)
-    (dashboard-refresh-buffer))
+    (setq
+     welcome-dashboard-latitude 35.4660694   ;; latitude and longitude must be set to show weather information
+     welcome-dashboard-longitude 139.6226196
+     welcome-dashboard-use-nerd-icons t      ;; Use nerd icons instead of all-the-icons
+     welcome-dashboard-image-file "~/.emacs.d/logo/straylight_mark.png"
+     welcome-dashboard-image-width 250
+     welcome-dashboard-image-height 250
+     welcome-dashboard-title (concat "Welcome " " Ore "))
+    (welcome-dashboard-create-welcome-hook))
+
+  (with-eval-after-load 'welcome-dashboard
+    ;; RET/o/C-x 数字 を全部外す
+    (dolist (key '("RET" "<return>" "o"))
+      (define-key welcome-dashboard-mode-map (kbd key) nil))
+    (dotimes (i 10)                           ; 0〜9
+      (unless (zerop i)                       ; C-x 0 は存在しないので除外
+        (define-key welcome-dashboard-mode-map
+                    (kbd (format "C-x %d" i)) nil))))
+
 #+end_src
 
 ** corfu
@@ -1112,9 +1119,9 @@ perfect-marginと互換性があります。
           ("C-x t M-t" . treemacs-find-tag)))
 
   ;; treemacs-nerd-icons
-  (use-package treemacs-nerd-icons
-    :config
-    (treemacs-load-theme "nerd-icons"))
+  ;(use-package treemacs-nerd-icons
+  ;  :config
+  ;  (treemacs-load-theme "nerd-icons"))
 
   ;; treemacs-projectile
   (use-package treemacs-projectile
@@ -1750,8 +1757,8 @@ org-directory と org-agenda-files は別の場所に設定している
 
     ;; org ファイルの格納先とorg-agendaで使うファイルの格納先
     ;; 拡張子がorgのファイルをすべて読みだすはず
-    (setq org-directory "~/org_template")
-    (setq org-agenda-files (list "~/org_agenda"))
+    ;(setq org-directory "~/org_template")
+    ;(setq org-agenda-files (list "~/org_agenda"))
 
     (setq org-log-done 'time) ; org-logを有効化し、タスクのステータスが変わった時間を記録する
     (setq org-log-into-drawer t) ; org-logの記録をドロワーで隠す
@@ -1777,20 +1784,6 @@ org-directory と org-agenda-files は別の場所に設定している
   (use-package org-indent
     :hook (org-mode . org-indent-mode)
     :ensure nil)
-#+end_src
-
-** org-pomodoro
-[[https://github.com/marcinkoziej/org-pomodoro]]
-#+begin_src emacs-lisp
-  (use-package org-pomodoro
-    :after org)
-#+end_src
-
-** ox-qmd
-orgファイルをmarkdownファイルに変換してくれます。
-#+begin_src emacs-lisp
-  (use-package ox-qmd
-    :after org)
 #+end_src
 
 ** org-modern
