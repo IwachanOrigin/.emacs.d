@@ -289,10 +289,8 @@ nerd-iconsを使用している
 
 ** ダッシュボード
 アイコンにはストレイライトのロゴを利用している.
-最新バージョンを使っていたが、あるタイミングで壊れることがある.
-また、orgの参照先フォルダを~/Documents以下に設定した場合、org-agendaのファイルを見つけられずに
-無限ループへと落ち、dashboardが表示されないこともある.
-[[https://github.com/emacs-dashboard/emacs-dashboard?tab=readme-ov-file]]
+emacs-dashboardは読み込みが遅すぎたのでやめた。
+比較的軽量なwelcome-dashboardを使っている。
 #+begin_src emacs-lisp
   (use-package welcome-dashboard
     :vc ( :fetcher github :repo "konrad1977/welcome-dashboard")
