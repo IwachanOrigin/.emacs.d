@@ -739,7 +739,7 @@ tempelはEmacs用のテンプレートパッケージ
 ** magit
 #+begin_src emacs-lisp
   (use-package magit
-    :defer 1
+    :defer t
     :config
     (when IS-WINDOWS
       (setq magit-refresh-status-buffer nil)
@@ -824,7 +824,7 @@ undo履歴を視覚的に分かりやすく表示してくれる
 ** modus-themes
 #+begin_src emacs-lisp
   (use-package modus-themes
-    :defer 1
+    :demand t
     :config
     (setq modus-themes-italic-constructs t
           modus-themes-bold-constructs nil
@@ -847,26 +847,6 @@ undo履歴を視覚的に分かりやすく表示してくれる
 
     ;;(load-theme 'modus-operandi-tinted t)
     (load-theme 'modus-vivendi-tinted t))
-#+end_src
-
-** alert
-通知機能を利用できるようにする
-主に org-pomodoro で使用する
-[[https://github.com/jwiegley/alert]]
-#+begin_src emacs-lisp
-  (use-package alert
-    :init
-    (setq alert-default-style 'libnotify))
-#+end_src
-
-*** alert-toast
-Windowsのtoast機能を使うための設定
-[[https://github.com/gkowzan/alert-toast]]
-#+begin_src emacs-lisp
-  (use-package alert-toast
-    :if IS-WINDOWS
-    :init
-    (setq alert-default-style 'toast))
 #+end_src
 
 ** avy
