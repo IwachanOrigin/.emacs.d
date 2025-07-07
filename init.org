@@ -67,9 +67,9 @@ org-scheduleなどで有効
 #+end_src
 
 ** use-package
-use-packageを有効化する
-melpaはstableを優先する
-最新パッケージの場合、NT Emacsではうまく動かない場合がある
+use-packageを有効化する  
+melpaはstableを優先する  
+最新パッケージの場合、NT Emacsではうまく動かない場合がある  
 #+begin_src emacs-lisp
   (eval-and-compile
     (require 'package)
@@ -90,9 +90,7 @@ melpaはstableを優先する
     ;; use-package
     (unless (package-installed-p 'use-package)
       (package-refresh-contents)
-      (package-install 'use-package)
-      ;; (package-install 'diminish)
-)
+      (package-install 'use-package))
 
     (setq use-package-always-ensure t)
     (setq use-package-expand-minimally t)
@@ -102,9 +100,9 @@ melpaはstableを優先する
 #+end_src
 
 ** vc-use-package
-[[https://github.com/slotThe/vc-use-package]]
-2023-05-16にEmacsのマスターへ取り込まれている
-emacs 30+を使っている場合、インストール不要で「:vc」を利用できる
+[[https://github.com/slotThe/vc-use-package]]  
+2023-05-16にEmacsのマスターへ取り込まれている  
+emacs 30+を使っている場合、インストール不要で「:vc」を利用できる  
 #+begin_src emacs-lisp
   (unless (package-installed-p 'vc-use-package)
     (package-vc-install "https://github.com/slotThe/vc-use-package"))
@@ -1178,6 +1176,13 @@ perfect-marginと互換性があります。
   (use-package cmake-mode
     :defer 1)
 #+end_src
+** cmake-build
+自作パッケージ
+#+begin_src emacs-lisp
+  (use-package cmake-build
+    :vc (:fetcher github :repo IwachanOrigin/cmake-build)
+    :defer 1)
+#+end_src
 
 ** Dart-mode
 #+begin_src emacs-lisp
@@ -1483,6 +1488,9 @@ eglot-boosterの親. 高速化するらしい
     ;; Global bindings for setting breakpoints with mouse
     (dape-breakpoint-global-mode))
 #+end_src
+
+*** cmake-utils
+自作パッケージのcmake-utilsを個人のgithubから持ってくるようにする。
 
 *** repeat
 Enable repeat mode for more ergonomic `dape' use
