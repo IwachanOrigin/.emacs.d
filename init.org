@@ -1176,13 +1176,6 @@ perfect-marginと互換性があります。
   (use-package cmake-mode
     :defer 1)
 #+end_src
-** cmake-build
-自作パッケージ
-#+begin_src emacs-lisp
-  (use-package cmake-build
-    :vc (:fetcher github :repo IwachanOrigin/cmake-build)
-    :defer 1)
-#+end_src
 
 ** Dart-mode
 #+begin_src emacs-lisp
@@ -1477,6 +1470,8 @@ eglot-boosterの親. 高速化するらしい
 #+end_src
 
 ** dap
+*** dape
+lldb-dapを用いてデバッグを行う
 #+begin_src emacs-lisp
   ;; dape
   (use-package dape
@@ -1486,14 +1481,34 @@ eglot-boosterの親. 高速化するらしい
     ("C-x C-a" . dape-global-map)
     :config
     ;; Global bindings for setting breakpoints with mouse
-    (dape-breakpoint-global-mode))
+    (dape-breakpoint-global-mode)
+    ;; Showing inlay hints
+    (setq dape-inlay-hints t)
+    ;; Pulse source line (performance hit)
+    (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line))
 #+end_src
 
-*** cmake-utils
-自作パッケージのcmake-utilsを個人のgithubから持ってくるようにする。
+*** cmake-build
+自作パッケージ  
+emacsからCMakeを用いたビルドをサポートするツール  
+#+begin_src emacs-lisp
+  (use-package cmake-build
+    :vc (:fetcher github :repo IwachanOrigin/cmake-build)
+    :defer 1)
+#+end_src
+
+*** dape-cmake
+自作パッケージ  
+ビルドした実行ファイルをdapeで比較的簡単にデバッグ実行できるようにするツール  
+#+begin_src emacs-lisp
+(use-package dape-cmake
+    :vc (:fetcher github :repo IwachanOrigin/dape-cmake))
+#+end_src
 
 *** repeat
-Enable repeat mode for more ergonomic `dape' use
+dape-modeを使う場合、repeat-modeを有効にするとエルゴノミクス的な視点で便利  
+dapeはデフォルトでC-x C-a を起点としてステップイン・ステップオーバーなどを定義している  
+repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけで進めることが出来る  
 #+begin_src emacs-lisp
   (use-package repeat
     :after dape
@@ -1596,9 +1611,9 @@ pandoc, latex, elsvogel.latexを導入する必要がある
 
 * Enhance C-s settings
 ** migemo
-This package can use the Roman alphabet to search  the japanese language.
-We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)
-Please add path cmigemo.exe.
+This package can use the Roman alphabet to search  the japanese language.  
+We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.net/software/cmigemo/)  
+Please add path cmigemo.exe.  
 #+begin_src emacs-lisp
   (use-package migemo
     :defer 1
@@ -1719,10 +1734,10 @@ Please add path cmigemo.exe.
 #+end_src
 
 ** restart-emacs
-Windows11 ではrestart-emacsがうまく動作しない場合がある
-プロセスは終了するが、立ち上がってこない
-理由は不明だが、runemacs.exeの起動時引数に"--debug-init"や"-Q"などを指定するとうまく再起動が出来る
-何か引数が無いとダメなようだ。30.1でこの現象は再現済み
+Windows11 ではrestart-emacsがうまく動作しない場合がある  
+プロセスは終了するが、立ち上がってこない  
+理由は不明だが、runemacs.exeの起動時引数に"--debug-init"や"-Q"などを指定するとうまく再起動が出来る  
+何か引数が無いとダメなようだ。30.1でこの現象は再現済み  
 #+begin_src emacs-lisp
   (when (>= emacs-major-version 29)
     (global-set-key (kbd "C-x r") #'restart-emacs))
@@ -1730,9 +1745,6 @@ Windows11 ではrestart-emacsがうまく動作しない場合がある
 
 * org
 ** org-mode
-org-directory と org-agenda-files は別の場所に設定している
-何故かわからないが、スケジュールをたくさん入れているファイルがある場合、dashboardがハングする？
-起動しないことがWin10では発生したので、その対策として、フォルダを分けた
 #+begin_src emacs-lisp
   ;; org
   (use-package org
@@ -1740,12 +1752,6 @@ org-directory と org-agenda-files は別の場所に設定している
     :init
     (setq org-return-follows-link t) ; Returnキーでリンク先を開く
     (setq org-mouse-1-follows-link t) ; マウスクリックでリンク先を開く
-
-    ;; org ファイルの格納先とorg-agendaで使うファイルの格納先
-    ;; 拡張子がorgのファイルをすべて読みだすはず
-    ;(setq org-directory "~/org_template")
-    ;(setq org-agenda-files (list "~/org_agenda"))
-
     (setq org-log-done 'time) ; org-logを有効化し、タスクのステータスが変わった時間を記録する
     (setq org-log-into-drawer t) ; org-logの記録をドロワーで隠す
     ;; Learn about the ! and more by reading the relevant section of the
@@ -1756,13 +1762,6 @@ org-directory と org-agenda-files は別の場所に設定している
   ;;  アンダースコアを入力しても下付き文字にならないようにする
   (setq org-use-sub-superscripts '{}
         org-export-with-sub-superscripts nil)
-#+end_src
-
-** org-agenda
-#+begin_src emacs-lisp
-  (use-package org-agenda
-    :after org
-    :ensure nil)
 #+end_src
 
 ** org-indent
@@ -1885,43 +1884,6 @@ org-directory と org-agenda-files は別の場所に設定している
              'face 'display-time-date-and-time
              'help-echo (format-time-string "%a %b %e, %Y" now))
             " ")))
-#+end_src
-
-** World clock (M-x world-clock)
-世界の現在時刻を表示する
-[[https://protesilaos.com/emacs/dotemacs]]
-5.2.17. The prot-emacs-essentials.el settings for the world-clock
-#+begin_src emacs-lisp
-  (use-package time
-    :commands (world-clock)
-    :config
-    (setq display-time-world-list t)
-    (setq zoneinfo-style-world-list ; M-x shell RET timedatectl list-timezones
-          '(("America/Los_Angeles" "Los Angeles")
-            ("America/Vancouver" "Vancouver")
-            ("America/Chicago" "Chicago")
-            ("America/Toronto" "Toronto")
-            ("America/New_York" "New York")
-            ("UTC" "UTC")
-            ("Europe/Lisbon" "Lisbon")
-            ("Europe/Brussels" "Brussels")
-            ("Europe/Athens" "Athens")
-            ("Asia/Riyadh" "Riyadh")
-            ("Asia/Tbilisi" "Tbilisi")
-            ("Asia/Singapore" "Singapore")
-            ("Asia/Shanghai" "Shanghai")
-            ("Asia/Seoul" "Seoul")
-            ("Asia/Tokyo" "Tokyo")
-            ("Australia/Brisbane" "Brisbane")
-            ("Australia/Sydney" "Sydney")
-            ("Pacific/Auckland" "Auckland")))
-
-    ;; All of the following variables are for Emacs 28
-    (setq world-clock-list t)
-    (setq world-clock-time-format "%R	%z	%A %d %B")
-    (setq world-clock-buffer-name "*world-clock*") ; Placement handled by `display-buffer-alist'
-    (setq world-clock-timer-enable t)
-    (setq world-clock-timer-second 60))
 #+end_src
 
 ** goto-chg
