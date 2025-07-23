@@ -1475,7 +1475,6 @@ lldb-dapを用いてデバッグを行う
 #+begin_src emacs-lisp
   ;; dape
   (use-package dape
-    :ensure nil
     :defer 1
     :bind-keymap
     ("C-x C-a" . dape-global-map)
@@ -1919,6 +1918,22 @@ Windows11 ではrestart-emacsがうまく動作しない場合がある
 #+begin_src emacs-lisp
 (global-set-key (kbd "M-[") 'switch-to-prev-buffer)
 (global-set-key (kbd "M-]") 'switch-to-next-buffer)
+#+end_src
+
+** org to markdown出力時、titleがあったら「# title」を追加する関数
+#+begin_src emacs-lisp
+  (with-eval-after-load 'ox-md
+    ;; org-md-template (CONTENTS INFO) の返り値冒頭にタイトルを挿入
+    (defun my/org-md-template-prepend-title (orig-fun contents info)
+      (let* ((res   (funcall orig-fun contents info))
+             ;; Org 側にタイトルがあれば取得
+             (raw-title (plist-get info :title))
+             ;; Org の書式（句読点やマクロ等）を展開
+             (title (and raw-title (org-export-data raw-title info))))
+        (if (and title (plist-get info :with-title))
+            (concat "# " title "\n\n" res)
+          res)))
+    (advice-add 'org-md-template :around #'my/org-md-template-prepend-title))
 #+end_src
 
 ** footer
