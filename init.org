@@ -691,49 +691,6 @@ vertico の候補に情報を追加する.
     :init
     (marginalia-mode))
 #+end_src
-
-** embark
-vertico の候補等に様々なアクションを提供してくれます。
-#+begin_src emacs-lisp
-  (use-package embark
-    :defer 1
-    :bind (("C-." . embark-act)         ;; pick some comfortable binding
-           ("C-;" . embark-dwim)        ;; good alternative: M-.
-           )
-    :init
-    (setq prefix-help-command #'embark-prefix-help-command)
-
-    :config
-    ;; Hide the mode line of the Embark live/completions buffers
-    (add-to-list 'display-buffer-alist
-                 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                   nil
-                   (window-parameters (mode-line-format . none)))))
-#+end_src
-
-**** embark-consult
-#+begin_src emacs-lisp
-  (use-package embark-consult
-    :after (embark consult)
-    :hook (embark-collect-mode . consult-preview-at-point-mode))
-#+end_src
-
-** tempel
-tempelはEmacs用のテンプレートパッケージ
-#+begin_src emacs-lisp
-  (use-package tempel
-    :defer 1
-    :demand t
-    :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-           ("M-*" . tempel-insert)))
-#+end_src
-
-**** tempel-collection
-#+begin_src emacs-lisp
-  (use-package tempel-collection
-    :after tempel)
-#+end_src
-
 ** magit
 #+begin_src emacs-lisp
   (use-package magit
@@ -847,18 +804,6 @@ undo履歴を視覚的に分かりやすく表示してくれる
     (load-theme 'modus-vivendi-tinted t))
 #+end_src
 
-** avy
-画面上の文字へ移動できるようになる
-[[https://github.com/abo-abo/avy]]
-#+begin_src emacs-lisp
-  (use-package avy
-    :defer 1
-    :config
-    (global-set-key (kbd "C-'") 'avy-goto-char-timer)
-    (global-set-key (kbd "C-:") 'avy-goto-line)
-    (setq avy-timeout-seconds 1.0))
-#+end_src
-
 ** ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
@@ -922,14 +867,6 @@ hl-line-mode を強化するパッケージ
     (spacious-padding-mode))
 #+end_src
 
-** aggressive-indent
-インデントを自動的に整えてくれるパッケージ
-emacs-list-modeの時のみ、自動インデントする
-#+begin_src emacs-lisp
-  (use-package aggressive-indent
-    :hook (emacs-lisp-mode . aggressive-indent-mode))
-#+end_src
-
 ** perfect-mergin
 バッファが1つの時、中央に表示します。2つ以上の時は通常の表示に戻ります。
 [[https://github.com/mpwang/perfect-margin]]
@@ -950,16 +887,6 @@ emacs-list-modeの時のみ、自動インデントする
     :vc ( :fetcher github :repo "joaotavora/breadcrumb")
     :config
     (breadcrumb-mode))
-#+end_src
-
-** page-break-lines
-^Lの改ページ文字の表示を良くします。
-[[https://github.com/purcell/page-break-lines]]
-[[https://www.emacswiki.org/emacs/PageBreaks]]
-#+begin_src emacs-lisp
-  (use-package page-break-lines
-    :config
-    (page-break-lines-mode))
 #+end_src
 
 ** rainbow-delimiters
@@ -1226,38 +1153,22 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 #+end_src
 
 ** About web
-*** typescript-mode
+*** web-mode
 #+begin_src emacs-lisp
-  (use-package typescript-mode
-    :defer 1)
-#+end_src
-
-*** emmet-mode
-[[https://github.com/smihica/emmet-mode]]
-[[https://zenn.dev/miz_dev/articles/6cac5f2e32398d][emmetとは？]]
-#+begin_src emacs-lisp
-  (use-package emmet-mode
-    :hook ((html-mode
-            css-mode
-            js-mode
-            typescript-mode) . emmet-mode))
-#+end_src
-
-*** web-beautify
-[[https://github.com/yasuyk/web-beautify]]
-#+begin_src emacs-lisp
-  (use-package web-beautify
+  (use-package web-mode
     :defer 1)
 #+end_src
 
 ** editorconfig
 30.1から、editorconfigはemacs masterに統合されたらしい
+統合されているのなら、ensure nilにしないとmelpaなどから取得してしまう。
 #+begin_src emacs-lisp
-    (use-package editorconfig
-    :defer 2
-    :config
-    (editorconfig-mode)
-    (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
+  (use-package editorconfig
+  :defer 2
+  :ensure nil
+  :config
+  (editorconfig-mode)
+  (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 #+end_src
 
 ** eglot config
@@ -1357,10 +1268,12 @@ consultとeglotを統合するパッケージ。シンボルの検索が行え�
 
 *** jsonrpc
 jsonを扱うEmacsの標準パッケージ
+標準パッケージなのでensure nilして、パッケージを取得しないようにしている
 デフォルトのタイムアウト時間が短いため、タイムアウトしないように時間を延ばしている
 また、ログを無視するように設定し、パフォーマンスを向上させている。
 #+begin_src emacs-lisp
   (use-package jsonrpc
+    :ensure nil
     :config
     (setq jsonrpc-default-request-timeout 3000)
     (fset #'jsonrpc--log-event #'ignore))
@@ -1421,16 +1334,6 @@ emacsの組み込み関数を利用してシンボルをハイライトする
   (use-package symbol-overlay
     :defer 1
     :hook (prog-mode . symbol-overlay-mode))
-#+end_src
-
-*** lsp-snippet
-#+begin_src emacs-lisp
-  (use-package lsp-snippet
-    :defer 1
-    :vc ( :fetcher github :repo "svaante/lsp-snippet")
-    :config
-    (when (featurep 'lsp)
-      (lsp-snippet-tempel-lsp-mode-init)))
 #+end_src
 
 *** emacs-lsp-booster
@@ -1744,9 +1647,11 @@ Windows11 ではrestart-emacsがうまく動作しない場合がある
 
 * org
 ** org-mode
+org本体
+ensure nilしてパッケージをmelpaなどから取得しないようにした
 #+begin_src emacs-lisp
-  ;; org
   (use-package org
+    :ensure nil
     :defer 1
     :init
     (setq org-return-follows-link t) ; Returnキーでリンク先を開く
@@ -1764,6 +1669,7 @@ Windows11 ではrestart-emacsがうまく動作しない場合がある
 #+end_src
 
 ** org-indent
+たぶん、orgに含まれている
 #+begin_src emacs-lisp
   (use-package org-indent
     :hook (org-mode . org-indent-mode)
@@ -1883,18 +1789,6 @@ Windows11 ではrestart-emacsがうまく動作しない場合がある
              'face 'display-time-date-and-time
              'help-echo (format-time-string "%a %b %e, %Y" now))
             " ")))
-#+end_src
-
-** goto-chg
-最後に変更した文字の場所へ順番に移動していく
-[[https://github.com/emacs-evil/goto-chg/tree/master]]
-[[https://protesilaos.com/emacs/dotemacs]]
-5.2.22. The prot-emacs-essentials.el section about goto-chg (go to change)
-#+begin_src emacs-lisp
-  (use-package goto-chg
-    :bind
-    (("C-(" . goto-last-change)
-     ("C-)" . goto-last-change-reverse)))
 #+end_src
 
 ** 水平分割よりも垂直分割を優先するような設定
