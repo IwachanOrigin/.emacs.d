@@ -401,7 +401,6 @@ corfuで利用されている
     (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
     (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
 
-    (add-hook 'completion-at-point-functions #'tempel-complete)
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
