@@ -1155,7 +1155,15 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 *** web-mode
 #+begin_src emacs-lisp
   (use-package web-mode
-    :defer 1)
+    :mode ("\\.html?\\'" "\\.jsx?\\'" "\\.vue\\?'")
+    :defer 1
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-enable-auto-quoting 2
+          indent-tabs-mode nil
+          tab-width 2))
 #+end_src
 
 ** editorconfig
@@ -1441,6 +1449,13 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
     (setq frame-background-mode 'dark)
     (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 #+end_src
+** YAML
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :mode ("\\.ya?ml\\'" . yaml-mode)
+    :config (setq yaml-indent-offset 2))
+#+end_src
+
 * Custom functions
 ** pandocを利用して、マークダウンからスライドを生成する関数
 pandoc, latex, elsvogel.latexを導入する必要がある
