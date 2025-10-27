@@ -235,6 +235,7 @@ from Centaur Emacs
 #+end_src
 
 ** フォントの設定
+*** fontaineを使ったフォント設定
 fontaineを使ってフォントを設定する.
 「CommitMono Nerd Font Mono/Italic」を使用している.
 [[https://github.com/ryanoasis/nerd-fonts]]
@@ -266,6 +267,46 @@ fontaineを使ってフォントを設定する.
 
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
     (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
+#+end_src
+*** 実験コード
+Windows で CommitMono NF に不足グリフをフォールバックで補う実験用設定
+前提: fontaine のプリセット適用後に走らせる
+#+begin_src emacs-lisp
+  (when (and (boundp 'IS-WINDOWS) IS-WINDOWS (display-graphic-p))
+    ;; 利用可能なら設定する小関数
+    (defun my/set-font-if-available (target font &optional append)
+      (when (find-font (font-spec :name font))
+        (set-fontset-font t target font nil (if append 'append 'prepend))))
+
+    (defun my/apply-windows-font-fallbacks ()
+      "CommitMono NF で欠ける文字を Windows 既定フォント等で補う。"
+      ;; CJK（日本語）：等幅を厳密に求めないなら Yu Gothic UI / Meiryo が手軽
+      (my/set-font-if-available 'han  "Yu Gothic UI" t)
+      (my/set-font-if-available 'kana "Yu Gothic UI" t)
+      (my/set-font-if-available 'cjk-misc "Yu Gothic UI" t)
+      ;; 必要なら Meiryo を追加（端末によって Yu Gothic UI より読みやすい場合あり）
+      (my/set-font-if-available 'han  "Meiryo" t)
+      (my/set-font-if-available 'kana "Meiryo" t)
+      (my/set-font-if-available 'cjk-misc "Meiryo" t)
+
+      ;; 絵文字
+      (my/set-font-if-available 'emoji "Segoe UI Emoji" t)
+      ;; 記号類（矢印など）
+      (my/set-font-if-available 'symbol "Segoe UI Symbol" t)
+      ;; Nerd/Symbols の欠落対策（導入済みなら有効）
+      (my/set-font-if-available 'symbol "Symbols Nerd Font Mono" t)
+      (my/set-font-if-available 'symbol "Nerd Font Symbols" t)
+
+      ;; ついでに Unicode 全般の穴埋めを少し
+      (my/set-font-if-available 'unicode "Segoe UI Symbol" t))
+
+    ;; fontaine のプリセット切替後にも毎回適用
+    (with-eval-after-load 'fontaine
+      (advice-add #'fontaine-set-preset :after
+                  (lambda (&rest _) (my/apply-windows-font-fallbacks))))
+
+    ;; 起動直後にも一回適用（既に fontaine 済みなら効く）
+    (my/apply-windows-font-fallbacks))
 #+end_src
 
 ** アイコン
