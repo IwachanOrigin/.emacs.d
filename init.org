@@ -28,13 +28,17 @@ C-c C-v t
   (setq gc-cons-percentage 0.2
         gc-cons-threshold (* 128 1024 1024))
   (add-hook 'focus-out-hook #'garbage-collect)
-  (setq garbage-collection-messages t)
+  ;; 常時ログ出力は負荷が掛かるので行わない
+  (setq garbage-collection-messages nil)
 
   ;; magic file name
   (defconst my-saved-file-name-handler-alist file-name-handler-alist)
   (setq file-name-handler-alist nil)
   (add-hook 'emacs-startup-hook
             (lambda ()
+              ;; 起動後にGC設定は戻す方が良いとGPTが言う
+              (setq gc-cons-percentage 0.1)
+              (setq gc-cons-threshold (* 16 1024 1024))
               (setq file-name-handler-alist my-saved-file-name-handler-alist)))
 #+end_src
 
@@ -84,7 +88,8 @@ melpaはstableを優先する
             ("melpa" . 5)
             ("gnu" . 5)))
 
-    (setq package-install-upgrade-built-in t)
+    ;; 組み込みパッケージの上書きアップグレードを無効化
+    (setq package-install-upgrade-built-in nil)
     (setq package-native-compile t)
 
     ;; use-package
@@ -92,7 +97,8 @@ melpaはstableを優先する
       (package-refresh-contents)
       (package-install 'use-package))
 
-    (setq use-package-always-ensure t)
+    ;; ensureは基本nil. 必要なパッケージは個別でtにする
+    (setq use-package-always-ensure nil)
     (setq use-package-expand-minimally t)
     (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
@@ -141,7 +147,7 @@ emacs 30+を使っている場合、インストール不要で「:vc」を利�
   (use-package so-long
     :ensure nil
     :init
-    (global-so-long-mode))
+    (global-so-long-mode 1))
 #+end_src
 
 ** Optimizing performance
@@ -241,6 +247,7 @@ fontaineを使ってフォントを設定する.
 [[https://github.com/ryanoasis/nerd-fonts]]
 #+begin_src emacs-lisp
   (use-package fontaine
+    :ensure t
     :defer 1
     :config
     (cond (IS-LINUX
@@ -268,64 +275,32 @@ fontaineを使ってフォントを設定する.
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
     (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
 #+end_src
-*** 実験コード
-Windows で CommitMono NF に不足グリフをフォールバックで補う実験用設定
-前提: fontaine のプリセット適用後に走らせる
-#+begin_src emacs-lisp
-  (when (and (boundp 'IS-WINDOWS) IS-WINDOWS (display-graphic-p))
-    ;; 利用可能なら設定する小関数
-    (defun my/set-font-if-available (target font &optional append)
-      (when (find-font (font-spec :name font))
-        (set-fontset-font t target font nil (if append 'append 'prepend))))
-
-    (defun my/apply-windows-font-fallbacks ()
-      "CommitMono NF で欠ける文字を Windows 既定フォント等で補う。"
-      ;; CJK（日本語）：等幅を厳密に求めないなら Yu Gothic UI / Meiryo が手軽
-      (my/set-font-if-available 'han  "Yu Gothic UI" t)
-      (my/set-font-if-available 'kana "Yu Gothic UI" t)
-      (my/set-font-if-available 'cjk-misc "Yu Gothic UI" t)
-      ;; 必要なら Meiryo を追加（端末によって Yu Gothic UI より読みやすい場合あり）
-      (my/set-font-if-available 'han  "Meiryo" t)
-      (my/set-font-if-available 'kana "Meiryo" t)
-      (my/set-font-if-available 'cjk-misc "Meiryo" t)
-
-      ;; 絵文字
-      (my/set-font-if-available 'emoji "Segoe UI Emoji" t)
-      ;; 記号類（矢印など）
-      (my/set-font-if-available 'symbol "Segoe UI Symbol" t)
-      ;; Nerd/Symbols の欠落対策（導入済みなら有効）
-      (my/set-font-if-available 'symbol "Symbols Nerd Font Mono" t)
-      (my/set-font-if-available 'symbol "Nerd Font Symbols" t)
-
-      ;; ついでに Unicode 全般の穴埋めを少し
-      (my/set-font-if-available 'unicode "Segoe UI Symbol" t))
-
-    ;; fontaine のプリセット切替後にも毎回適用
-    (with-eval-after-load 'fontaine
-      (advice-add #'fontaine-set-preset :after
-                  (lambda (&rest _) (my/apply-windows-font-fallbacks))))
-
-    ;; 起動直後にも一回適用（既に fontaine 済みなら効く）
-    (my/apply-windows-font-fallbacks))
-#+end_src
-
 ** アイコン
 nerd-iconsを使用している
 [[https://github.com/rainstormstudio/nerd-icons.el]]
 #+begin_src emacs-lisp
   (use-package nerd-icons
+    :ensure t
     :defer 0.5)
   (use-package nerd-icons-completion
+    :ensure t
     :hook (after-init . nerd-icons-completion-mode))
   (use-package nerd-icons-dired
+    :ensure t
     :hook (dired-mode . nerd-icons-dired-mode))
   (use-package nerd-icons-corfu
+    :ensure t
     :vc ( :fetcher github :repo "LuigiPiucco/nerd-icons-corfu")
     :after (corfu nerd-icons)
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+  ;; リモートディレクトリでは nerd-icons-dired を無効化
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (when (and (bound-and-true-p nerd-icons-dired-mode)
+                         (file-remote-p default-directory))
+                (nerd-icons-dired-mode -1))))
 #+end_src
-
 ** ダッシュボード
 アイコンにはストレイライトのロゴを利用している.
 emacs-dashboardは読み込みが遅すぎたのでやめた。
@@ -358,34 +333,44 @@ emacs-dashboardは読み込みが遅すぎたのでやめた。
 ** corfu
 [[https://github.com/minad/corfu]]
 #+begin_src emacs-lisp
+  (defun my/c-remap-indent ()
+    (local-set-key [remap c-indent-line-or-region] #'indent-for-tab-command))
+
   (use-package corfu
+    :ensure t
     :defer 1
-    :demand t
-    :hook (prog-mode . (lambda ()
-                         (global-set-key [remap c-indent-line-or-region] #'indent-for-tab-command)))
     :config
     (setopt corfu-cycle t
             corfu-auto t
             corfu-auto-delay 0.0
             corfu-auto-prefix 2
             corfu-on-exact-match 'show)
-
-    (global-corfu-mode)
-
-    (with-eval-after-load 'lsp-mode
-      (setopt lsp-completion-provider :none))
-
     (with-eval-after-load 'orderless
       (defun my/orderless-for-corfu ()
         (setq-local orderless-matching-styles '(orderless-flex)))
-
       (add-hook 'corfu-mode-hook #'my/orderless-for-corfu))
+    :init
+    (global-corfu-mode 1)
     :custom
     ;; https://github.com/minad/corfu?tab=readme-ov-file#configuration
     ;; Emacs 30 and newer: Disable Ispell completion function. As an alternative,
     ;; try `cape-dict'.
     ;; 参考 : https://www.grugrut.net/posts/202408192021/
-    (text-mode-ispell-word-completion . nil))
+    (text-mode-ispell-word-completion . nil)
+    (add-hook 'c-mode-common-hook #'my/c-remap-indent))
+
+  ;; Corfu: 大規模候補/リモートで margin アイコンを抑制
+  (with-eval-after-load 'corfu
+    (defun my/corfu-maybe-disable-icons ()
+      (when (or
+             ;; リモートディレクトリのとき
+             (file-remote-p default-directory)
+             ;; 大量候補のとき（corfu--candidates は「変数」であることに注意）
+             (and (boundp 'corfu--candidates)
+                  (listp corfu--candidates)
+                  (> (length corfu--candidates) 500)))
+        (setq-local corfu-margin-formatters nil)))
+    (add-hook 'corfu-mode-hook #'my/corfu-maybe-disable-icons))
 #+end_src
 
 ** corfu-popup
@@ -434,13 +419,11 @@ capeはEmacsの組み込み補完機能を拡張するパッケージ.
 corfuで利用されている
 #+begin_src emacs-lisp
   (use-package cape
+    :ensure t
     :defer 1
     :config
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
-    (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
-    (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
-    (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)
 
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
@@ -461,6 +444,7 @@ corfuで利用されている
 ** vertico
 #+begin_src emacs-lisp
   (use-package vertico
+    :ensure t
     :defer 1
     :init
     (setq vertico-cycle t)
@@ -537,6 +521,7 @@ verticoに含まれています
 ** orderless
 #+begin_src emacs-lisp
   (use-package orderless
+    :ensure t
     :defer 1
     :config
     (setq completion-styles '(orderless basic)
@@ -569,34 +554,6 @@ verticoに含まれています
       (add-hook 'corfu-mode-hook #'my/setup-corfu-for-orderless)))
 #+end_src
 
-** prescient
-#+begin_src emacs-lisp
-  (use-package prescient
-    :defer 1
-    :config
-    (setq prescient-aggressive-file-save t)
-    (prescient-persist-mode))
-
-#+end_src
-
-** vertico-prescient
-#+begin_src emacs-lisp
-  (use-package vertico-prescient
-    :after (vertico prescient)
-    :config
-    (setq vertico-prescient-enable-filtering nil)
-    (vertico-prescient-mode))
-#+end_src
-
-** corfu-prescient
-#+begin_src emacs-lisp
-  (use-package corfu-prescient
-    :after (corfu prescient)
-    :config
-    (setq corfu-prescient-enable-filtering nil)
-    (corfu-prescient-mode))
-#+end_src
-
 ** consult-line-migemo
 CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関数
 #+begin_src emacs-lisp
@@ -620,6 +577,7 @@ CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関�
 #+begin_src emacs-lisp
   ;; Example configuration for Consult
   (use-package consult
+    :ensure t
     :defer 1
     ;; Replace bindings. Lazily loaded due by `use-package'.
     :bind (;; C-c bindings (mode-specific-map)
@@ -727,9 +685,10 @@ CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関�
 vertico の候補に情報を追加する.
 #+begin_src emacs-lisp
   (use-package marginalia
+    :ensure t
     :defer 1
     :init
-    (marginalia-mode))
+    (marginalia-mode 1))
 #+end_src
 ** magit
 #+begin_src emacs-lisp
@@ -753,7 +712,7 @@ vertico の候補に情報を追加する.
     :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
            (magit-post-refresh . diff-hl-magit-post-refresh)
            (dired-mode . diff-hl-dired-mode))
-    :init
+    :config
     (global-diff-hl-mode)
     (global-diff-hl-show-hunk-mouse-mode)
     (diff-hl-margin-mode))
@@ -763,16 +722,16 @@ Emacsでdifftasticを使用できるようにする.
 通常のコマンドとしても使用でき、magitにも統合
 #+begin_src emacs-lisp
   (use-package difftastic
-    :defer 2
-    :demand t
-    :bind (:map magit-blame-read-only-mode-map
-                ("D" . difftastic-magit-show)
-                ("S" . difftastic-magit-show))
-    :config
-    (eval-after-load 'magit-diff
-      '(transient-append-suffix 'magit-diff '(-1 -1)
-         [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
-          ("S" "Difftastic show" difftastic-magit-show)])))
+    :defer t
+    :commands (difftastic-buffer difftastic-region difftastic-dwim
+                                 difftastic-magit-show difftastic-magit-diff)
+    :init
+    (with-eval-after-load 'magit
+      (define-key magit-blame-read-only-mode-map (kbd "D") #'difftastic-magit-show)
+      (transient-append-suffix 'magit-dispatch "d"
+        '("D" "Difftastic diff (dwim)" difftastic-magit-diff))
+      (transient-append-suffix 'magit-dispatch "d"
+        '("S" "Difftastic show"      difftastic-magit-show))))
 
 #+end_src
 
@@ -780,9 +739,11 @@ Emacsでdifftasticを使用できるようにする.
 キーバインドの可視化
 #+begin_src emacs-lisp
   (use-package which-key
+    :ensure t
     :defer 1
     :config
-    (which-key-mode))
+    (setq which-key-idle-delay 0.8)
+    (which-key-mode 1))
 #+end_src
 
 ** undo
@@ -810,84 +771,74 @@ undo履歴を視覚的に分かりやすく表示してくれる
     :defer 2)
 #+end_src
 
-** rg
-#+begin_src emacs-lisp
-  (use-package rg
-    :defer 2)
-#+end_src
-
 ** modus-themes
 #+begin_src emacs-lisp
-  (use-package modus-themes
-    :demand t
-    :config
-    (setq modus-themes-italic-constructs t
-          modus-themes-bold-constructs nil
-          modus-themes-mixed-fonts t
-          modus-themes-variable-pitch-ui t
-          modus-themes-disable-other-themes t)
+  ;;(use-package modus-themes
+  ;;  :demand t
+  ;;  :config
+  ;;  (setq modus-themes-italic-constructs t
+  ;;        modus-themes-bold-constructs nil
+  ;;        modus-themes-mixed-fonts t
+  ;;        modus-themes-variable-pitch-ui t
+  ;;        modus-themes-disable-other-themes t)
+  ;;
+  ;;  (setq modus-themes-completions
+  ;;        '((t . (underline))))
+  ;;
+  ;;  (setq modus-themes-common-palette-overrides
+  ;;        '((fg-completion-match-0 blue)
+  ;;          (fg-completion-match-1 magenta-warmer)
+  ;;          (fg-completion-match-2 cyan)
+  ;;          (fg-completion-match-3 red)
+  ;;          (bg-completion-match-0 bg-blue-nuanced)
+  ;;          (bg-completion-match-1 bg-magenta-nuanced)
+  ;;          (bg-completion-match-2 bg-cyan-nuanced)
+  ;;          (bg-completion-match-3 bg-red-nuanced)))
+  ;;
+  ;;  ;;(load-theme 'modus-operandi-tinted t)
+  ;;  (load-theme 'modus-vivendi-tinted t))
+  (setq modus-themes-italic-constructs t
+        modus-themes-bold-constructs nil
+        modus-themes-mixed-fonts t
+        modus-themes-variable-pitch-ui t
+        modus-themes-disable-other-themes t)
 
-    (setq modus-themes-completions
-          '((t . (underline))))
+  (setq modus-themes-completions
+        '((t . (underline))))
 
-    (setq modus-themes-common-palette-overrides
-          '((fg-completion-match-0 blue)
-            (fg-completion-match-1 magenta-warmer)
-            (fg-completion-match-2 cyan)
-            (fg-completion-match-3 red)
-            (bg-completion-match-0 bg-blue-nuanced)
-            (bg-completion-match-1 bg-magenta-nuanced)
-            (bg-completion-match-2 bg-cyan-nuanced)
-            (bg-completion-match-3 bg-red-nuanced)))
+  (setq modus-themes-common-palette-overrides
+        '((fg-completion-match-0 blue)
+          (fg-completion-match-1 magenta-warmer)
+          (fg-completion-match-2 cyan)
+          (fg-completion-match-3 red)
+          (bg-completion-match-0 bg-blue-nuanced)
+          (bg-completion-match-1 bg-magenta-nuanced)
+          (bg-completion-match-2 bg-cyan-nuanced)
+          (bg-completion-match-3 bg-red-nuanced)))
 
-    ;;(load-theme 'modus-operandi-tinted t)
-    (load-theme 'modus-vivendi-tinted t))
+  (load-theme 'modus-vivendi-tinted t)
 #+end_src
 
-** ace-window
+** hl-line-mode
+hl-line-mode
 #+begin_src emacs-lisp
-  (use-package ace-window
-    :defer 1
-    :config
-    (global-set-key (kbd "M-o") 'ace-window)
-    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-#+end_src
-
-** lin
-hl-line-mode を強化するパッケージ
-#+begin_src emacs-lisp
-  (use-package lin
-    :defer 1
-    :init
-    (setq lin-face 'lin-red)
-    (lin-global-mode))
+  (global-hl-line-mode 1)
 #+end_src
 
 ** pulsar
 カーソルの移動を視覚的に分かりやすくしてくれる
 #+begin_src emacs-lisp
-  (use-package pulsar
-    :defer 1
-    :config
-    (pulsar-global-mode))
+  (use-package pulse)
+  (defun my/pulse-line () (pulse-momentary-highlight-one-line (point)))
+  (add-hook 'next-error-hook #'my/pulse-line)
+  (advice-add 'yank :after (lambda (&rest _) (pulse-momentary-highlight-region (mark t) (point))))
 #+end_src
-
-** goggles
-何処に貼り付けたのかとか、視覚的に目立ちやすくする
-[[https://github.com/minad/goggles]]
-#+begin_src emacs-lisp
-  (use-package goggles
-    :defer 1
-    :hook ((prog-mode text-mode) . goggles-mode)
-    :config
-    (setq-default goggles-pulse t)) ;; set to nil to disable pulsing
-#+end_src
-
 ** spacious-padding
 スペースを設定して、見やすくします。
 [[https://github.com/protesilaos/spacious-padding?tab=readme-ov-file]]
 #+begin_src emacs-lisp
   (use-package spacious-padding
+    :ensure t
     :defer 1
     :config
     (setq spacious-padding-widths
@@ -911,28 +862,30 @@ hl-line-mode を強化するパッケージ
 バッファが1つの時、中央に表示します。2つ以上の時は通常の表示に戻ります。
 [[https://github.com/mpwang/perfect-margin]]
 #+begin_src emacs-lisp
-  (use-package perfect-margin
-    :defer 1
-    :config
-    (setq perfect-margin-ignore-filters nil)
-    (setq perfect-margin-only-set-left-margin t)
-    (perfect-margin-mode))
+  ;;  (use-package perfect-margin
+  ;;    :defer 1
+  ;;    :config
+  ;;    (setq perfect-margin-ignore-filters nil)
+  ;;    (setq perfect-margin-only-set-left-margin t)
+  ;;    (perfect-margin-mode))
+  (pixel-scroll-precision-mode 1)
 #+end_src
 
 ** breadcrumb
 バッファ上部にパンくずリストを表示してくれます。
 #+begin_src emacs-lisp
   (use-package breadcrumb
-    :defer 1
-    :vc ( :fetcher github :repo "joaotavora/breadcrumb")
+    :ensure t
+    :vc (:fetcher github :repo "joaotavora/breadcrumb")
     :config
-    (breadcrumb-mode))
+    (breadcrumb-mode 1))
 #+end_src
 
 ** rainbow-delimiters
 括弧に色を付けて見やすくします。
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
+    :ensure t
     :defer 1
     :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
@@ -949,150 +902,27 @@ hl-line-mode を強化するパッケージ
 Check for file updates and update buffers as well.
 #+begin_src emacs-lisp
   (use-package autorevert
-    :defer 3
+    :ensure nil
     :hook (after-init . global-auto-revert-mode))
 #+end_src
 
 ** hungry-delete
 空白とか、いっぱい消す
-#+begin_src emacs-lisp
-  (use-package hungry-delete
-    :defer 3
-    :hook
-    (after-init . global-hungry-delete-mode)
-    :config
-    (setq hungry-delete-chars-to-skip " \t\f\v"))
-#+end_src
-
-** treemacs
-treemacs
-左側にディレクトリを表示し、ファイルを開いたりできます。
-perfect-marginと互換性があります。
-[[https://github.com/Alexander-Miller/treemacs]]
-#+begin_src emacs-lisp
-  (use-package treemacs
-    :defer 1
-    :init
-    (with-eval-after-load 'winum
-      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-    (with-eval-after-load 'treemacs
-      (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action))
-    :config
-    (progn
-      (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
-            treemacs-deferred-git-apply-delay        0.5
-            treemacs-directory-name-transformer      #'identity
-            treemacs-display-in-side-window          t
-            treemacs-eldoc-display                   'simple
-            treemacs-file-event-delay                2000
-            treemacs-file-extension-regex            treemacs-last-period-regex-value
-            treemacs-file-follow-delay               0.2
-            treemacs-file-name-transformer           #'identity
-            treemacs-follow-after-init               t
-            treemacs-expand-after-init               t
-            treemacs-find-workspace-method           'find-for-file-or-pick-first
-            treemacs-git-command-pipe                ""
-            treemacs-goto-tag-strategy               'refetch-index
-            treemacs-header-scroll-indicators        '(nil . "^^^^^^")
-            treemacs-hide-dot-git-directory          t
-            treemacs-indentation                     2
-            treemacs-indentation-string              " "
-            treemacs-is-never-other-window           nil
-            treemacs-max-git-entries                 5000
-            treemacs-missing-project-action          'ask
-            treemacs-move-files-by-mouse-dragging    t
-            treemacs-move-forward-on-expand          nil
-            treemacs-no-png-images                   nil
-            treemacs-no-delete-other-windows         t
-            treemacs-project-follow-cleanup          nil
-            treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-            treemacs-position                        'left
-            treemacs-read-string-input               'from-child-frame
-            treemacs-recenter-distance               0.1
-            treemacs-recenter-after-file-follow      nil
-            treemacs-recenter-after-tag-follow       nil
-            treemacs-recenter-after-project-jump     'always
-            treemacs-recenter-after-project-expand   'on-distance
-            treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
-            treemacs-project-follow-into-home        nil
-            treemacs-show-cursor                     nil
-            treemacs-show-hidden-files               t
-            treemacs-silent-filewatch                nil
-            treemacs-silent-refresh                  nil
-            treemacs-sorting                         'alphabetic-asc
-            treemacs-select-when-already-in-treemacs 'move-back
-            treemacs-space-between-root-nodes        t
-            treemacs-tag-follow-cleanup              t
-            treemacs-tag-follow-delay                1.5
-            treemacs-text-scale                      nil
-            treemacs-user-mode-line-format           nil
-            treemacs-user-header-line-format         nil
-            treemacs-wide-toggle-width               70
-            treemacs-width                           35
-            treemacs-width-increment                 1
-            treemacs-width-is-initially-locked       t
-            treemacs-workspace-switch-cleanup        nil)
-
-      ;; The default width and height of the icons is 22 pixels. If you are
-      ;; using a Hi-DPI display, uncomment this to double the icon size.
-      ;;(treemacs-resize-icons 44)
-
-      (treemacs-follow-mode t)
-      (treemacs-filewatch-mode t)
-      (treemacs-fringe-indicator-mode 'always)
-      (when treemacs-python-executable
-        (treemacs-git-commit-diff-mode t))
-
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-
-      (treemacs-hide-gitignored-files-mode nil))
-    :bind
-    (:map global-map
-          ("M-0"       . treemacs-select-window)
-          ("C-x t 1"   . treemacs-delete-other-windows)
-          ("C-x t t"   . treemacs)
-          ("C-x t d"   . treemacs-select-directory)
-          ("C-x t B"   . treemacs-bookmark)
-          ("C-x t C-t" . treemacs-find-file)
-          ("C-x t M-t" . treemacs-find-tag)))
-
-  ;; treemacs-nerd-icons
-  ;(use-package treemacs-nerd-icons
-  ;  :config
-  ;  (treemacs-load-theme "nerd-icons"))
-
-  ;; treemacs-projectile
-  (use-package treemacs-projectile
-    :after (treemacs projectile))
-
-  ;; treemacs-icons-dired
-  (use-package treemacs-icons-dired
-    :hook (dired-mode . treemacs-icons-dired-enable-once))
-
-  ;; treemacs-magit
-  (use-package treemacs-magit
-    :after (treemacs magit))
-
-  ;; reemacs-persp
-  (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-    :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-    :config (treemacs-set-scope-type 'Perspectives))
-
-  ;; treemacs-tab-bar
-  (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
-    :after (treemacs)
-    :config (treemacs-set-scope-type 'Tabs))
+#+begin_src emacs-lisp 
+  ;;  (use-package hungry-delete
+  ;;    :defer 3
+  ;;    :hook
+  ;;    (after-init . global-hungry-delete-mode)
+  ;;    :config
+  ;;    (setq hungry-delete-chars-to-skip " \t\f\v"))
+  (add-hook 'c-mode-common-hook (lambda () (c-toggle-hungry-state 1)))
 #+end_src
 
 * Programing language config
 ** c/c++ mode
 #+begin_src emacs-lisp
   (use-package cc-mode
+    :ensure nil
     :defer 1
     :config
     (setq c-default-style "bsd")
@@ -1141,12 +971,14 @@ perfect-marginと互換性があります。
 ** cmake-mode
 #+begin_src emacs-lisp
   (use-package cmake-mode
+    :ensure t
     :defer 1)
 #+end_src
 
 ** Dart-mode
 #+begin_src emacs-lisp
   (use-package dart-mode
+    :ensure t
     :defer 1)
 #+end_src
 
@@ -1167,35 +999,18 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 参考: https://github.com/ltylty/eglot-java-lombok
 #+begin_src emacs-lisp
   (use-package eglot-java-lombok
+    :ensure nil
     :demand t
     :load-path "~/.emacs.d/external/eglot-java-lombok"
     :config
     (eglot-java-lombok/init))
 #+end_src
 
-** elisp
-*** highlight-defined
-既知のシンボルに色を付けてくれます。
-[[https://github.com/Fanael/highlight-defined]]
-#+begin_src emacs-lisp
-  (use-package highlight-defined
-    :defer 1
-    :hook (emacs-lisp-mode . highlight-defined-mode))
-#+end_src
-
-*** highlight-quoted
-引用符と引用記号を色付けしてくれます。
-[[https://github.com/Fanael/highlight-quoted]]
-#+begin_src emacs-lisp
-  (use-package highlight-quoted
-    :defer 1
-    :hook (emacs-lisp-mode . highlight-quoted-mode))
-#+end_src
-
 ** About web
 *** web-mode
 #+begin_src emacs-lisp
   (use-package web-mode
+    :ensure t
     :mode ("\\.html?\\'" "\\.jsx?\\'" "\\.vue\\?'")
     :defer 1
     :config
@@ -1234,7 +1049,7 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 
       ;; c/c++
       (add-to-list 'eglot-server-programs
-                   '((c-mode c++-mode c-ts-mode c++-ts-mode c-or-c++-ts-mode)
+                   '((c-mode c++-mode)
                      . ("clangd"
                         "-j=2"
                         "--log=error"
@@ -1356,76 +1171,13 @@ eldocの情報を追加する
                 :override #'eglot-signature-eldoc-talkative))
 #+end_src
 
-** lsp-mode
-#+begin_src emacs-lisp
-  (use-package lsp-mode
-    :ensure nil
-    :defer 1
-    :init
-    (setq read-process-output-max (* 1024 1024)) ;; 1mb
-    (setq lsp-keymap-prefix "M-l")
-    (setq lsp-headerline-breadcrumb-enable nil
-          lsp-enable-file-watchers nil
-          lsp-enable-folding nil
-          lsp-enable-symbol-highlighting nil
-          lsp-enable-text-document-color nil
-          lsp-enable-indentation nil
-          lsp-enable-on-type-formatting nil
-          lsp-auto-execute-action nil
-          lsp-before-save-edits nil))
-
-#+end_src
-
-*** symbol-overlay
-emacsの組み込み関数を利用してシンボルをハイライトする
-#+begin_src emacs-lisp
-  (use-package symbol-overlay
-    :defer 1
-    :hook (prog-mode . symbol-overlay-mode))
-#+end_src
-
-*** emacs-lsp-booster
-eglot-boosterの親. 高速化するらしい
-[[https://github.com/blahgeek/emacs-lsp-booster]]
-#+begin_src emacs-lisp
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
-
-  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
-    (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-              (setcar orig-result command-from-exec-path))
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
-        orig-result)))
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
-#+end_src
-
 ** dap
 *** dape
 lldb-dapを用いてデバッグを行う
 #+begin_src emacs-lisp
   ;; dape
   (use-package dape
+    :ensure t
     :defer 1
     :bind-keymap
     ("C-x C-a" . dape-global-map)
@@ -1461,6 +1213,7 @@ dapeはデフォルトでC-x C-a を起点としてステップイン・ステ�
 repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけで進めることが出来る  
 #+begin_src emacs-lisp
   (use-package repeat
+    :ensure t
     :after dape
     :config
     (repeat-mode))
@@ -1490,9 +1243,10 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
     (setq frame-background-mode 'dark)
     (add-hook 'hlsl-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 #+end_src
-** YAML
+** yaml
 #+begin_src emacs-lisp
   (use-package yaml-mode
+    :ensure t
     :mode ("\\.ya?ml\\'" . yaml-mode)
     :config (setq yaml-indent-offset 2))
 #+end_src
@@ -1598,6 +1352,7 @@ Please add path cmigemo.exe.
 保存されたコマンドの履歴を使うための設定
 #+begin_src emacs-lisp
   (use-package savehist
+    :ensure nil
     :init
     (savehist-mode))
 #+end_src
@@ -1617,6 +1372,7 @@ Please add path cmigemo.exe.
 *** hydra
 #+begin_src emacs-lisp
   (use-package hydra
+    :ensure t
     :defer 2
     :bind ("C-c SPC" . hydra-shortcut-of-emacs/body))
 
@@ -1673,21 +1429,24 @@ Please add path cmigemo.exe.
 * server configuration for emacsclient
 ** server
 #+begin_src emacs-lisp
-  (when (eq system-type 'windows-nt)
-    (use-package server
-      :defer 0.01
-      :config (server-start)
-      ;; Assign kill buffer to C-x C-c
-      ;; NOTE : Until 29.4 I used [kill-this-buffer], but since 30.1 I can't turn off the buffer except via the menu.
-      ;; To solve this problem, [kill-current-buffer] is used.
-      ;; It was mentioned as a bug, but it was closed after the description to use [kill-current-buffer] was written in the document.
-      ;; https://emacs.stackexchange.com/a/55047
-      ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2024-06/msg00840.html
-      (global-set-key (kbd "C-x C-c") #'kill-current-buffer)
-      ;; Allow Emacs to exit with M-x exit
-      (defalias 'exit 'save-buffers-kill-emacs)
-      ;; yes/no query on exit
-      (setq confirm-kill-emacs 'yes-or-no-p)))
+    (when (eq system-type 'windows-nt)
+      (use-package server
+        :ensure nil
+        :defer 0.01
+        :config
+        (unless (server-running-p)
+          (server-start))
+        ;; Assign kill buffer to C-x C-c
+        ;; NOTE : Until 29.4 I used [kill-this-buffer], but since 30.1 I can't turn off the buffer except via the menu.
+        ;; To solve this problem, [kill-current-buffer] is used.
+        ;; It was mentioned as a bug, but it was closed after the description to use [kill-current-buffer] was written in the document.
+        ;; https://emacs.stackexchange.com/a/55047
+        ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2024-06/msg00840.html
+        (global-set-key (kbd "C-x C-c") #'kill-current-buffer)
+        ;; Allow Emacs to exit with M-x exit
+        (defalias 'exit 'save-buffers-kill-emacs)
+        ;; yes/no query on exit
+        (setq confirm-kill-emacs 'yes-or-no-p)))
 #+end_src
 
 ** restart-emacs
@@ -1734,6 +1493,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 ** org-modern
 #+begin_src emacs-lisp
   (use-package org-modern
+    :ensure t
     :after org
     :config
     (setopt
@@ -1784,6 +1544,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 ** org-modern-indent
 #+begin_src emacs-lisp
   (use-package org-modern-indent
+    :ensure t
     :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
     :config
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
@@ -1796,6 +1557,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 5.3.1. The prot-emacs-modeline.el section about keycast
 #+begin_src emacs-lisp
   (use-package keycast
+    :ensure t
     :defer 1
     :commands (keycast-mode-line-mode keycast-header-line-mode keycast-tab-bar-mode keycast-log-mode)
     :init
@@ -1819,6 +1581,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 5.2.16. The prot-emacs-essentials.el configurations for the date and time (display-time-mode)
 #+begin_src emacs-lisp
   (use-package time
+    :ensure nil
     :hook (after-init . display-time-mode)
     :config
     (setq display-time-format " %a %e %b, %H:%M ")
@@ -1852,13 +1615,9 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
   (setq split-height-threshold nil)
 #+end_src
 
-** Display a bar that clearly indicates the number of characters per line
-#+begin_src emacs-lisp
-  (setq-default display-fill-column-indicator-column 100)
-#+end_src
-
 ** 画面の100文字目あたりに線を出す設定
 #+begin_src emacs-lisp
+  (setq-default display-fill-column-indicator-column 100)
   (global-display-fill-column-indicator-mode)
 #+end_src
 
