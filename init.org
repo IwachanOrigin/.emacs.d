@@ -937,9 +937,10 @@ Check for file updates and update buffers as well.
 「.clang-format」はユーザーフォルダの直下にあれば良い様子
 #+begin_src emacs-lisp
   (use-package clang-format
+    :ensure t
     :commands (clang-format-buffer clang-format-on-save-mode)
-    :hook ((c-mode . clang-format-on-save-mode)
-           (c++-mode . clang-format-on-save-mode))
+    ;;:hook ((c-mode . clang-format-on-save-mode)
+    ;;       (c++-mode . clang-format-on-save-mode))
     :config
     (setq clang-format-style "file")           ; .clang-format を参照
     (setq clang-format-fallback-style "none")) ; .clang-format がない場合は何もしない
@@ -957,6 +958,7 @@ Check for file updates and update buffers as well.
 ** markdown
 #+begin_src emacs-lisp
   (use-package markdown-mode
+    :ensure t
     :defer 3
     :mode ("\\.md\\'" . gfm-mode)
     ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
@@ -1124,6 +1126,7 @@ consultとeglotを統合するパッケージ。シンボルの検索が行え�
 [[https://github.com/mohkale/consult-eglot]]
 #+begin_src emacs-lisp
   (use-package consult-eglot
+    :ensure t
     :after eglot
     :bind
     ("C-c s" . consult-eglot-symbols))
@@ -1146,6 +1149,7 @@ jsonを扱うEmacsの標準パッケージ
 eglotでサポートされる機能が増える
 #+begin_src emacs-lisp
   (use-package eglot-x
+    :ensure t
     :vc ( :fetcher github :repo "nemethf/eglot-x")
     :after eglot
     :config
@@ -1157,6 +1161,7 @@ eglotでサポートされる機能が増える
 ミニバッファのeldocをposframeで表示してくれる
 #+begin_src emacs-lisp
   (use-package eldoc-box
+    :ensure t
     :defer 1
     :hook (eglot-managed-mode . eldoc-box-hover-mode))
 #+end_src
@@ -1165,6 +1170,7 @@ eglotでサポートされる機能が増える
 eldocの情報を追加する
 #+begin_src emacs-lisp
   (use-package eglot-signature-eldoc-talkative
+    :ensure t
     :after eldoc-box
     :config
     (advice-add #'eglot-signature-eldoc-function
