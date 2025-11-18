@@ -102,6 +102,10 @@ melpaはstableを優先する
     (setq use-package-expand-minimally t)
     (setq use-package-compute-statistics t) ;; For "M-x use-package-report"
 
+    ;; nerd-iconsはmelpaから取得する
+    ;; nerd-icons-*関連パッケージがmelpaにしかなく、melpa-stableのnerd-iconsでは動かない場合がある
+    (add-to-list 'package-pinned-packages '(nerd-icons . "melpa"))
+
     (require 'use-package))
 #+end_src
 
@@ -442,6 +446,7 @@ corfuで利用されている
 #+end_src
 
 ** vertico
+*** vertico
 #+begin_src emacs-lisp
   (use-package vertico
     :ensure t
@@ -451,7 +456,7 @@ corfuで利用されている
     (vertico-mode))
 #+end_src
 
-**** vertico-repeat
+*** vertico-repeat
 https://github.com/minad/vertico/blob/main/extensions/vertico-repeat.el
 verticoに含まれています
 「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
@@ -463,7 +468,7 @@ verticoに含まれています
     :hook (minibuffer-setup . vertico-repeat-save))
 #+end_src
 
-**** vertico-directory
+*** vertico-directory
 https://github.com/minad/vertico/blob/main/extensions/vertico-directory.el
 verticoに含まれています
 「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
@@ -476,7 +481,7 @@ verticoに含まれています
             ("<backspace>" . vertico-directory-delete-char)))
 #+end_src
 
-**** vertico-buffer
+*** vertico-buffer
 https://github.com/minad/vertico/blob/main/extensions/vertico-buffer.el
 verticoに含まれています
 「ensure: nil」を入れておかないと、melpaへ問い合わせしてダウンロードを試みます
@@ -490,7 +495,7 @@ verticoに含まれています
     (vertico-buffer-mode))
 #+end_src
 
-**** Prefix current candidate with arrow
+*** Prefix current candidate with arrow
 #+begin_src emacs-lisp
   (defvar +vertico-current-arrow t)
 
@@ -509,9 +514,10 @@ verticoに含まれています
           (concat "    " cand)))))
 #+end_src
 
-**** vertico-truncate
+*** vertico-truncate
 #+begin_src emacs-lisp
   (use-package vertico-truncate
+    :ensure t
     :after vertico
     :vc ( :fetcher github :repo "jdtsmith/vertico-truncate")
     :config
@@ -751,6 +757,7 @@ Emacsでdifftasticを使用できるようにする.
 Emacsのundoとredoを強化するパッケージです
 #+begin_src emacs-lisp
   (use-package undo-fu
+    :ensure t
     :defer 2)
 #+end_src
 
@@ -758,6 +765,7 @@ Emacsのundoとredoを強化するパッケージです
 undo情報をEmacs終了後も保持してくれるようになる
 #+begin_src emacs-lisp
   (use-package undo-fu-session
+    :ensure t
     :defer 2
     :config
     (undo-fu-session-global-mode))
@@ -768,6 +776,7 @@ undo履歴を視覚的に分かりやすく表示してくれる
 [[https://github.com/casouri/vundo]]
 #+begin_src emacs-lisp
   (use-package vundo
+    :ensure t
     :defer 2)
 #+end_src
 
@@ -1333,6 +1342,7 @@ We need to install cmigemo for Windows [migemo-kaoriya-64](https://www.kaoriya.n
 Please add path cmigemo.exe.  
 #+begin_src emacs-lisp
   (use-package migemo
+    :ensure t
     :defer 1
     :config
     ;; use to C/Migemo
