@@ -1502,8 +1502,9 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 たぶん、orgに含まれている
 #+begin_src emacs-lisp
   (use-package org-indent
+    :ensure nil
     :hook (org-mode . org-indent-mode)
-    :ensure nil)
+    :after org)
 #+end_src
 
 ** org-modern
@@ -1562,6 +1563,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
   (use-package org-modern-indent
     :ensure t
     :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
+    :after org-modern
     :config
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 #+end_src
