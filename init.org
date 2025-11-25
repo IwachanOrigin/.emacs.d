@@ -1660,6 +1660,13 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
     (advice-add 'org-md-template :around #'my/org-md-template-prepend-title))
 #+end_src
 
+** recentfでネットワークアクセスパスは存在確認から除外する
+NW上のファイルがrecentfにある場合、ファイルの存在チェックなどが自動で走り、環境によってはUIが固まるのでその対策
+#+begin_src emacs-lisp
+  (with-eval-after-load 'recentf
+    (add-to-list 'recentf-exclude "^//[^/]+/"))
+#+end_src
+
 ** footer
 #+begin_src emacs-lisp
   ;;(profiler-report)
