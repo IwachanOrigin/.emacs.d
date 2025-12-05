@@ -699,6 +699,7 @@ vertico の候補に情報を追加する.
 ** magit
 #+begin_src emacs-lisp
   (use-package magit
+    :ensure t
     :defer t
     :config
     (when IS-WINDOWS
@@ -711,34 +712,34 @@ vertico の候補に情報を追加する.
 #+end_src
 
 ** diff-hl
+*** diff-hl
 ウィンドウの左側にコミットされていない箇所を強調表示する
 #+begin_src emacs-lisp
   (use-package diff-hl
-    :defer 2
+    :ensure t
     :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
            (magit-post-refresh . diff-hl-magit-post-refresh)
            (dired-mode . diff-hl-dired-mode))
     :config
+    ;; バッファ全体で git 差分を左側に表示
     (global-diff-hl-mode)
+    ;; マウスでhunkを表示
     (global-diff-hl-show-hunk-mouse-mode)
+    ;; 左マージンに表示
     (diff-hl-margin-mode))
 #+end_src
+
 *** difftastic
 Emacsでdifftasticを使用できるようにする.
 通常のコマンドとしても使用でき、magitにも統合
 #+begin_src emacs-lisp
   (use-package difftastic
+    :ensure t
     :defer t
-    :commands (difftastic-buffer difftastic-region difftastic-dwim
-                                 difftastic-magit-show difftastic-magit-diff)
-    :init
-    (with-eval-after-load 'magit
-      (define-key magit-blame-read-only-mode-map (kbd "D") #'difftastic-magit-show)
-      (transient-append-suffix 'magit-dispatch "d"
-        '("D" "Difftastic diff (dwim)" difftastic-magit-diff))
-      (transient-append-suffix 'magit-dispatch "d"
-        '("S" "Difftastic show"      difftastic-magit-show))))
-
+    :commands (difftastic-buffer difftastic-region difftastic-dwim)
+    :bind (("C-c d b" . difftastic-buffer)
+           ("C-c d r" . difftastic-region)
+           ("C-c d d" . difftastic-dwim)))
 #+end_src
 
 ** whick-key
