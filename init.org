@@ -123,6 +123,7 @@ emacs 30+を使っている場合、インストール不要で「:vc」を利�
 #+begin_src emacs-lisp
   (when (eq window-system 'w32)
     (use-package tr-ime
+      :ensure t
       :defer 0.01
       :config
       (tr-ime-standard-install)
