@@ -74,6 +74,7 @@ org-scheduleなどで有効
   (let* ((msys2-root
           (my--first-existing-dir
            "C:/msys64"
+           "C:/software/msys2"
            "C:/software/msys2_64"))
          (ucrt-bin (and msys2-root (expand-file-name "ucrt64/bin" msys2-root))))
     (when (and (eq system-type 'windows-nt)
