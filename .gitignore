@@ -11,14 +11,16 @@ var/
 eglot-java-eclipse-jdt-cache/
 eln-cache/
 share/
-undu-fu-session/
+undo-fu-session/
+data/
+url/
 
 recentf
 *.elc
 .dap-breakpoints
 projectile-bookmarks.eld
-custom.el
-init.el
+readme.el
+.org-id-locations
 bookmarks
 history
 projects
