@@ -1,11 +1,10 @@
-#+property: header-args :tangle "init.el"
+#+property: header-args:emacs-lisp :tangle "readme.el" :lexical t
 #+startup: content indent
 
-* .org to .el
-** コマンド
-org-babel-tangle
-** ショートカット
-C-c C-v t
+This repository is iwachan's emacs setting.
+I use to NT version emacs for windows.
+Windows 10 or Windows 11.
+We delay loading as much as possible.
 
 * My init el configure
 ** header
@@ -24,24 +23,49 @@ C-c C-v t
 #+end_src
 
 ** GC
+early-init.elで設定した内容を元に戻します
 #+begin_src emacs-lisp
-  (setq gc-cons-percentage 0.2
-        gc-cons-threshold (* 128 1024 1024))
   (add-hook 'focus-out-hook #'garbage-collect)
   ;; 常時ログ出力は負荷が掛かるので行わない
   (setq garbage-collection-messages nil)
 
-  ;; magic file name
-  (defconst my-saved-file-name-handler-alist file-name-handler-alist)
-  (setq file-name-handler-alist nil)
   (add-hook 'emacs-startup-hook
             (lambda ()
               ;; 起動後にGC設定は戻す方が良いとGPTが言う
               (setq gc-cons-percentage 0.1)
-              (setq gc-cons-threshold (* 16 1024 1024))
-              (setq file-name-handler-alist my-saved-file-name-handler-alist)))
+              (setq gc-cons-threshold (* 64 1024 1024))
+
+  	    ;; early-initで退避した値を復元する
+  	    (when (boundp 'startup/file-name-handler-alist)
+  	      (setq file-name-handler-alist startup/file-name-handler-alist))))
+#+end_src
+** Disable Scroll Bar in minibuffer window
+#+begin_src emacs-lisp
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+              (let ((w (minibuffer-window frame)))
+                (when (window-live-p w)
+  		(set-window-scroll-bars w 0 nil 0 nil t)
+  		(set-window-fringes w 0 0 nil t)))))
 #+end_src
 
+** config of ff-find-other-file
+#+begin_src emacs-lisp
+  ;; Associate extensions to be used with ff-find-other-file
+  (setq cc-other-file-alist
+        '(
+    	("\\.c"   (".h" ".hpp"))
+    	("\\.cpp"   (".h" ".hpp"))
+    	("\\.h"   (".c" ".cpp"))
+    	("\\.hpp"   (".c" ".cpp"))))
+
+  ;; Set target directories to look for with ff-find-other-files
+  (setq ff-search-directories
+        '("." "../src" "../include" "../main" "../core" "../*"))
+
+  ;; Set ff-find-other-file to work with Meta+t
+  (global-set-key "\M-t" 'ff-find-other-file)
+#+end_src
 ** environment to Japanese, UTF-8
 #+begin_src emacs-lisp
   (setenv "LANG" "ja_JP.UTF-8")
@@ -52,17 +76,11 @@ C-c C-v t
   (when IS-WINDOWS
     (setq-default default-process-coding-system '(utf-8-unix . japanese-cp932-dos)))
 #+end_src
-
 ** 曜日/日付フォーマットは英語表示にしたい
 org-scheduleなどで有効
 >= emacs 28
 #+begin_src emacs-lisp
   (setq system-time-locale "C")
-#+end_src
-
-** native-compの警告を表示しない
-#+begin_src emacs-lisp
-  (setq native-comp-async-report-warnings-errors 'silent)
 #+end_src
 
 ** emacs実行環境パスを追加
@@ -85,7 +103,11 @@ org-scheduleなどで有効
       ;; 環境変数 PATH（Emacs が起動する sub-process 用）
       (setenv "PATH" (concat ucrt-bin ";" (getenv "PATH")))))
 #+end_src
-
+** random
+ダッシュボードロゴシャッフルのためにランダムを有効化
+#+begin_src emacs-lisp
+  (random t)
+#+end_src
 ** use-package
 use-packageを有効化する  
 melpaはstableを優先する  
@@ -169,6 +191,15 @@ emacs 30+を使っている場合、インストール不要で「:vc」を利�
     :ensure nil
     :init
     (global-so-long-mode 1))
+#+end_src
+
+** ターミナルモードの場合はテーマを無効にする
+#+begin_src emacs-lisp
+  (unless (display-graphic-p)
+    (xterm-mouse-mode 1)
+    ;; 端末Emacsでテーマが崩れる場合の保険。Windowsは特に差が出やすい。
+    (when (and (eq system-type 'windows-nt) custom-enabled-themes)
+      (disable-theme (car custom-enabled-themes))))
 #+end_src
 
 ** Optimizing performance
@@ -261,6 +292,135 @@ from Centaur Emacs
     (setq command-line-x-option-alist nil))
 #+end_src
 
+* UI 設定
+** emacs全体構成
+#+begin_src emacs-lisp
+  (use-package emacs
+    :ensure nil
+    :init
+    (when (eq system-type 'windows-nt)
+      (let ((gnupg-bin "C:/Program Files (x86)/GnuPG/bin"))
+        (when (file-directory-p gnupg-bin)
+  	(add-to-list 'exec-path gnupg-bin)
+  	(setenv "PATH" (concat gnupg-bin ";" (getenv "PATH")))))
+      (setq epg-gpg-program "C:/Program Files (x86)/GnuPG/bin/gpg.exe")
+      (setq package-gnupghome-dir (expand-file-name "elpa/gnupg" user-emacs-directory))
+      (make-directory package-gnupghome-dir t))
+
+    ;; フレーム生成後のGUI設定関数
+    (defun my/apply-gui-frame-settings (&optional frame)
+      (let ((frame (or frame (selected-frame))))
+        (when (display-graphic-p frame)
+  	(with-selected-frame frame
+            ;; GUI整理
+            (tool-bar-mode 1)
+            (scroll-bar-mode 1)
+            (menu-bar-mode 1)
+
+            ;; IDEっぽいタイトル
+            (setq frame-title-format
+  		'(:eval
+                    (format "%s — Emacs"
+                            (abbreviate-file-name
+                             (or (buffer-file-name)
+                                 (buffer-name))))))
+
+            ;; ウィンドウ区切り線
+            (setq window-divider-default-right-width 1
+  		window-divider-default-bottom-width 1)
+            (window-divider-mode 1)))))
+
+    ;; 起動後の既存フレーム
+    (add-hook 'emacs-startup-hook #'my/apply-gui-frame-settings)
+
+    ;; 新規フレーム（daemon対応）
+    (add-hook 'after-make-frame-functions #'my/apply-gui-frame-settings)
+    
+    :custom
+    ;; --- Bell / Beep 無効化---
+    (ring-bell-function #'ignore)
+    ;; 画面フラッシュ
+    (visible-bell nil)
+    ;; emacsデフォルトのスタートアップ画面表示を止める
+    (inhibit-startup-screen t)
+    ;; 非選択ウィンドウではカーソルを表示しない
+    (cursor-in-non-selected-windows nil)
+    ;; 選択した範囲の文字を削除し、入力文字に置き換える
+    (delete-selection-mode t)
+    ;; コンテキストメニュー表示を許可する
+    (context-menu-mode t)
+    ;; --- スクロール改善 ---
+    (scroll-conservatively 101)
+    (scroll-step 1)
+    ;; pixel-scroll は Emacs 29+ で体感が良いらしい
+    (pixel-scroll-precision-mode t)
+    (pixel-scroll-precision-interpolate-page t)
+    ;; --- ネイティブコンパイル警告抑制---
+    (native-comp-async-report-warnings-errors 'silent)
+    ;;  ---  行番号  --- 
+    (display-line-numbers-type 'absolute)  ; 絶対行番号で表示する
+    (display-line-numbers-width-start t)   ; 行番号の幅を最初から確保する
+    :config
+    ;; --- y-or-n-p ---
+    (defalias 'yes-or-no-p 'y-or-n-p)
+    ;; y-or-n-p を Return で確定できるようにする
+    (advice-add 'y-or-n-p :around
+                (lambda (orig-func &rest args)
+    		(let ((query-replace-map (copy-keymap query-replace-map)))
+                    (keymap-set query-replace-map "<return>" 'act)
+                    (apply orig-func args))))
+    ;; --- Windows 最適化---
+    (when (eq system-type 'windows-nt)
+      (setopt w32-get-true-file-attributes nil   ; ファイルI/O負荷軽減
+              w32-use-native-image-API t         ; 画像APIをWindowsネイティブに
+              w32-pipe-read-delay 0
+              w32-pipe-buffer-size (* 64 1024)))
+
+    ;; --- show-paren special-mode/text-mode/hexl-modeでは抑制する---
+    (setopt show-paren-style 'parenthesis
+            show-paren-when-point-inside-paren t
+            show-paren-predicate
+            (lambda (&rest _args)
+              (not (or (derived-mode-p 'special-mode)
+                       (derived-mode-p 'text-mode)
+                       (derived-mode-p 'hexl-mode)))))
+    (show-paren-mode 1)
+    ;; 大文字小文字変換を許可
+    (put 'upcase-region     'disabled nil)
+    (put 'downcase-region   'disabled nil)
+    (put 'capitalize-region 'disabled nil)
+
+    ;; コメント継続
+    (setopt comment-multi-line t)
+    (advice-add 'newline-and-indent :before-until
+                (lambda (&rest _)
+    		(interactive "*")
+    		(when-let (((nth 4 (syntax-ppss (point))))
+                             ((functionp comment-line-break-function))
+                             (fill-prefix " *"))
+                    (funcall comment-line-break-function nil)
+                    t)))
+    ;; 1単語削除の機能を追加
+    (defun my-backward-delete-word ()
+      (interactive)
+      (delete-region (point)
+                     (progn (backward-word 1) (point))))
+
+    (defun my-forward-delete-word ()
+      (interactive)
+      (delete-region (point)
+                     (progn (forward-word 1) (point))))
+    ;; 標準キーバインドを置き換え
+    (global-set-key (kbd "C-<backspace>") #'my-backward-delete-word)
+    (global-set-key (kbd "C-<delete>") #'my-forward-delete-word)
+    ;; 括弧を自動で閉じてくれる
+    (electric-pair-mode 1)
+    :hook
+    ((prog-mode . display-line-numbers-mode))
+    ((text-mode . visual-line-mode)
+     (text-mode . visual-wrap-prefix-mode))
+    (prog-mode . subword-mode))
+#+end_src
 ** フォントの設定
 *** fontaineを使ったフォント設定
 fontaineを使ってフォントを設定する.
@@ -275,6 +435,7 @@ fontaineを使ってフォントを設定する.
            (setq fontaine-presets
                  '((regular
                     :default-family "CommitMono Nerd Font Mono"
+  		  :default-height 120
                     :fixed-pitch-family "CommitMono Nerd Font Mono"
                     :variable-pitch-family "CommitMono Nerd Font Mono"
                     :italic-family "CommitMono Nerd Font Mono Italic")
@@ -286,6 +447,7 @@ fontaineを使ってフォントを設定する.
            (setq fontaine-presets
                  '((regular
                     :default-family "CommitMono Nerd Font Mono"
+  		  :default-height 120
                     :fixed-pitch-family "CommitMono Nerd Font Mono"
                     :variable-pitch-family "CommitMono Nerd Font Mono"
                     :italic-family "CommitMono Nerd Font Mono")
@@ -322,35 +484,6 @@ nerd-iconsを使用している
                          (file-remote-p default-directory))
                 (nerd-icons-dired-mode -1))))
 #+end_src
-** ダッシュボード
-アイコンにはストレイライトのロゴを利用している.
-emacs-dashboardは読み込みが遅すぎたのでやめた。
-比較的軽量なwelcome-dashboardを使っている。
-#+begin_src emacs-lisp
-  (use-package welcome-dashboard
-    :vc ( :fetcher github :repo "konrad1977/welcome-dashboard")
-    :config
-    (setq
-     welcome-dashboard-latitude 35.4660694   ;; latitude and longitude must be set to show weather information
-     welcome-dashboard-longitude 139.6226196
-     welcome-dashboard-use-nerd-icons t      ;; Use nerd icons instead of all-the-icons
-     welcome-dashboard-image-file "~/.emacs.d/logo/straylight_mark.png"
-     welcome-dashboard-image-width 250
-     welcome-dashboard-image-height 250
-     welcome-dashboard-title (concat "Welcome " " Ore "))
-    (welcome-dashboard-create-welcome-hook))
-
-  (with-eval-after-load 'welcome-dashboard
-    ;; RET/o/C-x 数字 を全部外す
-    (dolist (key '("RET" "<return>" "o"))
-      (define-key welcome-dashboard-mode-map (kbd key) nil))
-    (dotimes (i 10)                           ; 0〜9
-      (unless (zerop i)                       ; C-x 0 は存在しないので除外
-        (define-key welcome-dashboard-mode-map
-                    (kbd (format "C-x %d" i)) nil))))
-
-#+end_src
-
 ** corfu
 [[https://github.com/minad/corfu]]
 #+begin_src emacs-lisp
@@ -752,7 +885,7 @@ Emacsでdifftasticを使用できるようにする.
            ("C-c d d" . difftastic-dwim)))
 #+end_src
 
-** whick-key
+** which-key
 キーバインドの可視化
 #+begin_src emacs-lisp
   (use-package which-key
@@ -926,18 +1059,515 @@ Check for file updates and update buffers as well.
     :hook (after-init . global-auto-revert-mode))
 #+end_src
 
-** hungry-delete
-空白とか、いっぱい消す
-#+begin_src emacs-lisp 
-  ;;  (use-package hungry-delete
-  ;;    :defer 3
-  ;;    :hook
-  ;;    (after-init . global-hungry-delete-mode)
-  ;;    :config
-  ;;    (setq hungry-delete-chars-to-skip " \t\f\v"))
-  (add-hook 'c-mode-common-hook (lambda () (c-toggle-hungry-state 1)))
+** helpful
+ヘルプバッファの機能を強化する
+#+begin_src emacs-lisp
+  (use-package helpful
+    :ensure t
+    :commands (helpful-callable helpful-variable helpful-key helpful-command helpful-at-point)
+    :bind
+    (("C-h f" . helpful-callable)   ;; describe-function
+     ("C-h v" . helpful-variable)   ;; describe-variable
+     ("C-h k" . helpful-key)        ;; describe-key
+     ("C-h x" . helpful-command)    ;; describe-command
+     ("C-c C-d" . helpful-at-point)) ;; 任意：ポイントのものを表示
+    :custom
+    (elisp-refs-verbose nil)
+    :config
+    ;; helpful buffer でツールバー/見た目が崩れる場合の保険（任意）
+    (add-hook 'helpful-mode-hook
+              (lambda ()
+                (setq-local tool-bar-map help-mode-tool-bar-map))))
+#+end_src
+** indent-bars
+インデントの範囲を分かりやすくする
+#+begin_src emacs-lisp
+  (use-package indent-bars
+    :ensure t
+    :hook (prog-mode . indent-bars-mode)
+    :custom
+    (indent-bars-treesit-support nil) ;; treesitは使わない
+    (indent-bars-pattern ".")
+    (indent-bars-width-frac 0.1)
+    (indent-bars-pad-frac 0.1))
+#+end_src
+** project
+gitなどのプロジェクトを管理しやすくする
+#+begin_src emacs-lisp
+  (use-package project
+    :ensure nil
+    :custom
+    (project-vc-extra-root-markers
+     '(".project" ".dir-locals.el" "*.gemspec" "autogen.sh" "GTAGS" "TAGS"
+       "configure.ac" "configure.in" "cscope.out" "rebar.config" "project.clj"
+       "build.boot" "deps.edn" "SConstruct" "default.nix" "flake.nix" "pom.xml"
+       "build.sbt" "build.sc" "gradlew" "build.gradle" ".ensime" "Gemfile"
+       "requirements.txt" "setup.py" "tox.ini" "composer.json" "Cargo.toml"
+       "mix.exs" "stack.yaml" "dune-project" "info.rkt" "DESCRIPTION" "TAGS"
+       "GTAGS" "configure.in" "autoconf old styl" "configure.ac" "cscope.out"
+       "CMakeLists.txt" "WORKSPACE" "debian/control"))
+    (project-vc-ignores '(".elc" ".pyc" ".o" ".github"))
+    :config
+    ;; Better Project.el Menu
+    (keymap-unset (current-global-map) "<menu-bar> <tools> <project>")
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<ripgrep-search>"
+      '(menu-item "Find with ripgrep (rg)" rg-project-el)
+      'project-or-external-find-regexp)
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<dir-locals>"
+      '(menu-item "Customize Dirlocals" customize-dirlocals)
+      'project-switch-project)
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<build-command>"
+      '(menu-item "Set Build Command" projection-commands-set-build-command
+  		:help
+  		"The command to use with projection-commands-build-project.
+  You can set via .dir-locals.el too.")
+      'dir-locals)
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<run-command>"
+      '(menu-item "Set Run Command" projection-commands-set-run-command
+  		:help
+  		"The command to use with projection-commands-run-project.
+  You can set via .dir-locals.el too.")
+      'build-command)
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<build>"
+      '(menu-item "Build Project..." projection-commands-build-project)
+      'project-compile)
+
+    (keymap-set-after (default-value 'menu-bar-project-menu) "<run>"
+      '(menu-item "Run Project..." projection-commands-run-project)
+      'build)
+
+    (keymap-set-after (current-global-map) "<menu-bar> <projects>"
+      menu-bar-project-item
+      'tools)
+
+    ;; (put 'projection-commands-run-command 'custom-type (purecopy '(choice (string :tag "String") (other :tag "Nothing"))))
+    ;; (put 'projection-commands-build-command 'custom-type (purecopy '(choice (string :tag "String") (other :tag "Nothing"))))
+    ;; (put 'projection-commands-configure-command 'custom-type (purecopy '(choice (string :tag "String") (other :tag "Nothing"))))
+
+    (let ((type (purecopy '(choice (string :tag "String") (other :tag "Nothing")))))
+      (put 'projection-commands-run-command 'custom-type type)
+      (put 'projection-commands-configure-command 'custom-type type)
+      (put 'projection-commands-build-command 'custom-type type))
+
+    (use-package projection
+      :ensure projection-multi
+      :hook
+      (after-init . global-projection-hook-mode)
+      :config
+      (use-package consult-compile-multi
+        :ensure t
+        :after compile-multi
+        :demand t
+        :config (consult-compile-multi-mode))))
+#+end_src
+** toolbar
+#+begin_src emacs-lisp
+  (when (display-graphic-p)
+    (setopt tool-bar-style 'image)
+    ;; For Lucid ToolKit
+    (set-face-attribute 'tool-bar nil :inherit 'tab-bar-tab-inactive)
+    (set-face-attribute 'tool-bar nil :box nil)
+    (if (eq system-type 'android)
+        (progn
+          (setopt tool-bar-position 'bottom)
+          (modifier-bar-mode t))
+      (setopt tool-bar-position 'bottom))
+
+    (tool-bar-add-item-from-menu 'undo-redo "redo" nil) ; Redo
+
+    (keymap-set-after (default-value 'tool-bar-map) "<undo-redo>"
+      (cdr (assq 'undo-redo tool-bar-map))
+      'undo)
+
+    (if (functionp 'vundo)
+        (keymap-set-after (default-value 'tool-bar-map) "<vundo>"
+          '(menu-item "Undo Tree" vundo
+                      :help "Show Visual Undo"
+                      :visible (or (derived-mode-p 'prog-mode)
+                                   (derived-mode-p 'text-mode))
+                      :image (find-image '((:type png :file "tree-widget/default/open.png"))))
+          'isearch-forward))
+    (keymap-set-after (default-value 'tool-bar-map) "<explorer>"
+      '(menu-item "Explorer" my/explorer-open
+                  :help "Hide/Show Side Explorer"
+                  :visible (or (derived-mode-p 'prog-mode)
+                               (derived-mode-p 'text-mode))
+                  :image (find-image `((:type svg :file ,(concat user-emacs-directory "assets/tree_explorer.svg")))))
+      'isearch-forward)
+
+    (keymap-set-after (default-value 'tool-bar-map) "<separator-4>"
+      '(menu-item "" nil
+                  :visible (derived-mode-p 'prog-mode))
+      'my/explorer-open)
+
+    (keymap-set-after (default-value 'tool-bar-map) "<build>"
+      '(menu-item "Build Project" my/build-command
+                  :help "Build/Compile Project"
+                  :visible (derived-mode-p 'prog-mode)
+                  :image (find-image `((:type svg :file ,(concat user-emacs-directory "assets/build_exec.svg")))))
+      'my/explorer-open)
+
+    (keymap-set-after (default-value 'tool-bar-map) "<debug>"
+      '(menu-item "Debug Project" dape
+                  :help "Debug Project"
+                  :visible (derived-mode-p 'prog-mode)
+                  :image (find-image `((:type svg :file ,(concat user-emacs-directory "assets/debug_exc.svg")))))
+      'my/build-command)
+
+    (keymap-set-after (default-value 'tool-bar-map) "<run-program>"
+      '(menu-item "Run Project" my/run-program
+                  :help "Run Project"
+                  :visible (derived-mode-p 'prog-mode)
+                  :image (find-image `((:type svg :file ,(concat user-emacs-directory "assets/run_exc.svg")))))
+      'dape)
+
+    (keymap-set-after (default-value 'tool-bar-map) "<separator-5>"
+      menu-bar-separator 'dap-debug-last) ; Add Separator
+
+    (keymap-set-after (default-value 'tool-bar-map) "<packages>"
+      '(menu-item "packages" list-packages
+                  :help   "Show List Packages"
+                  :image (find-image `((:type svg :file ,(concat user-emacs-directory "assets/elpa.svg")))))
+      'my/run-program)
+    (keymap-set-after (default-value 'tool-bar-map) "<dashboard>"
+      '(menu-item "Dashboard" dashboard-open
+                  :help "Back to Startpage"
+                  :image (find-image '((:type xpm :file "home.xpm"))))
+      'list-packages)
+    (keymap-set-after (default-value 'tool-bar-map) "<customize>"
+      '(menu-item "Settings" customize
+                  :help "Show Settings Buffer"
+                  :image (find-image '((:type xpm :file "preferences.xpm"))))
+      'dashboard-open))  
+#+end_src
+** menubar
+#+begin_src emacs-lisp
+
 #+end_src
 
+** treemacs
+#+begin_src emacs-lisp
+  ;; Define which file manager use
+  ;; (e.g 'treemacs' or 'dirvish-side').
+  (defalias 'my/explorer-open 'treemacs)
+  ;; dired+ (optional):
+  ;; (load (concat user-emacs-directory "config-lisp-files/" "diredp"))
+
+   ;;; DIRED CONFIGURATIONS
+  (use-package dired-x
+    :ensure nil
+    :custom
+    (dired-mouse-drag-files t)
+    (dired-omit-files
+     (rx (or (seq bol (one-or-more "flycheck_"))
+             (seq bol (? ".") "#")
+             (seq bol "." eol)
+             (seq bol ".." eol)))))
+
+   ;;; DIRVISH
+  (use-package dirvish
+    :ensure t
+    :hook
+    (dired-mode . auto-revert-mode)
+    (dirvish-find-entry
+     . (lambda (&rest _)
+         (interactive)
+         (dired-omit-mode)
+         (setq-local truncate-lines t
+                     mouse-1-click-follows-link 'double)))
+    :custom
+    (delete-by-moving-to-trash t)
+    (dirvish-subtree-always-show-state t)
+    (dirvish-side-follow-mode t)
+    (dirvish-side-width 31)
+    (dirvish-subtree-state-style 'nerd)
+    (dirvish-attributes
+     '(nerd-icons
+       subtree-state
+       git-msg
+       file-time
+       vc-stat))
+    (dirvish-path-separators
+     (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
+           (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+           (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
+    (dirvish-override-dired-mode t)
+    (dirvish-reuse-session nil)
+    (dirvish-use-mode-line nil)
+    (dired-listing-switches
+     "-l --almost-all --human-readable --group-directories-first --no-group")
+    :bind
+    (:map dirvish-mode-map
+          ("<remap> <kill-this-buffer>" . dirvish-quit)
+          ("TAB"       . dirvish-subtree-toggle)
+          ("<delete>"  . dired-do-delete)
+          ("<double-mouse-1>" . dirvish-subtree-toggle-or-open))
+    (:map dirvish-directory-view-mode-map
+          ("<remap> <kill-this-buffer>" . dirvish-quit)
+          ("<double-mouse-1>" . dired-find-file)
+          ("RET"              . dired-find-file)))
+
+  ;;; TREEMACS
+  
+  (use-package treemacs
+    :ensure t
+    :demand t
+    :hook (treemacs-mode . (lambda () (setq-local context-menu-mode nil)))
+    :bind
+    (:map treemacs-mode-map
+          ("<delete>" . treemacs-delete-file))
+    :custom
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode nil)
+    (treemacs-indent-guide-mode t)
+    (treemacs-indentation 1)
+    (treemacs-is-never-other-window t)
+    (treemacs-project-follow-mode t)
+    (treemacs-user-mode-line-format 'none)
+    (treemacs-width 37)
+    :preface
+    (defun doom-themes-enable-treemacs-variable-pitch-labels (&rest _)
+      (dolist (face '(treemacs-root-face
+                      treemacs-git-unmodified-face
+                      treemacs-git-modified-face
+                      treemacs-git-renamed-face
+                      treemacs-git-ignored-face
+                      treemacs-git-untracked-face
+                      treemacs-git-added-face
+                      treemacs-git-conflict-face
+                      treemacs-directory-face
+                      treemacs-directory-collapsed-face
+                      treemacs-file-face
+                      treemacs-tags-face))
+        (let ((faces (face-attribute face :inherit nil)))
+          (set-face-attribute
+           face nil :inherit
+           `(variable-pitch
+             ,@(delq 'unspecified (if (listp faces) faces (list faces))))))))
+    :config
+    (set-window-fringes (treemacs-get-local-window) 0 0 nil)
+    (doom-themes-enable-treemacs-variable-pitch-labels)
+    (treemacs-resize-icons 14)
+    (advice-add #'load-theme
+                :after #'doom-themes-enable-treemacs-variable-pitch-labels)
+    (use-package treemacs-nerd-icons
+      :ensure t
+      :functions treemacs-load-theme
+      :preface
+      (defun treemacs--propagate-new-icons (_theme))
+      :custom-face (cfrs-border-color ((t (:inherit posframe-border))))
+      :config (treemacs-load-theme "nerd-icons")))
+#+end_src
+** theme
+emacs-dashboardの設定時、利用しているテーマ
+#+begin_src emacs-lisp
+  (use-package solaire-mode
+    :ensure t
+    :if (display-graphic-p)
+    :config
+    (add-to-list #'solaire-mode-remap-alist
+                 '(treemacs-hl-line-face . solaire-hl-line-face))
+    (add-to-list #'solaire-mode-remap-alist
+                 '(treemacs-window-background-face . solaire-default-face))
+    (solaire-global-mode t))
+#+end_src
+** ランダムロゴ
+#+begin_src emacs-lisp
+  (defun my/dashboard-random-logo ()
+    "Pick a random image from logo directory."
+    (let* ((logo-dir (expand-file-name "logo/" user-emacs-directory))
+  	 (images (directory-files logo-dir t "\\.png$")))
+      (when images
+        (nth (random (length images)) images))))
+#+end_src
+** ダッシュボード
+emacs-dashboardを利用する
+最新バージョンを利用しないと、ボタンを画面下部に出すことが出来ない
+#+begin_src emacs-lisp
+  (defun my/dashboard-choose-random-banner ()
+    (setq dashboard-startup-banner
+  	(my/dashboard-random-logo)))
+
+  (use-package dashboard
+    :ensure t
+    :hook
+    (window-configuration-change
+     . (lambda ()
+         "Quit treemacs window when in dashboard"
+         (if (and (or (dirvish-side--session-visible-p)
+                      (windowp (treemacs-get-local-window)))
+     		(derived-mode-p 'dashboard-mode))
+             (delete-window (treemacs-get-local-window)))))
+    ;; ランダムバナー関数を初期化する
+    (dashboard-before-initialize . my/dashboard-choose-random-banner)
+    (after-init . dashboard-setup-startup-hook)
+    ;; solaire-modeをインストールする必要がある
+    (dashboard-before-initialize . turn-on-solaire-mode)
+    (dashboard-mode . (lambda ()
+                        (setq-local left-fringe-width 0
+                                    right-fringe-width 0
+                                    left-margin-width 0
+                                    right-margin-width 0)
+                        (widget-forward 1)))
+    (dashboard-before-initialize . my/dashboard-choose-random-banner)
+    (after-init . dashboard-setup-startup-hook)
+    :bind
+    (:map dashboard-mode-map
+     	("<f5>" . dashboard-open)
+     	("<remap> <dashboard-previous-line>" . widget-backward)
+     	("<remap> <dashboard-next-line>" . widget-forward)
+     	("<remap> <previous-line>" . widget-backward)
+     	("<remap> <next-line>"  . widget-forward)
+     	("<remap> <right-char>" . widget-forward)
+     	("<remap> <left-char>"  . widget-backward))
+
+    :custom-face
+    (dashboard-banner-logo-title ((t (:height 2.0 :weight ultra-heavy :inherit (variable-pitch)))))
+    :custom
+    (dashboard-banner-logo-title "EMACS KATSUDOU !")
+    (dashboard-footer-messages '("MIKURU's MIRACLE"))
+    (dashboard-startup-banner
+     `(,(or (my/dashboard-random-logo)  ; my/dashboard-random-logo is original function.
+  	  (expand-file-name "logo/straylight_mark.png" user-emacs-directory))
+       . nil)) 
+    (dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+    (dashboard-vertically-center-content nil)
+    (dashboard-center-content t)
+    (dashboard-display-icons-p t) ; display icons on both GUI and terminal
+    (dashboard-path-style 'truncate-middle)
+    (dashboard-path-max-length 50)
+    (dashboard-items '((projects . 7)
+   		     (recents  . 9)))
+    (dashboard-set-file-icons t)
+    (dashboard-set-heading-icons t)
+    (dashboard-heading-icons '((recents   . "nf-oct-history")
+                               (bookmarks . "nf-oct-bookmark")
+                               (agenda    . "nf-oct-calendar")
+                               (projects  . "nf-oct-rocket")
+                               (registers . "nf-oct-database")))
+    (dashboard-footer-icon `(,(nerd-icons-devicon "nf-dev-emacs" :height 1.2 :face 'nerd-icons-purple)
+                             ,(nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :height 1.2 :face 'nerd-icons-blue)))
+    (dashboard-heading-shorcut-format (propertize " [%s]" 'face 'shadow))
+    (dashboard-startupify-list `(dashboard-insert-banner
+                                 dashboard-insert-banner-title
+                                 dashboard-insert-init-info
+                                 ,(dashboard-insert-newline 2)
+                                 dashboard-insert-footer
+                                 (lambda () (delete-char -1))
+                                 dashboard-insert-items
+                                 dashboard-insert-navigator
+                                 dashboard-insert-newline))
+    ;; nerd-icons が使えるようになってからボタンを作る
+    :config
+    (with-eval-after-load 'nerd-icons
+      (let ((l (nerd-icons-powerline "nf-ple-left_half_circle_thick"
+                                     :face 'dashboard-navigator :height 1.5))
+            (r (nerd-icons-powerline "nf-ple-right_half_circle_thick"
+                                     :face 'dashboard-navigator :height 1.5)))
+        (setq dashboard-navigator-buttons
+              `((;; line1
+                 (,(nerd-icons-faicon "nf-fa-file_text_o")
+     		"Open File"
+     		"Open External File"
+     		(lambda (&rest _) (menu-find-file-existing))
+     		(:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 (,(nerd-icons-octicon "nf-oct-rocket")
+     		"Projects"
+     		"Open Project"
+     		(lambda (&rest _)
+                    (if project--list
+                        (call-interactively #'project-switch-project)
+                      (call-interactively #'project-remember-projects-under)))
+     		(:inverse-video t :inherit dashboard-navigator) ,l ,r)
+     	       (,(nerd-icons-octicon "nf-oct-code_square")
+     		" Edit init file"     ; Title
+     		"Open and Edit Emacs init file"   ; Description
+     		(lambda (&rest _) (find-file user-init-file))
+     		(:inverse-video t :inherit dashboard-navigator) ,l ,r)
+     	       )
+                (;; line2
+                 (,(nerd-icons-mdicon "nf-md-package_variant")
+     		"Search Packages"
+     		"Search and install Emacs Packages"
+     		(lambda (&rest _) (list-packages))
+     		(:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 (,(nerd-icons-octicon "nf-oct-gear")
+     		"Settings"
+     		"Open settings"
+     		(lambda (&rest _) (customize))
+     		(:inverse-video t :inherit dashboard-navigator) ,l ,r)))))))
+#+end_src
+
+** mode line
+*** hide-mode-line
+#+begin_src emacs-lisp
+  (use-package minions
+    :ensure t
+    :custom
+    (minions-mode-line-lighter "…")
+    :hook (doom-modeline-mode . minions-mode))
+
+  (use-package hide-mode-line
+    :ensure t
+    :hook (((treemacs-mode
+             eshell-mode shell-mode term-mode vterm-mode
+             embark-collect-mode
+  	   woman-mode
+             dap-ui-breakpoints-ui-list-mode
+             flymake-diagnostics-buffer-mode
+             flymake-project-diagnostics-mode
+             emacs-lisp-compilation-mode flycheck-error-list-mode
+             dashboard-mode Custom-mode pdf-annot-list-mode)
+            . hide-mode-line-mode)))
+#+end_src
+
+*** doom-modeline
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :hook (after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-height 28)
+    (doom-modeline-bar-width 3)
+    (doom-modeline-icon t)
+    (doom-modeline-buffer-state-icon t)
+    (doom-modeline-minor-modes t)
+    (doom-modeline-modal-icon t)
+    (doom-modeline-checker-simple-format nil)
+    (doom-modeline-lsp t)
+    (doom-modeline-vcs t)
+    (doom-modeline-buffer-encoding t)
+    (doom-modeline-indent-info t)
+    (doom-modeline-input-method nil)
+
+    ;; ノイズ源は抑える
+    (doom-modeline-irc nil)
+    (doom-modeline-env-version nil)
+    (doom-modeline-time nil)
+
+    :config
+    (set-face-attribute 'doom-modeline-bar nil :background 'unspecified)
+    (set-face-attribute 'doom-modeline-bar nil :inherit 'mode-line)
+
+    ;; main を組み直し
+    ;; Configure Some Modeline
+    (doom-modeline-def-modeline 'main
+      '(bar matches workspace-name window-number follow modals
+            buffer-info remote-host " " check lsp debug parrot " "
+            compilation process misc-info)
+      '(vcs media-info indent-info input-method buffer-encoding
+            buffer-position word-count pdf-pages major-mode
+            minor-modes))
+    (doom-modeline-set-modeline 'main t)
+
+    ;; dashboard は専用（後述）
+    (add-to-list 'doom-modeline-mode-alist '(dashboard-mode . main)))
+#+end_src
 * Programing language config
 ** c/c++ mode
 #+begin_src emacs-lisp
@@ -1263,6 +1893,81 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
     :config (setq yaml-indent-offset 2))
 #+end_src
 
+** flymake
+#+begin_src emacs-lisp
+(use-package flymake
+  :ensure nil
+  :hook
+  (prog-mode . flymake-mode)
+  ((flymake-diagnostics-buffer-mode
+    flymake-project-diagnostics-mode)
+   . (lambda ()
+       (when (display-graphic-p)
+         (ignore-errors (text-scale-decrease 1)))))
+  :custom
+  (flymake-indicator-type 'margins)
+
+  :bind
+  (:map flymake-mode-map
+        ("<left-fringe> <mouse-1>" . nil))
+
+  :config
+  ;; メニューに「Project全体の診断」を追加
+  (keymap-set-after (default-value 'flymake-menu) "<list-project-problems>"
+    '(menu-item "List all Project Problems" flymake-show-project-diagnostics)
+    'List\ all\ problems)
+
+  ;; Flymake一覧の「行/列」カラムを少し広げる
+  (when (boundp 'flymake--diagnostics-base-tabulated-list-format)
+    (setf (cadr (aref flymake--diagnostics-base-tabulated-list-format 2)) 10))
+
+  ;; whitespace 等と併用して margin が詰まる場合の保険
+  (advice-add #'flymake--indicator-overlay-spec
+              :filter-return
+              (lambda (indicator)
+                (concat indicator
+                        (propertize " " 'face 'default
+                                    'display `((margin left-margin)
+                                               (space :width 1))))))
+
+  ;; nerd-icons がロードされてから設定
+  (with-eval-after-load 'nerd-icons
+    (when (fboundp 'nerd-icons-faicon) ; 念のため
+      (setopt flymake-margin-indicators-string
+              `((error   ,(nerd-icons-faicon "nf-fa-remove_sign") compilation-error)
+                (warning ,(nerd-icons-faicon "nf-fa-warning")     compilation-warning)
+                (note    ,(nerd-icons-faicon "nf-fa-circle_info") compilation-info))))))
+#+end_src
+
+** hl-todo
+#+begin_src emacs-lisp
+  (use-package hl-todo
+    :ensure t
+    :hook ((prog-mode text-mode) . hl-todo-mode)
+    :custom
+    (hl-todo-require-punctuation t)
+    (hl-todo-highlight-punctuation ":")
+    :config
+    ;; TODOコメントを Flymake の診断として出す
+    (add-hook 'flymake-diagnostic-functions #'hl-todo-flymake)
+
+    ;; 色分け
+    (let ((err (face-attribute 'error   :foreground))
+          (wrn (face-attribute 'warning :foreground))
+          (inf (face-attribute 'success :foreground))
+          ;; nerd-icons-blue が無い環境でも落ちないように保険
+          (msc (or (ignore-errors (face-attribute 'nerd-icons-blue :foreground))
+                   (face-attribute 'link :foreground))))
+      (dolist (k '("BUG" "DEFECT" "ISSUE" "FAIL" "FIXME"))
+        (add-to-list 'hl-todo-keyword-faces `(,k . ,err)))
+      (dolist (k '("WARNING"))
+        (add-to-list 'hl-todo-keyword-faces `(,k . ,wrn)))
+      (dolist (k '("WORKAROUND" "NOTE" "TRICK" "HACK"))
+        (add-to-list 'hl-todo-keyword-faces `(,k . ,inf)))
+      (dolist (k '("TODO" "DEBUG" "STUB"))
+        (add-to-list 'hl-todo-keyword-faces `(,k . ,msc)))))
+#+end_src
+
 * Custom functions
 ** pandocを利用して、マークダウンからスライドを生成する関数
 pandoc, latex, elsvogel.latexを導入する必要がある
@@ -1296,16 +2001,6 @@ pandoc, latex, elsvogel.latexを導入する必要がある
         (insert buffer-content))
       (shell-command-to-string cmd-str)
       (message "PDF created: %s" outfilename)))
-#+end_src
-
-** 画面に表示している100文字くらいの線表示のON/OFFをトグルする関数
-#+begin_src emacs-lisp
-  (defun toggle-display-fill-column-indicator-mode ()
-    "toggle display-fill-column-indicator-mode"
-    (interactive)
-    (cond (display-fill-column-indicator-mode (display-fill-column-indicator-mode -1))
-          (t (display-fill-column-indicator-mode 1))))
-  (global-set-key (kbd "C-c h") 'toggle-display-fill-column-indicator-mode)
 #+end_src
 
 ** プライマリモニターの解像度の70%に設定し、emacsのウィンドウを中央に配置する関数
@@ -1359,15 +2054,6 @@ Please add path cmigemo.exe.
 
     :config
     (migemo-init))
-#+end_src
-
-** savehist
-保存されたコマンドの履歴を使うための設定
-#+begin_src emacs-lisp
-  (use-package savehist
-    :ensure nil
-    :init
-    (savehist-mode))
 #+end_src
 
 ** Hydra config
@@ -1509,6 +2195,9 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
   (use-package org-modern
     :ensure t
     :after org
+    :custom
+    (org-modern-star
+     '(" " "󰎥 " "󰎨 " "󰎫" "󰎲 " "󰎯 " "󰎴 " "󰎷 " "󰎺 " "󰎽 " "󰏀 "))
     :config
     (setopt
      ;; Edit settings
@@ -1624,12 +2313,6 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
             " ")))
 #+end_src
 
-** 水平分割よりも垂直分割を優先するような設定
-#+begin_src emacs-lisp
-  (setq split-width-threshold 160)
-  (setq split-height-threshold nil)
-#+end_src
-
 ** 画面の100文字目あたりに線を出す設定
 #+begin_src emacs-lisp
   (setq-default display-fill-column-indicator-column 100)
@@ -1664,6 +2347,12 @@ NW上のファイルがrecentfにある場合、ファイルの存在チェッ�
 #+begin_src emacs-lisp
   (with-eval-after-load 'recentf
     (add-to-list 'recentf-exclude "^//[^/]+/"))
+#+end_src
+** Output custom setting to custom.el.
+#+begin_src emacs-lisp
+  ;; i.e. (custom-set-variables~~~ (custom-set-faces~~~~
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (load custom-file t)
 #+end_src
 
 ** footer
