@@ -1086,7 +1086,7 @@ Check for file updates and update buffers as well.
     :ensure t
     :hook (prog-mode . indent-bars-mode)
     :custom
-    (indent-bars-treesit-support nil) ;; treesitは使わない
+    (indent-bars-treesit-support t) ;; treesitは使わない
     (indent-bars-pattern ".")
     (indent-bars-width-frac 0.1)
     (indent-bars-pad-frac 0.1))
@@ -1569,6 +1569,19 @@ emacs-dashboardを利用する
     (add-to-list 'doom-modeline-mode-alist '(dashboard-mode . main)))
 #+end_src
 * Programing language config
+** treesit
+#+begin_src emacs-lisp
+  (use-package treesit
+    :ensure nil
+    :init
+    ;; 言語モジュール探索パス
+    (setq treesit-extra-load-path
+  	(list (expand-file-name "tree-sitter" user-emacs-directory)))
+
+    ;; フォントロック最大化
+    (setq treesit-font-lock-level 4)
+)
+#+end_src
 ** c/c++ mode
 #+begin_src emacs-lisp
   (use-package cc-mode
@@ -2038,7 +2051,7 @@ Please add path cmigemo.exe.
     :defer 1
     :config
     ;; use to C/Migemo
-    (setq migemo-command "cmigemo")
+    (setq migemo-command "~/.emacs.d/cmigemo-default-win64/cmigemo")
     (setq migemo-options '("-q" "--emacs" "-i" "\a"))
     ;; The following description is the art of treating relative paths as absolute paths
     ;; (expand-file-name "~/.emacs.d/init.el")
