@@ -298,14 +298,8 @@ from Centaur Emacs
   (use-package emacs
     :ensure nil
     :init
-    (when (eq system-type 'windows-nt)
-      (let ((gnupg-bin "C:/Program Files (x86)/GnuPG/bin"))
-        (when (file-directory-p gnupg-bin)
-  	(add-to-list 'exec-path gnupg-bin)
-  	(setenv "PATH" (concat gnupg-bin ";" (getenv "PATH")))))
-      (setq epg-gpg-program "C:/Program Files (x86)/GnuPG/bin/gpg.exe")
-      (setq package-gnupghome-dir (expand-file-name "elpa/gnupg" user-emacs-directory))
-      (make-directory package-gnupghome-dir t))
+    (setq package-gnupghome-dir (expand-file-name "elpa/gnupg" user-emacs-directory))
+    (make-directory package-gnupghome-dir t)
 
     ;; フレーム生成後のGUI設定関数
     (defun my/apply-gui-frame-settings (&optional frame)
@@ -349,6 +343,14 @@ from Centaur Emacs
     (delete-selection-mode t)
     ;; コンテキストメニュー表示を許可する
     (context-menu-mode t)
+    ;; バックアップファイルを作成しない
+    (setq make-backup-files nil)
+    (setq backup-inhibited t)
+    ;; 自動保存ファイルを作成しない
+    (setq auto-save-default nil)
+    (setq auto-save-list-file-prefix nil)
+    ;; ロックファイルを作成しない
+    (setq create-lockfiles nil)
     ;; --- スクロール改善 ---
     (scroll-conservatively 101)
     (scroll-step 1)
