@@ -291,7 +291,16 @@ from Centaur Emacs
   (unless IS-LINUX
     (setq command-line-x-option-alist nil))
 #+end_src
-
+*** emacs
+#+begin_src emacs-lisp
+  ;; バックアップファイルを作成しない
+  (setq make-backup-files nil)
+  ;; 自動保存ファイルを作成しない
+  (setq auto-save-default nil)
+  (setq auto-save-list-file-prefix nil)
+  ;; ロックファイルを作成しない
+  (setq create-lockfiles nil)
+#+end_src
 * UI 設定
 ** emacs全体構成
 #+begin_src emacs-lisp
@@ -343,14 +352,7 @@ from Centaur Emacs
     (delete-selection-mode t)
     ;; コンテキストメニュー表示を許可する
     (context-menu-mode t)
-    ;; バックアップファイルを作成しない
-    (setq make-backup-files nil)
-    (setq backup-inhibited t)
-    ;; 自動保存ファイルを作成しない
-    (setq auto-save-default nil)
-    (setq auto-save-list-file-prefix nil)
-    ;; ロックファイルを作成しない
-    (setq create-lockfiles nil)
+    
     ;; --- スクロール改善 ---
     (scroll-conservatively 101)
     (scroll-step 1)
@@ -1589,26 +1591,18 @@ emacs-dashboardを利用する
   (use-package cc-mode
     :ensure nil
     :defer 1
-    :config
-    (setq c-default-style "bsd")
-    (setq c-basic-offset 2)       ; basic indent value
-    (setq tab-width 2)            ; tab width
-    (setq indent-tabs-mode nil)   ; indent use space.
-    (c-set-offset 'innamespace 0) ; namespace indent pos is 0
-    )
-#+end_src
-
-** clang-format
-「.clang-format」はユーザーフォルダの直下にあれば良い様子
-#+begin_src emacs-lisp
-  (use-package clang-format
-    :ensure t
-    :commands (clang-format-buffer clang-format-on-save-mode)
-    ;;:hook ((c-mode . clang-format-on-save-mode)
-    ;;       (c++-mode . clang-format-on-save-mode))
-    :config
-    (setq clang-format-style "file")           ; .clang-format を参照
-    (setq clang-format-fallback-style "none")) ; .clang-format がない場合は何もしない
+    :hook
+    (c-mode-common . (lambda ()
+                       (c-set-style "bsd")
+                       (setq-local c-basic-offset 2
+  				 tab-width 2
+  				 indent-tabs-mode nil)
+                       (c-set-offset 'innamespace 0)
+                       ;; 関数開始の { を必ず次行にする
+                       (setq-local c-hanging-braces-alist
+  				 (cons '(defun-open after)
+                                         (assq-delete-all 'defun-open
+  							c-hanging-braces-alist))))))
 #+end_src
 
 ** glsl-mode
@@ -1694,11 +1688,11 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 統合されているのなら、ensure nilにしないとmelpaなどから取得してしまう。
 #+begin_src emacs-lisp
   (use-package editorconfig
-  :defer 2
-  :ensure nil
-  :config
-  (editorconfig-mode)
-  (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
+    :ensure nil
+    :defer 2
+    :config
+    (editorconfig-mode)
+    (setq editorconfig-exec-path "~/.emacs.d/editorconfig/.editorconfig"))
 #+end_src
 
 ** eglot config
@@ -1707,8 +1701,11 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
   (progn
     (customize-set-variable 'eglot-autoshutdown t)
     (customize-set-variable 'eglot-extend-to-xref t)
-    (customize-set-variable 'eglot-ignored-server-capabilities
-                            (quote (:documentFormattingProvider :documentRangeFormattingProvider)))
+    (customize-set-variable 'eglot-ignored-server-capabilities   ; 以下の設定は無効にすることを明言する
+                            '(:documentFormattingProvider        ; LSPによる全体フォーマットを行う設定
+  			    :documentRangeFormattingProvider   ; LSPによる選択範囲フォーマットを行う設定
+  			    :documentOnTypeFormattingProvider  ; LSPによる入力に反応してフォーマットを行う設定(ex. Enterして{}の位置を変更するetc...)
+  			    ))
 
     (with-eval-after-load 'eglot
       ;; timeout
@@ -1718,11 +1715,9 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
       (add-to-list 'eglot-server-programs
                    '((c-mode c++-mode)
                      . ("clangd"
-                        "-j=2"
                         "--log=error"
                         "--background-index=false"
                         "--clang-tidy"
-                        "--cross-file-rename"
                         "--completion-style=detailed"
                         "--pch-storage=disk"
                         "--header-insertion=never"
@@ -1745,31 +1740,9 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
       (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
       (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
-    (add-hook 'c++-mode-hook
-              (lambda ()
-                (eglot-ensure)
-                (message "called c++-mode-hook")
-                (setq c-default-style "bsd")
-                (setq c-basic-offset 2)         ; basic indent value
-                (setq tab-width 2)              ; tab width
-                (setq indent-tabs-mode nil)     ; indent use space.
-                (c-set-offset 'innamespace 0)   ; namespace indent pos is 0
-                ))
-    (add-hook 'c-mode-hook
-              (lambda ()
-                (eglot-ensure)
-                (message "called c-mode-hook")
-                (setq c-default-style "bsd")
-                (setq c-basic-offset 2)         ; basic indent value
-                (setq tab-width 2)              ; tab width
-                (setq indent-tabs-mode nil)     ; indent use space.
-                (c-set-offset 'innamespace 0)   ; namespace indent pos is 0
-                ))
-    (add-hook 'java-mode-hook
-              (lambda ()
-                (eglot-ensure)
-                (message "called java-mode-hook")
-                )))
+    (add-hook 'c++-mode-hook #'eglot-ensure)
+    (add-hook 'c-mode-hook #'eglot-ensure)
+    (add-hook 'java-mode-hook #'eglot-ensure))
 #+end_src
 
 *** consult-eglot
