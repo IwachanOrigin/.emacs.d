@@ -301,126 +301,131 @@ from Centaur Emacs
 * UI 設定
 ** emacs全体構成
 #+begin_src emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :init
-      (setq package-gnupghome-dir (expand-file-name "elpa/gnupg" user-emacs-directory))
-      (make-directory package-gnupghome-dir t)
+  (use-package emacs
+    :ensure nil
+    :init
+    (setq package-gnupghome-dir (expand-file-name "elpa/gnupg" user-emacs-directory))
+    (make-directory package-gnupghome-dir t)
 
-      ;; フレーム生成後のGUI設定関数
-      (defun my/apply-gui-frame-settings (&optional frame)
-        (let ((frame (or frame (selected-frame))))
-          (when (display-graphic-p frame)
-            (with-selected-frame frame
-              ;; GUI整理
-              (tool-bar-mode 1)
-              (scroll-bar-mode 1)
-              (menu-bar-mode 1)
+    ;; フレーム生成後のGUI設定関数
+    (defun my/apply-gui-frame-settings (&optional frame)
+      (let ((frame (or frame (selected-frame))))
+        (when (display-graphic-p frame)
+          (with-selected-frame frame
+            ;; GUI整理
+            (tool-bar-mode 1)
+            (scroll-bar-mode 1)
+            (menu-bar-mode 1)
 
-              ;; IDEっぽいタイトル
-              (setq frame-title-format
-                    '(:eval
-                      (format "%s — Emacs"
-                              (abbreviate-file-name
-                               (or (buffer-file-name)
-                                   (buffer-name))))))
+            ;; IDEっぽいタイトル
+            (setq frame-title-format
+                  '(:eval
+                    (format "%s — Emacs"
+                            (abbreviate-file-name
+                             (or (buffer-file-name)
+                                 (buffer-name))))))
 
-              ;; ウィンドウ区切り線
-              (setq window-divider-default-right-width 1
-                    window-divider-default-bottom-width 1)
-              (window-divider-mode 1)))))
+            ;; ウィンドウ区切り線
+            (setq window-divider-default-right-width 1
+                  window-divider-default-bottom-width 1)
+            (window-divider-mode 1)))))
 
-      ;; 起動後の既存フレーム
-      (add-hook 'emacs-startup-hook #'my/apply-gui-frame-settings)
+    ;; 起動後の既存フレーム
+    (add-hook 'emacs-startup-hook #'my/apply-gui-frame-settings)
 
-      ;; 新規フレーム（daemon対応）
-      (add-hook 'after-make-frame-functions #'my/apply-gui-frame-settings)
-      
-      :custom
-      ;; --- Bell / Beep 無効化---
-      (ring-bell-function #'ignore)
-      ;; 画面フラッシュ
-      (visible-bell nil)
-      ;; emacsデフォルトのスタートアップ画面表示を止める
-      (inhibit-startup-screen t)
-      ;; 非選択ウィンドウではカーソルを表示しない
-      (cursor-in-non-selected-windows nil)
-      ;; 選択した範囲の文字を削除し、入力文字に置き換える
-      (delete-selection-mode t)
-      ;; コンテキストメニュー表示を許可する
-      (context-menu-mode t)
-      
-      ;; --- スクロール改善 ---
-      (scroll-conservatively 101)
-      (scroll-step 1)
-      ;; pixel-scroll は Emacs 29+ で体感が良いらしい
-      (pixel-scroll-precision-mode t)
-      (pixel-scroll-precision-interpolate-page t)
-      ;; --- ネイティブコンパイル警告抑制---
-      (native-comp-async-report-warnings-errors 'silent)
-      ;;  ---  行番号  --- 
-      (display-line-numbers-type 'absolute)  ; 絶対行番号で表示する
-      (display-line-numbers-width-start t)   ; 行番号の幅を最初から確保する
-      :config
-      ;; --- y-or-n-p ---
-      (defalias 'yes-or-no-p 'y-or-n-p)
-      ;; y-or-n-p を Return で確定できるようにする
-      (advice-add 'y-or-n-p :around
-                  (lambda (orig-func &rest args)
-                            (let ((query-replace-map (copy-keymap query-replace-map)))
-                      (keymap-set query-replace-map "<return>" 'act)
-                      (apply orig-func args))))
-      ;; --- Windows 最適化---
-      (when (eq system-type 'windows-nt)
-        (setopt w32-get-true-file-attributes nil   ; ファイルI/O負荷軽減
-                w32-use-native-image-API t         ; 画像APIをWindowsネイティブに
-                w32-pipe-read-delay 0
-                w32-pipe-buffer-size (* 64 1024)))
+    ;; 新規フレーム（daemon対応）
+    (add-hook 'after-make-frame-functions #'my/apply-gui-frame-settings)
+    
+    :custom
+    ;; --- Bell / Beep 無効化---
+    (ring-bell-function #'ignore)
+    ;; 画面フラッシュ
+    (visible-bell nil)
+    ;; emacsデフォルトのスタートアップ画面表示を止める
+    (inhibit-startup-screen t)
+    ;; 非選択ウィンドウではカーソルを表示しない
+    (cursor-in-non-selected-windows nil)
+    ;; 選択した範囲の文字を削除し、入力文字に置き換える
+    (delete-selection-mode t)
+    ;; コンテキストメニュー表示を許可する
+    (context-menu-mode t)
+    
+    ;; --- スクロール改善 ---
+    (scroll-conservatively 101)
+    (scroll-step 1)
+    ;; pixel-scroll は Emacs 29+ で体感が良いらしい
+    (pixel-scroll-precision-mode t)
+    (pixel-scroll-precision-interpolate-page t)
+    ;; --- ネイティブコンパイル警告抑制---
+    (native-comp-async-report-warnings-errors 'silent)
+    ;;  ---  行番号  --- 
+    (display-line-numbers-type 'absolute)  ; 絶対行番号で表示する
+    (display-line-numbers-width-start t)   ; 行番号の幅を最初から確保する
+    :config
+    ;; --- y-or-n-p ---
+    (defalias 'yes-or-no-p 'y-or-n-p)
+    ;; y-or-n-p を Return で確定できるようにする
+    (advice-add 'y-or-n-p :around
+                (lambda (orig-func &rest args)
+                  (let ((query-replace-map (copy-keymap query-replace-map)))
+                    (keymap-set query-replace-map "<return>" 'act)
+                    (apply orig-func args))))
+    ;; --- Windows 最適化---
+    (when (eq system-type 'windows-nt)
+      (setopt w32-get-true-file-attributes nil   ; ファイルI/O負荷軽減
+              w32-use-native-image-API t         ; 画像APIをWindowsネイティブに
+              w32-pipe-read-delay 0
+              w32-pipe-buffer-size (* 64 1024)))
 
-      ;; --- show-paren special-mode/text-mode/hexl-modeでは抑制する---
-      (setopt show-paren-style 'parenthesis
-              show-paren-when-point-inside-paren t
-              show-paren-predicate
-              (lambda (&rest _args)
-                (not (or (derived-mode-p 'special-mode)
-                         (derived-mode-p 'text-mode)
-                         (derived-mode-p 'hexl-mode)))))
-      (show-paren-mode 1)
-      ;; 大文字小文字変換を許可
-      (put 'upcase-region     'disabled nil)
-      (put 'downcase-region   'disabled nil)
-      (put 'capitalize-region 'disabled nil)
+    ;; --- show-paren を使ってかっこを強調表示させる special-mode/text-mode/hexl-modeでは抑制する---
+    (setopt show-paren-style 'parenthesis
+            show-paren-when-point-inside-paren t
+            show-paren-predicate
+            (lambda (&rest _args)
+              (not (or (derived-mode-p 'special-mode)
+                       (derived-mode-p 'text-mode)
+                       (derived-mode-p 'hexl-mode)))))
+    (show-paren-mode 1)
+    ;; 大文字小文字変換を許可
+    (put 'upcase-region     'disabled nil)
+    (put 'downcase-region   'disabled nil)
+    (put 'capitalize-region 'disabled nil)
 
-      ;; コメント継続
-      (setopt comment-multi-line t)
-      (advice-add 'newline-and-indent :before-until
-                  (lambda (&rest _)
-                            (interactive "*")
-                            (when-let (((nth 4 (syntax-ppss (point))))
-                               ((functionp comment-line-break-function))
-                               (fill-prefix " *"))
-                      (funcall comment-line-break-function nil)
-                      t)))
-      ;; 1単語削除の機能を追加
-      (defun my-backward-delete-word ()
-        (interactive)
-        (delete-region (point)
-                       (progn (backward-word 1) (point))))
+    ;; コメント継続
+    (setopt comment-multi-line t)
+    (advice-add 'newline-and-indent :before-until
+                (lambda (&rest _)
+                  (interactive "*")
+                  (when-let (((nth 4 (syntax-ppss (point))))
+                             ((functionp comment-line-break-function))
+                             (fill-prefix " *"))
+                    (funcall comment-line-break-function nil)
+                    t)))
+    ;; 1単語削除の機能を追加
+    (defun my-backward-delete-word ()
+      (interactive)
+      (delete-region (point)
+                     (progn (backward-word 1) (point))))
 
-      (defun my-forward-delete-word ()
-        (interactive)
-        (delete-region (point)
-                       (progn (forward-word 1) (point))))
-      ;; 標準キーバインドを置き換え
-      (global-set-key (kbd "C-<backspace>") #'my-backward-delete-word)
-      (global-set-key (kbd "C-<delete>") #'my-forward-delete-word)
-      ;; 括弧を自動で閉じてくれる
-      (electric-pair-mode 1)
-      :hook
-      ((prog-mode . display-line-numbers-mode))
-      ((text-mode . visual-line-mode)
-       (text-mode . visual-wrap-prefix-mode))
-      (prog-mode . subword-mode))
+    (defun my-forward-delete-word ()
+      (interactive)
+      (delete-region (point)
+                     (progn (forward-word 1) (point))))
+    ;; 標準キーバインドを置き換え
+    (global-set-key (kbd "C-<backspace>") #'my-backward-delete-word)
+    (global-set-key (kbd "C-<delete>") #'my-forward-delete-word)
+    ;; タブ文字は基本的に利用せず、空白とする
+    (setq-default indent-tabs-mode nil)
+    ;; インデント幅は2スペース文字を基本とする
+    (setq-default tab-width 2)
+    ;; 括弧を自動で閉じてくれる
+    (electric-pair-mode 1)
+
+    :hook
+    ((prog-mode . display-line-numbers-mode))
+    ((text-mode . visual-line-mode)
+     (text-mode . visual-wrap-prefix-mode))
+    (prog-mode . subword-mode))
 #+end_src
 ** フォントの設定
 *** fontaineを使ったフォント設定
@@ -606,7 +611,7 @@ corfuで利用されている
     :defer 1
     :init
     (setq vertico-cycle t
-          vertico-count 20)
+          vertico-count 20) ; 30にしたら表示が遅れるようになったので20くらいが良さそう
     (vertico-mode))
 #+end_src
 
@@ -967,7 +972,10 @@ undo履歴を視覚的に分かりやすく表示してくれる
     :defer 2)
 #+end_src
 
-** modus-themes
+
+** theme
+*** modus-theme
+emacsで利用しているデフォルトテーマです。
 #+begin_src emacs-lisp
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs nil
@@ -989,6 +997,30 @@ undo履歴を視覚的に分かりやすく表示してくれる
           (bg-completion-match-3 bg-red-nuanced)))
 
   (load-theme 'modus-vivendi-tinted t)
+#+end_src
+
+*** solaire-mode
+emacs-dashboardの設定時、利用しているテーマです
+#+begin_src emacs-lisp
+  (use-package solaire-mode
+    :ensure t
+    :if (display-graphic-p)
+    :config
+    (add-to-list #'solaire-mode-remap-alist
+                 '(treemacs-hl-line-face . solaire-hl-line-face))
+    (add-to-list #'solaire-mode-remap-alist
+                 '(treemacs-window-background-face . solaire-default-face))
+    (solaire-global-mode t))
+#+end_src
+
+*** Faces
+#+begin_verse
+show-parenで対応するカッコを見やすくするために白いカッコで囲みます。
+visual-emacsから輸入しました
+#+end_verse
+#+begin_src emacs-lisp
+  (set-face-attribute 'show-paren-match nil :box '(-1 . -1))
+  (set-face-attribute 'show-paren-match nil :foreground 'unspecified)
 #+end_src
 
 ** hl-line-mode
@@ -1093,9 +1125,19 @@ hl-line-mode
     :hook (prog-mode . indent-bars-mode)
     :custom
     (indent-bars-treesit-support t) ;; treesitは使わない
-    (indent-bars-pattern ".")
+    (indent-bars-no-stipple-char 9615)
+    (indent-bars-depth-update-delay 0.1)
+    (indent-bars-display-on-blank-lines nil)
+    (indent-bars-starting-column 0)
+    (indent-bars-color-by-depth
+     `(:regexp ,(rx (seq "rainbow-delimiters-depth-" (1+ (group num))))
+               :blend 1))
+    (indent-bars-highlight-current-depth '(:blend 1 :width 0.3))
+    (indent-bars-pad-frac 0)
     (indent-bars-width-frac 0.1)
-    (indent-bars-pad-frac 0.1))
+    (indent-bars-pattern ".")
+    (indent-bars-treesit-support t)
+    (indent-bars-treesit-ignore-blank-lines-types '("module")))
 #+end_src
 ** project
 gitなどのプロジェクトを管理しやすくする
@@ -1363,20 +1405,6 @@ gitなどのプロジェクトを管理しやすくする
       :config (treemacs-load-theme "nerd-icons")))
 #+end_src
 
-** theme
-emacs-dashboardの設定時、利用しているテーマ
-#+begin_src emacs-lisp
-  (use-package solaire-mode
-    :ensure t
-    :if (display-graphic-p)
-    :config
-    (add-to-list #'solaire-mode-remap-alist
-                 '(treemacs-hl-line-face . solaire-hl-line-face))
-    (add-to-list #'solaire-mode-remap-alist
-                 '(treemacs-window-background-face . solaire-default-face))
-    (solaire-global-mode t))
-#+end_src
-
 ** ランダムロゴ
 #+begin_src emacs-lisp
   (defun my/dashboard-random-logo ()
@@ -1571,8 +1599,10 @@ emacs-dashboardを利用する
 #+end_src
 
 ** ミニフレーム
+#+begin_verse
 M-xしたときに出るバッファの表示位置を中央上部へ移動させる仕組みです。
 visual-emacsから輸入し、一部の設定を変更しました。
+#+end_verse
 #+begin_src emacs-lisp
   (use-package mini-frame
     :ensure t
@@ -1613,6 +1643,19 @@ visual-emacsから輸入し、一部の設定を変更しました。
                                #'select-frame))
                       (apply orig fn args)))))
     (mini-frame-mode t))
+#+end_src
+
+** show-paren customize
+カーソルがカッコの直上に無くても外側のカッコを拾いやすくするためのヒントを与える処理です。
+visual-emacsから輸入しました
+#+begin_src emacs-lisp
+  ;; Show Paren when inside of them
+  (define-advice show-paren-function (:around (fn) fix)
+    "Highlight enclosing parens."
+    (cond ((looking-at-p "\\s(") (funcall fn))
+          (t (save-excursion
+               (ignore-errors (backward-up-list))
+               (funcall fn)))))
 #+end_src
 
 * Programing language config
