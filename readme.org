@@ -300,39 +300,19 @@ from Centaur Emacs
 #+end_src
 * UI 設定
 ** emacs全体構成
-*** MSYS2 パス変換関数
-https://www.reddit.com/r/emacs/comments/ymzw78/windows_elpa_gnupg_and_keys_problems/
-
-#+begin_verse
-イカれた問題であるgpgのフォルダパス問題を解決するために作成した酷い関数です。
-msys2を使っていると、gpgのエラーが起き、パッケージに更新が出来ません。署名が認証できないからです。
-gpgを使って手動で署名を発行するか、gnu-elpa-keyring-update(?)のようなものをインストールする必要があります。
-ただ、msys2を使っていると「expand-file-name」が「C:\」のパスで解決してしまいます。
-結果、認証時に「/C:/.../elpa/gnupg」のフォルダを見に行くのですが、パスの解決が出来ないので認証エラーとなります。
-それを解決するため、C:/だったら/c/に変換する関数を書きました。
-#+end_verse
-#+begin_src emacs-lisp
-  (defun my-windows-path-to-msys (path)
-    "Windows形式 C:/foo/bar を MSYS2形式 /c/foo/bar に変換する。すでに /c/... 形式ならそのまま返す。"
-    (cond
-     ((null path) nil)
-     ((string-match "\\`\\([A-Za-z]\\):/" path)
-      (format "/%s/%s"
-              (downcase (match-string 1 path))
-              (substring path 3)))
-     ((string-match "\\`/\\([A-Za-z]\\):/" path)
-      (replace-match "/\\1/" nil nil path))
-     (t path)))
-#+end_src
-
 *** 本体設定
 #+begin_src emacs-lisp
   (use-package emacs
     :ensure nil
     :init
-    ;; あまり美しくないコード
-    (setq package-gnupghome-dir
-          (my-windows-path-to-msys (expand-file-name "elpa/gnupg" user-emacs-directory)))
+    ;; NOTE
+    ;; MSYS2に同梱されているgpgを用いると、WindowsパスがC:\Windows~として扱われてしまう
+    ;; これによって署名を認識できず、packageの更新が一切行えなくなる
+    ;; 解決するためにはWindows用のGnuPGを別途インストールし、MSYS2の起動時PATHへ追加する必要がある
+    ;; emacs側で解決しようとしたがフォルダの認識がうまくいかず、想定外のフォルダパスが生成されたりして苦戦した
+    ;; 現在は.bash_profileに「export PATH="/c/Program Files/GnuPG/bin":$PATH」を書いて起動している
+    ;; ref : https://www.youtube.com/watch?v=9ha4AkqUPp4
+    ;;       https://www.reddit.com/r/emacs/comments/ymzw78/windows_elpa_gnupg_and_keys_problems/
     (make-directory package-gnupghome-dir t)
 
     ;; フレーム生成後のGUI設定関数
