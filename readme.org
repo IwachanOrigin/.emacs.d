@@ -1734,7 +1734,9 @@ visual-emacsから輸入しました
 #+begin_src emacs-lisp
   (use-package dart-mode
     :ensure t
-    :defer 1)
+    :defer 1
+    :mode ("\\.dart?\\'")
+    )
 #+end_src
 
 ** Java
@@ -1835,6 +1837,13 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
             '((java.import.gradle.enabled . :json-false)
               (java.import.maven.enabled  . :json-false)))
 
+      ;; Dart
+      (add-to-list 'eglot-server-programs
+                   '(dart-mode . ("dart"
+                                  "language-server"
+                                  "--client-id=emacs.eglot"
+                                  "--client-version=1.0")))
+
       ;; Language Serverからの進捗を表示するか否か
       (setq eglot-report-progress nil))
 
@@ -1847,6 +1856,18 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
     (add-hook 'c++-mode-hook #'eglot-ensure)
     (add-hook 'c-mode-hook #'eglot-ensure)
     (add-hook 'java-mode-hook #'eglot-ensure))
+#+end_src
+
+*** flutter
+補助コマンドをemacsから使えるようにします
+#+begin_src emacs-lisp
+  (use-package flutter
+    :ensure t
+    :after dart-mode
+    :bind (:map dart-mode-map
+                ("C-c C-r" . flutter-run-or-hot-reload)
+                ("C-c C-a" . flutter-run)
+                ("C-c C-t" . flutter-test-current-file)))
 #+end_src
 
 *** consult-eglot
