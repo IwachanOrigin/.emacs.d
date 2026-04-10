@@ -256,7 +256,6 @@ from doomemacs
 #+begin_src emacs-lisp
   (setq ffap-machine-p-known 'reject)
 #+end_src
-
 **** UIの更新頻度を下げる
 from doomemacs
 #+begin_src emacs-lisp
@@ -691,6 +690,7 @@ verticoに含まれています。
               (progn (string-match-p pattern "") pattern)
             (invalid-regexp nil))))
       (add-to-list 'orderless-matching-styles 'orderless-migemo))
+    
 
     (with-eval-after-load 'corfu
       (defun orderless-fast-dispatch (word index total)
@@ -839,6 +839,7 @@ vertico の候補に情報を追加する.
     (marginalia-mode 1))
 #+end_src
 ** magit
+emacsからのgit操作を司る
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
@@ -864,11 +865,13 @@ vertico の候補に情報を追加する.
            (dired-mode . diff-hl-dired-mode))
     :config
     ;; バッファ全体で git 差分を左側に表示
-    (global-diff-hl-mode)
+    (global-diff-hl-mode 1)
     ;; マウスでhunkを表示
-    (global-diff-hl-show-hunk-mouse-mode)
+    (global-diff-hl-show-hunk-mouse-mode 1)
     ;; 左マージンに表示
-    (diff-hl-margin-mode))
+    (diff-hl-margin-mode 1)
+    ;; 保存前でもタイマーで差分表示を更新するon-the-fly機能
+    (diff-hl-flydiff-mode 1))
 #+end_src
 
 *** difftastic
@@ -1126,9 +1129,11 @@ hl-line-mode
 #+end_src
 ** indent-bars
 インデントの範囲を分かりやすくします
+indent-bars-color-by-depthでrainbow-delimitersの情報を使っています
 #+begin_src emacs-lisp
   (use-package indent-bars
     :ensure t
+    :after rainbow-delimiters
     :hook (prog-mode . indent-bars-mode)
     :custom
     (indent-bars-treesit-support t) ;; treesitは使わない
@@ -1143,7 +1148,6 @@ hl-line-mode
     (indent-bars-pad-frac 0)
     (indent-bars-width-frac 0.1)
     (indent-bars-pattern ".")
-    (indent-bars-treesit-support t)
     (indent-bars-treesit-ignore-blank-lines-types '("module")))
 #+end_src
 ** project
