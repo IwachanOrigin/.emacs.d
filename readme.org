@@ -2528,22 +2528,30 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 #+end_src
 
 * vterm
-[[https://emacs-china.org/t/windows-emacs-libvterm/30140]]\\
-[[https://github.com/xhcoding/conpty-proxy]]\\
-[[https://github.com/xhcoding/emacs-libvterm]]\\
-中国の方が「Windows Pseudoconsole」を使ってlibvtermを動かすための仕組みを作ってくれた\\
+[[https://emacs-china.org/t/windows-emacs-libvterm/30140]]  
+[[https://github.com/xhcoding/conpty-proxy]]  
+[[https://github.com/xhcoding/emacs-libvterm]]  
+中国の方が「Windows Pseudoconsole」を使ってlibvtermを動かすための仕組みを作ってくれた  
+ビルドするにはlibtoolとlibvtermをインストールする必要がある  
+[[https://packages.msys2.org/packages/libtool]]  
+[[https://packages.msys2.org/packages/mingw-w64-ucrt-x86_64-libvterm]]  
 #+begin_src emacs-lisp
   (use-package vterm
     :ensure t
     :defer t
     :vc ( :fetcher github :repo "IwachanOrigin/emacs-libvterm"))
+
+  (with-eval-after-load 'vterm
+    (add-hook 'vterm-mode-hook
+              (lambda ()
+                (display-fill-column-indicator-mode -1))))
 #+end_src
 
 * Others
 ** keycast
-[[https://github.com/tarsius/keycast]]
-[[https://protesilaos.com/emacs/dotemacs]]
-5.3.1. The prot-emacs-modeline.el section about keycast
+[[https://github.com/tarsius/keycast]]  
+[[https://protesilaos.com/emacs/dotemacs]]  
+5.3.1. The prot-emacs-modeline.el section about keycast  
 #+begin_src emacs-lisp
   (use-package keycast
     :ensure t
@@ -2564,9 +2572,9 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 #+end_src
 
 ** time(Display current time)
-モードラインに現在の時間を表示する
-[[https://github.com/emacs-mirror/emacs/blob/master/lisp/time.el]]
-[[https://protesilaos.com/emacs/dotemacs]]
+モードラインに現在の時間を表示する  
+[[https://github.com/emacs-mirror/emacs/blob/master/lisp/time.el]]  
+[[https://protesilaos.com/emacs/dotemacs]]  
 5.2.16. The prot-emacs-essentials.el configurations for the date and time (display-time-mode)
 #+begin_src emacs-lisp
   (use-package time
