@@ -450,7 +450,7 @@ fontaineを使ってフォントを設定する。
            (setq fontaine-presets
                  '((regular
                     :default-family "CommitMono Nerd Font Mono"
-                    :default-height 120
+                    :default-height 110
                     :fixed-pitch-family "CommitMono Nerd Font Mono"
                     :variable-pitch-family "CommitMono Nerd Font Mono"
                     :italic-family "CommitMono Nerd Font Mono Italic")
@@ -462,7 +462,7 @@ fontaineを使ってフォントを設定する。
            (setq fontaine-presets
                  '((regular
                     :default-family "CommitMono Nerd Font Mono"
-                    :default-height 120
+                    :default-height 110
                     :fixed-pitch-family "CommitMono Nerd Font Mono"
                     :variable-pitch-family "CommitMono Nerd Font Mono"
                     :italic-family "CommitMono Nerd Font Mono")
@@ -1302,15 +1302,9 @@ gitなどのプロジェクトを管理しやすくする
       'dashboard-open))  
 #+end_src
 
-** treemacs
+** dirvish
 #+begin_src emacs-lisp
-  ;; Define which file manager use
-  ;; (e.g 'treemacs' or 'dirvish-side').
-  (defalias 'my/explorer-open 'treemacs)
-  ;; dired+ (optional):
-  ;; (load (concat user-emacs-directory "config-lisp-files/" "diredp"))
-
-   ;;; DIRED CONFIGURATIONS
+  ;; DIRED CONFIGURATIONS
   (use-package dired-x
     :ensure nil
     :custom
@@ -1321,38 +1315,47 @@ gitなどのプロジェクトを管理しやすくする
              (seq bol "." eol)
              (seq bol ".." eol)))))
 
-   ;;; DIRVISH
+  (defun my/dired-setup ()
+    ;;(dired-omit-mode 1)
+    (setq-local truncate-lines t
+                mouse-1-click-follows-link 'double))
+
+  (use-package dired
+    :config
+    (setq dired-listing-switches
+          "-l --almost-all --human-readable --group-directories-first --no-group")
+    ;; this command is useful when you want to close the window of `dirvish-side'
+    ;; automatically when opening a file
+    (put 'dired-find-alternate-file 'disabled nil))
+
+  ;; DIRVISH
   (use-package dirvish
     :ensure t
+    :init
+    (dirvish-override-dired-mode t)
     :hook
     (dired-mode . auto-revert-mode)
-    (dirvish-find-entry
-     . (lambda (&rest _)
-         (interactive)
-         (dired-omit-mode)
-         (setq-local truncate-lines t
-                     mouse-1-click-follows-link 'double)))
+    (dired-mode . my/dired-setup)
     :custom
     (delete-by-moving-to-trash t)
-    (dirvish-subtree-always-show-state t)
+    ;;(dirvish-subtree-always-show-state t)
     (dirvish-side-follow-mode t)
     (dirvish-side-width 31)
     (dirvish-subtree-state-style 'nerd)
     (dirvish-attributes
      '(nerd-icons
-       subtree-state
-       git-msg
+       ;;subtree-state
+       ;;git-msg
+       ;;vc-stat
        file-time
-       vc-stat))
+       ))
     (dirvish-path-separators
-     (list (format "  %s " (nerd-icons-codicon "nf-cod-home"))
-           (format "  %s " (nerd-icons-codicon "nf-cod-root_folder"))
+     (list (format " %s " (nerd-icons-codicon "nf-cod-home"))
+           (format " %s " (nerd-icons-codicon "nf-cod-root_folder"))
            (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
-    (dirvish-override-dired-mode t)
     (dirvish-reuse-session nil)
     (dirvish-use-mode-line nil)
-    (dired-listing-switches
-     "-l --almost-all --human-readable --group-directories-first --no-group")
+    (dirvish-preview-dispatchers nil)
     :bind
     (:map dirvish-mode-map
           ("<remap> <kill-this-buffer>" . dirvish-quit)
@@ -1361,59 +1364,9 @@ gitなどのプロジェクトを管理しやすくする
           ("<double-mouse-1>" . dirvish-subtree-toggle-or-open))
     (:map dirvish-directory-view-mode-map
           ("<remap> <kill-this-buffer>" . dirvish-quit)
-          ("<double-mouse-1>" . dired-find-file)
-          ("RET"              . dired-find-file)))
-
-  ;;; TREEMACS
-  
-  (use-package treemacs
-    :ensure t
-    :demand t
-    :hook (treemacs-mode . (lambda () (setq-local context-menu-mode nil)))
-    :bind
-    (:map treemacs-mode-map
-          ("<delete>" . treemacs-delete-file))
-    :custom
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode nil)
-    (treemacs-indent-guide-mode t)
-    (treemacs-indentation 1)
-    (treemacs-is-never-other-window t)
-    (treemacs-project-follow-mode t)
-    (treemacs-user-mode-line-format 'none)
-    (treemacs-width 37)
-    :preface
-    (defun doom-themes-enable-treemacs-variable-pitch-labels (&rest _)
-      (dolist (face '(treemacs-root-face
-                      treemacs-git-unmodified-face
-                      treemacs-git-modified-face
-                      treemacs-git-renamed-face
-                      treemacs-git-ignored-face
-                      treemacs-git-untracked-face
-                      treemacs-git-added-face
-                      treemacs-git-conflict-face
-                      treemacs-directory-face
-                      treemacs-directory-collapsed-face
-                      treemacs-file-face
-                      treemacs-tags-face))
-        (let ((faces (face-attribute face :inherit nil)))
-          (set-face-attribute
-           face nil :inherit
-           `(variable-pitch
-             ,@(delq 'unspecified (if (listp faces) faces (list faces))))))))
-    :config
-    (set-window-fringes (treemacs-get-local-window) 0 0 nil)
-    (doom-themes-enable-treemacs-variable-pitch-labels)
-    (treemacs-resize-icons 14)
-    (advice-add #'load-theme
-                :after #'doom-themes-enable-treemacs-variable-pitch-labels)
-    (use-package treemacs-nerd-icons
-      :ensure t
-      :functions treemacs-load-theme
-      :preface
-      (defun treemacs--propagate-new-icons (_theme))
-      :custom-face (cfrs-border-color ((t (:inherit posframe-border))))
-      :config (treemacs-load-theme "nerd-icons")))
+          ;;("<double-mouse-1>" . dired-find-file)
+          ;;("RET"              . dired-find-file)
+          ))
 #+end_src
 
 ** ランダムロゴ
@@ -1436,13 +1389,13 @@ emacs-dashboardを利用する
     (use-package dashboard
       :ensure t
       :hook
-      (window-configuration-change
-       . (lambda ()
-           "Quit treemacs window when in dashboard"
-           (if (and (or (dirvish-side--session-visible-p)
-                        (windowp (treemacs-get-local-window)))
-                            (derived-mode-p 'dashboard-mode))
-               (delete-window (treemacs-get-local-window)))))
+      ;(window-configuration-change
+      ; . (lambda ()
+      ;     "Quit treemacs window when in dashboard"
+      ;     (if (and (or (dirvish-side--session-visible-p)
+      ;                  (windowp (treemacs-get-local-window)))
+      ;                      (derived-mode-p 'dashboard-mode))
+      ;         (delete-window (treemacs-get-local-window)))))
       ;; ランダムバナー関数を初期化する
       (dashboard-before-initialize . my/dashboard-choose-random-banner)
       (after-init . dashboard-setup-startup-hook)
@@ -1806,6 +1759,49 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 #+end_src
 
 ** eglot config
+*** diff-hl の再起動
+eglogがdiff-hlの後に起動すると左マージンのgit差分が出ないので再起動する
+#+begin_src emacs-lisp
+  (defun my/restart-diff-hl-buffer (buf)
+    "Restart diff-hl margin in BUF."
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (when (and (fboundp 'eglot-managed-p)
+                   (eglot-managed-p))
+          ;; margin が必要なら明示
+          (setq-local left-margin-width 2)
+
+          (when (fboundp 'diff-hl-mode)
+            (diff-hl-mode -1)
+            (diff-hl-mode 1))
+
+          (when (fboundp 'diff-hl-margin-mode)
+            (diff-hl-margin-mode -1)
+            (diff-hl-margin-mode 1))
+
+          (when (fboundp 'diff-hl-update)
+            (diff-hl-update))
+
+          ;; 表示中 window の margin を明示的に確保
+          (dolist (win (get-buffer-window-list buf nil t))
+            (set-window-margins win 2 0))
+
+          (force-window-update)
+          (redisplay t)))))
+
+  (defun my/restart-diff-hl-after-eglot-connect (_server)
+    "Restart diff-hl after Eglot server connection is established."
+    ;; Eglot/Flymake の初期反映が少し遅れる場合に備えて遅延
+    (run-at-time
+     0.5 nil
+     (lambda ()
+       (dolist (buf (buffer-list))
+         (with-current-buffer buf
+           (when (and (fboundp 'eglot-managed-p)
+                      (eglot-managed-p))
+             (my/restart-diff-hl-buffer buf)))))))
+#+end_src
+
 *** eglot
 #+begin_src emacs-lisp
   (progn
@@ -1849,7 +1845,10 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
                                   "--client-version=1.0")))
 
       ;; Language Serverからの進捗を表示するか否か
-      (setq eglot-report-progress nil))
+      (setq eglot-report-progress nil)
+
+      ;; Eglot 起動後に diff-hl の margin 表示を復元
+      (add-hook 'eglot-connect-hook #'my/restart-diff-hl-after-eglot-connect))
 
     (with-eval-after-load 'flymake
       (define-key flymake-mode-map (kbd "C-c ! n") nil)
