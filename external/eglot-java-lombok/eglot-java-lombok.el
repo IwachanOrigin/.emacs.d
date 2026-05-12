@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'eglot-java)
 
 (defvar eglot-java-lombok/version nil

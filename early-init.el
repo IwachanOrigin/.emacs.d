@@ -1,5 +1,4 @@
-;;; package --- Summary
-;;; Personal configuration -*- lexical-binding: t -*-
+;;; package --- Summary  -*- lexical-binding: t; -*-
 ;;; Commentary:
 
 ;;============================================================================
