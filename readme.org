@@ -2423,10 +2423,9 @@ Please add path cmigemo.exe.
 #+end_src
 
 ** restart-emacs
-Windows11 ではrestart-emacsがうまく動作しない場合がある  
-プロセスは終了するが、立ち上がってこない  
-理由は不明だが、runemacs.exeの起動時引数に"--debug-init"や"-Q"などを指定するとうまく再起動が出来る  
-何か引数が無いとダメなようだ。30.1でこの現象は再現済み  
+Windows11だけなのかは定かではないが、restart-emacsがうまく動作しない\\
+プロセスは終了するが、立ち上がってこない\\
+30.2でこの現象は再現済み
 #+begin_src emacs-lisp
   (when (>= emacs-major-version 29)
     (global-set-key (kbd "C-x r") #'restart-emacs))
@@ -2526,6 +2525,18 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
     :after org-modern
     :config
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+#+end_src
+
+* vterm
+[[https://emacs-china.org/t/windows-emacs-libvterm/30140]]\\
+[[https://github.com/xhcoding/conpty-proxy]]\\
+[[https://github.com/xhcoding/emacs-libvterm]]\\
+中国の方が「Windows Pseudoconsole」を使ってlibvtermを動かすための仕組みを作ってくれた\\
+#+begin_src emacs-lisp
+  (use-package vterm
+    :ensure t
+    :defer t
+    :vc ( :fetcher github :repo "IwachanOrigin/emacs-libvterm"))
 #+end_src
 
 * Others

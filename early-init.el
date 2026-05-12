@@ -1,4 +1,6 @@
+;;; package --- Summary
 ;;; Personal configuration -*- lexical-binding: t -*-
+;;; Commentary:
 
 ;;============================================================================
 ;;                           early-init.el                                  ;;
@@ -28,4 +30,7 @@
                          (getenv "PATH")))
   (push "/data/data/com.termux/files/usr/bin" exec-path)
   (setopt image-scaling-factor 3))
+
+(provide 'early-init)
+;;; early-init.el ends here
 
