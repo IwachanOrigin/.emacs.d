@@ -1367,6 +1367,22 @@ gitなどのプロジェクトを管理しやすくする
           ;;("<double-mouse-1>" . dired-find-file)
           ;;("RET"              . dired-find-file)
           ))
+
+  ;; vtermで開いているフォルダをdirvishで開き、UIで操作する
+  (defun my/vterm-open-pwd-in-dirvish ()
+    "Open vterm's current directory in full Dirvish."
+    (interactive)
+    (unless (derived-mode-p 'vterm-mode)
+      (user-error "This command must be used from a vterm buffer"))
+    (let ((dir (file-name-as-directory default-directory)))
+      (unless (file-directory-p dir)
+        (user-error "Not a directory: %s" dir))
+      (dirvish dir)))
+
+  (with-eval-after-load 'vterm
+    (define-key vterm-mode-map
+                (kbd "C-c C-o")
+                #'my/vterm-open-pwd-in-dirvish))
 #+end_src
 
 ** ランダムロゴ
@@ -1508,15 +1524,15 @@ emacs-dashboardを利用する
   (use-package hide-mode-line
     :ensure t
     :hook (((treemacs-mode
- eshell-mode shell-mode term-mode vterm-mode
- embark-collect-mode
-       woman-mode
- dap-ui-breakpoints-ui-list-mode
- flymake-diagnostics-buffer-mode
- flymake-project-diagnostics-mode
- emacs-lisp-compilation-mode flycheck-error-list-mode
- dashboard-mode Custom-mode pdf-annot-list-mode)
-. hide-mode-line-mode)))
+             eshell-mode shell-mode term-mode vterm-mode
+             embark-collect-mode
+             woman-mode
+             dap-ui-breakpoints-ui-list-mode
+             flymake-diagnostics-buffer-mode
+             flymake-project-diagnostics-mode
+             emacs-lisp-compilation-mode flycheck-error-list-mode
+             dashboard-mode Custom-mode pdf-annot-list-mode)
+            . hide-mode-line-mode)))
 #+end_src
 
 *** doom-modeline
@@ -1633,8 +1649,7 @@ visual-emacsから輸入しました
           (list (expand-file-name "tree-sitter" user-emacs-directory)))
 
     ;; フォントロック最大化
-    (setq treesit-font-lock-level 4)
-    )
+    (setq treesit-font-lock-level 4))
 #+end_src
 
 ** c/c++ mode
@@ -1697,6 +1712,11 @@ visual-emacsから輸入しました
 #+end_src
 
 ** Java
+*** Open java ts mode
+javaファイルはtsモードで開く
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.java\\'" . java-ts-mode))
+#+end_src
 *** eglot-java
 eglotよりも先に読み込む必要があるっぽいです。
 eglot単体の場合、jdtlsをPATHから探します。
@@ -1706,7 +1726,10 @@ eglot-javaが読み込まれていると上述処理を上書きし、jdtlsの�
     :ensure t
     :demand t
     :config
-    (eglot-java-mode))
+    ;; java-ts-mode 用インデント
+    (setq-default java-ts-indent-offset 2)
+    ;; 通常 java-mode 用インデント
+    (setq-default c-basic-offset 2))
 #+end_src
 
 *** eglot-java-lombok 
@@ -1727,13 +1750,17 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 #+begin_src emacs-lisp
   (use-package web-mode
     :ensure t
-    :mode ("\\.html?\\'")
+    :mode
+    (("\\.html?\\'" . web-mode)
+     ("\\.tpl\\'"   . web-mode)
+     ("\\.erb\\'"   . web-mode)
+     ("\\.php\\'"   . web-mode))
     :defer 1
     :config
     (setq web-mode-markup-indent-offset 2
-    web-mode-css-indent-offset 2
-    web-mode-code-indent-offset 2
-    web-mode-enable-auto-quoting t)
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-enable-auto-quoting t)
     (setq-default indent-tabs-mode nil)
     (setq-default tab-width 2))
 #+end_src
@@ -1760,7 +1787,8 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 
 ** eglot config
 *** diff-hl の再起動
-eglogがdiff-hlの後に起動すると左マージンのgit差分が出ないので再起動する
+eglogがdiff-hlの後に起動すると左マージンのgit差分が出ないので再起動する  
+またflymakeとのぶつかり合いも考え、こちらも再起動する
 #+begin_src emacs-lisp
   (defun my/restart-diff-hl-buffer (buf)
     "Restart diff-hl margin in BUF."
@@ -1800,9 +1828,32 @@ eglogがdiff-hlの後に起動すると左マージンのgit差分が出ない�
            (when (and (fboundp 'eglot-managed-p)
                       (eglot-managed-p))
              (my/restart-diff-hl-buffer buf)))))))
+
+  (defun my/restart-diff-hl-after-flymake ()
+    "Restart diff-hl after Flymake starts in Eglot buffers."
+    (when (and (fboundp 'eglot-managed-p)
+               (eglot-managed-p))
+      (let ((buf (current-buffer)))
+        (run-at-time
+         0.5 nil
+         (lambda ()
+           (my/restart-diff-hl-buffer buf))))))
+
+  (with-eval-after-load 'flymake
+    (add-hook 'flymake-mode-hook #'my/restart-diff-hl-after-flymake))
 #+end_src
 
 *** eglot
+language server のインストールが必要  
+web  
+nodeJS
+#+begin_src shell
+  pacman -S mingw-w64-ucrt-x86_64-nodejs
+#+end_src
+#+begin_src shell
+  npm install -g vscode-langservers-extracted
+#+end_src
+
 #+begin_src emacs-lisp
   (progn
     (customize-set-variable 'eglot-autoshutdown t)
@@ -1833,9 +1884,9 @@ eglogがdiff-hlの後に起動すると左マージンのgit差分が出ない�
       ;; (locate-dominating-file default-directory ".git")
       ;; 上述のS式をjavaファイルなどを開いているバッファで実行(M-:)すると、ルートディレクトリが分かる
       ;; Gradle/Maven の自動 import を止め、初期化を軽量化します。
-      (setq eglot-java-jdtls-settings
-            '((java.import.gradle.enabled . :json-false)
-              (java.import.maven.enabled  . :json-false)))
+      ;;(setq eglot-java-jdtls-settings
+      ;;      '((java.import.gradle.enabled . :json-false)
+      ;;        (java.import.maven.enabled  . :json-false)))
 
       ;; Dart
       (add-to-list 'eglot-server-programs
@@ -1843,6 +1894,20 @@ eglogがdiff-hlの後に起動すると左マージンのgit差分が出ない�
                                   "language-server"
                                   "--client-id=emacs.eglot"
                                   "--client-version=1.0")))
+
+      ;; Web
+      ;; HTML / template files handled by web-mode
+      (add-to-list 'eglot-server-programs
+                   '(web-mode . ("vscode-html-language-server" "--stdio")))
+
+      ;; CSS
+      (add-to-list 'eglot-server-programs
+                   '(css-mode . ("vscode-css-language-server" "--stdio")))
+
+      ;; JavaScript / TypeScript
+      (add-to-list 'eglot-server-programs
+                   '((js-mode js-ts-mode typescript-mode typescript-ts-mode)
+                     . ("typescript-language-server" "--stdio")))
 
       ;; Language Serverからの進捗を表示するか否か
       (setq eglot-report-progress nil)
@@ -1856,9 +1921,18 @@ eglogがdiff-hlの後に起動すると左マージンのgit差分が出ない�
       (define-key flymake-mode-map (kbd "C-c n") 'flymake-goto-next-error)
       (define-key flymake-mode-map (kbd "C-c p") 'flymake-goto-prev-error))
 
+    ;; c/c++
     (add-hook 'c++-mode-hook #'eglot-ensure)
     (add-hook 'c-mode-hook #'eglot-ensure)
-    (add-hook 'java-mode-hook #'eglot-ensure))
+    ;; java
+    (add-hook 'java-ts-mode-hook #'eglot-java-mode)
+    ;; Web
+    (add-hook 'web-mode-hook #'eglot-ensure)
+    (add-hook 'css-mode-hook #'eglot-ensure)
+    (add-hook 'js-mode-hook #'eglot-ensure)
+    (add-hook 'js-ts-mode-hook #'eglot-ensure)
+    (add-hook 'typescript-mode-hook #'eglot-ensure)
+    (add-hook 'typescript-ts-mode-hook #'eglot-ensure))
 #+end_src
 
 *** flutter
@@ -1939,6 +2013,14 @@ eldocの情報を追加する
     :config
     (advice-add #'eglot-signature-eldoc-function
                 :override #'eglot-signature-eldoc-talkative))
+#+end_src
+
+*** eglot code action
+UNICODEに対応するフォントが存在せず、表示が豆腐になるのを避ける
+#+begin_src emacs-lisp
+  (with-eval-after-load 'eglot
+    ;; Unicode の電球・記号を使わず、ASCII にする
+    (setq eglot-code-action-indicator "*"))
 #+end_src
 
 ** dap
