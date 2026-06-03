@@ -1727,7 +1727,7 @@ eglot-javaが読み込まれていると上述処理を上書きし、jdtlsの�
     :demand t
     :config
     ;; java-ts-mode 用インデント
-    (setq-default java-ts-indent-offset 2)
+    (setq-default java-ts-mode-indent-offset 2)
     ;; 通常 java-mode 用インデント
     (setq-default c-basic-offset 2))
 #+end_src
