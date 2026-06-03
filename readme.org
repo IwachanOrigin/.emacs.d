@@ -1768,9 +1768,19 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 .js を js-ts-modeで編集する設定です
 #+begin_src emacs-lisp
   (add-to-list 'major-mode-remap-alist '(javascript-mode . js-ts-mode))
+  ;; js-ts-modeのルールを一部変更
+  ;; indent-level を 2
+  ;; 改行したら {} はインデントせずに真下へ
   (add-hook 'js-ts-mode-hook
             (lambda ()
-              (setq-local js-indent-level 2)))
+              (setq-local js-indent-level 2)
+              (setf (alist-get 'javascript treesit-simple-indent-rules)
+                    (mapcar (lambda (rule)
+                              (if (and (listp rule)
+                                       (equal (car rule) '(node-is "statement_block")))
+                                  '((node-is "statement_block") parent-bol 0)
+                                rule))
+                            (alist-get 'javascript treesit-simple-indent-rules)))))
 #+end_src
 
 ** editorconfig
@@ -1867,6 +1877,10 @@ nodeJS
     (with-eval-after-load 'eglot
       ;; timeout
       (setq eglot-connect-timeout 120)
+
+      ;; https://github.com/joaotavora/eglot/issues/68
+      ;; 
+      (setq eglot-sync-connect nil)
 
       ;; c/c++
       (add-to-list 'eglot-server-programs
