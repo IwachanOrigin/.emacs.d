@@ -360,9 +360,10 @@ from Centaur Emacs
     ;; --- スクロール改善 ---
     (scroll-conservatively 101)
     (scroll-step 1)
-    ;; pixel-scroll は Emacs 29+ で体感が良いらしい
-    (pixel-scroll-precision-mode t)
-    (pixel-scroll-precision-interpolate-page t)
+    ;; pixel-scroll が滑らかになるらしいのだが、visual-line-modeと相性が悪い
+    ;; またマウス専用の仕組みみたいで、キーボードでのスクロールには向かない
+    (pixel-scroll-precision-mode -1)
+    (pixel-scroll-precision-interpolate-page -1)
     ;; --- ネイティブコンパイル警告抑制---
     (native-comp-async-report-warnings-errors 'silent)
     ;;  ---  行番号  --- 
@@ -428,10 +429,10 @@ from Centaur Emacs
     ;; 括弧を自動で閉じてくれる
     (electric-pair-mode 1)
 
+    ;; 行番号は常に出していこう
+    (global-display-line-numbers-mode 1)
+
     :hook
-    ((prog-mode . display-line-numbers-mode))
-    ((text-mode . visual-line-mode)
-     (text-mode . visual-wrap-prefix-mode))
     (prog-mode . subword-mode))
 #+end_src
 ** フォントの設定
@@ -670,6 +671,17 @@ verticoに含まれています。
         (if (= vertico--index index)
             (concat " " arrow " " cand)
           (concat "    " cand)))))
+#+end_src
+*** save-hist
+verticoで選択したコマンドを覚えてもらいます。
+emacsを起動したら、前回使ったコマンドが上位に来るようになります。
+#+begin_src emacs-lisp
+  (use-package savehist
+    :ensure nil
+    :init
+    (setq savehist-additional-variables
+          '(command-history extended-command-history))
+    (savehist-mode 1))
 #+end_src
 
 ** orderless
@@ -1685,13 +1697,15 @@ visual-emacsから輸入しました
   (use-package markdown-mode
     :ensure t
     :defer 3
-    :mode ("\\.md\\'" . gfm-mode)
+    :mode
+    (("\\.md\\'" . gfm-mode)
+     ("\\.qmd\\'" . gfm-mode))
     ;; need to installed "pandoc.exe" and set environment path for pandoc.exe.
     :config
-    (when (eq system-type 'windows-nt)
-      (setq markdown-command "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
-    (unless (eq system-type 'windows-nt)
-      (setq markdown-command "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
+    (setq markdown-command
+          (if (eq system-type 'windows-nt)
+              "pandoc.exe -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"
+            "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
     (setq markdown-fontify-code-blocks-natively t))
 #+end_src
 
@@ -2190,6 +2204,17 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
         (add-to-list 'hl-todo-keyword-faces `(,k . ,inf)))
       (dolist (k '("TODO" "DEBUG" "STUB"))
         (add-to-list 'hl-todo-keyword-faces `(,k . ,msc)))))
+#+end_src
+
+** tinker-bridge
+現在、個人で開発中のパッケージです。
+WSL2とTCP通信してファイル編集を高速化させることを目的にしています。
+#+begin_src emacs-lisp
+  (let ((tinker-path "~/.emacs.d/external/tinker-bridge/"))
+    (when (file-directory-p tinker-path)
+      (add-to-list 'load-path tinker-path)
+      (require 'tinker)
+      (tinker-global-mode 1)))
 #+end_src
 
 * Custom functions
