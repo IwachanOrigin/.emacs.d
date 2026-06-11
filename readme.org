@@ -2133,10 +2133,16 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
 
 ** flymake
 #+begin_src emacs-lisp
+  (defun my/flymake-mode-unless-eglot-managed-language ()
+    ;; C/C++でのflymakeはeglot-ensureで起動させる
+    ;; Eglogが管理を開始すると、flymake backend を eglot-flymake-backend にする
+    (unless (derived-mode-p 'c-mode 'c++-mode 'c-ts-mode 'c++-ts-mode)
+      (flymake-mode 1)))
+
   (use-package flymake
     :ensure nil
     :hook
-    (prog-mode . flymake-mode)
+    (prog-mode . my/flymake-mode-unless-eglot-managed-language)
     ((flymake-diagnostics-buffer-mode
       flymake-project-diagnostics-mode)
      . (lambda ()
