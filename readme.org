@@ -2214,7 +2214,8 @@ WSL2とTCP通信してファイル編集を高速化させることを目的に�
     (when (file-directory-p tinker-path)
       (add-to-list 'load-path tinker-path)
       (require 'tinker)
-      (tinker-global-mode 1)))
+      (tinker-global-mode 1)
+      (tinker-start-notify-server)))
 #+end_src
 
 * Custom functions
@@ -2464,6 +2465,59 @@ e = export のつもりでまとめている。
   (global-set-key (kbd "C-c e m") #'my/pandoc-org-to-markdown)
   (global-set-key (kbd "C-c e t") #'my/pandoc-org-to-txt)
   (global-set-key (kbd "C-c e b") #'my/pandoc-buffer-org-to-pdf)
+#+end_src
+
+*** emacsコマンドからvtermでディレクトリを開く
+bashrcにも以下を定義すること
+#+begin_src shell
+  # Setup emacsclient path
+  export EMACSCLIENT_PATH="/ucrt64/bin/emacsclientw.exe"
+  emacs-vterm() {
+      local dir="${1:-$PWD}"
+
+      if [[ ! -d "$dir" ]]; then
+          echo "not a directory: $dir" >&2
+          return 1
+      fi
+
+      # MSYS2のパスをWindowsのパスに変換
+      dir="$(cygpath -m "$dir")"
+
+      # Lisp 文字列用に最低限エスケープ
+      local escape="$dir"
+      escape="${escape//\\/\\\\}"
+      escape="${escape//\"/\\\"}"
+
+      "$EMACSCLIENT_PATH" -n --eval "(my/vterm-here \"$escape\")" >/dev/null
+  }
+#+end_src
+
+#+begin_src emacs-lisp
+  (defun my/vterm-here (dir)
+    "Open a new vterm buffer at DIR."
+    (interactive "Directory: ")
+    (let* ((dir (file-name-as-directory (expand-file-name dir)))
+           (default-directory dir)
+           (bufname
+            (generate-new-buffer-name
+             (format "*vterm:%s"
+                     (file-name-nondirectory
+                      (directory-file-name dir))))))
+      (unless (file-directory-p dir)
+        (error "Directory does not exist: %s" dir))
+      (require 'vterm)
+      (vterm bufname)
+
+      (my/raise-emacs-frame)))
+#+end_src
+
+*** emacsを最小化から復元する
+#+begin_src emacs-lisp
+  (defun my/raise-emacs-frame ()
+    "Focus current emacs frame on windows."
+    (select-frame-set-input-focus (selected-frame))
+    (when (fboundp 'w32-focus-frame)
+      (w32-focus-frame (selected-frame))))
 #+end_src
 
 ** プライマリモニターの解像度の70%に設定し、emacsのウィンドウを中央に配置する関数
