@@ -156,28 +156,37 @@ emacs 30+を使っている場合、インストール不要で「:vc」を利�
 
 ** useful to IME
 #+begin_src emacs-lisp
-  (when (eq window-system 'w32)
-    (use-package tr-ime
-      :ensure t
-      :defer 0.01
-      :config
-      (tr-ime-standard-install)
-      (setq default-input-method "W32-IME")
-      (w32-ime-initialize)
-      ;; IME のモードライン表示設定
-      (setq-default w32-ime-mode-line-state-indicator "[--]")
-      (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
-      ;; IME Init
-      (w32-ime-initialize)
-      ;; IME Control (Turn off IME when typing yes/no, etc)
-      (wrap-function-to-control-ime 'universal-argument t nil)
-      (wrap-function-to-control-ime 'read-string nil nil)
-      (wrap-function-to-control-ime 'read-char nil nil)
-      (wrap-function-to-control-ime 'read-from-minibuffer nil nil)
-      (wrap-function-to-control-ime 'y-or-n-p nil nil)
-      (wrap-function-to-control-ime 'yes-or-no-p nil nil)
-      (wrap-function-to-control-ime 'map-y-or-n-p nil nil)
-      (wrap-function-to-control-ime 'register-read-with-preview nil nil)))
+(when (eq window-system 'w32)
+  (use-package tr-ime
+    :ensure t
+    :defer 0.01
+    :init
+    ;; 診断用。まず負荷要因を切る。
+    ;;(setq tr-ime-debug-verbose-level 0)
+    ;;(setq tr-ime-workaround-inconsistent-p nil)
+    ;;(setq tr-ime-workaround-prefix-key-p nil)
+
+    :config
+    (tr-ime-standard-install)
+
+    (setq default-input-method "W32-IME")
+
+    ;; IME のモードライン表示設定
+    (setq-default w32-ime-mode-line-state-indicator "[--]")
+    (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
+
+    ;; IME Init は 1 回だけ
+    (w32-ime-initialize)
+
+    ;; MELPA版では新しい関数名を使う方が明示的
+    (w32-ime-wrap-function-to-control-ime 'universal-argument)
+    (w32-ime-wrap-function-to-control-ime 'read-string)
+    (w32-ime-wrap-function-to-control-ime 'read-char)
+    (w32-ime-wrap-function-to-control-ime 'read-from-minibuffer)
+    (w32-ime-wrap-function-to-control-ime 'y-or-n-p)
+    (w32-ime-wrap-function-to-control-ime 'yes-or-no-p)
+    (w32-ime-wrap-function-to-control-ime 'map-y-or-n-p)
+    (w32-ime-wrap-function-to-control-ime 'register-read-with-preview)))
 #+end_src
 
 ** so-long
