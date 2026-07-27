@@ -1185,7 +1185,7 @@ gitなどのプロジェクトを管理しやすくする
        "requirements.txt" "setup.py" "tox.ini" "composer.json" "Cargo.toml"
        "mix.exs" "stack.yaml" "dune-project" "info.rkt" "DESCRIPTION" "TAGS"
        "GTAGS" "configure.in" "autoconf old styl" "configure.ac" "cscope.out"
-       "CMakeLists.txt" "WORKSPACE" "debian/control"))
+       "WORKSPACE" "debian/control"))
     (project-vc-ignores '(".elc" ".pyc" ".o" ".github"))
     :config
     ;; Better Project.el Menu
