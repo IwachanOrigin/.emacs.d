@@ -456,52 +456,61 @@ fontaineを使ってフォントを設定する。
     :ensure t
     :defer 1
     :config
-    (cond (IS-LINUX
-           (setq fontaine-presets
-                 '((regular
-                    :default-family "CommitMono Nerd Font Mono"
-                    :default-height 110
-                    :fixed-pitch-family "CommitMono Nerd Font Mono"
-                    :variable-pitch-family "CommitMono Nerd Font Mono"
-                    :italic-family "CommitMono Nerd Font Mono Italic")
-                   (large
-                    :default-family "CommitMono Nerd Font Mono"
-                    :variable-pitch-family "CommitMono Nerd Font Mono"))))
+    (setq fontaine-presets
+      '((regular
+         :default-family "UDEV Gothic"
+         :default-height 110
+         :fixed-pitch-family "UDEV Gothic"
+         :variable-pitch-family "UDEV Gothic"
+         :italic-family "UDEV Gothic")
+        (large
+         :default-family "UDEV Gothic"
+         :default-height 130
+         :fixed-pitch-family "UDEV Gothic"
+         :variable-pitch-family "UDEV Gothic"
+         :italic-family "UDEV Gothic")))
 
-          (IS-WINDOWS
-           (setq fontaine-presets
-                 '((regular
-                    :default-family "CommitMono Nerd Font Mono"
-                    :default-height 110
-                    :fixed-pitch-family "CommitMono Nerd Font Mono"
-                    :variable-pitch-family "CommitMono Nerd Font Mono"
-                    :italic-family "CommitMono Nerd Font Mono")
-                   (large
-                    :default-family "CommitMono Nerd Font Mono"
-                    :variable-pitch-family "CommitMono Nerd Font Mono")))))
+  (fontaine-set-preset
+   (or (fontaine-restore-latest-preset) 'regular))
 
-    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular))
-    (add-hook 'kill-emacs-hook #'fontaine-store-latest-preset))
+  (add-hook 'kill-emacs-hook
+            #'fontaine-store-latest-preset))
 #+end_src
 ** アイコン
 nerd-iconsを使用している
 [[https://github.com/rainstormstudio/nerd-icons.el]]
 #+begin_src emacs-lisp
+  ;; Nerd Font の文字範囲をEmacsのfontsetへ登録
+  (when (display-graphic-p)
+    (dolist (range '((#xe000 . #xf8ff)
+                     (#xf0000 . #xffffd)
+                     (#x100000 . #x10fffd)))
+      (set-fontset-font
+       t range
+       (font-spec :family "Symbols Nerd Font Mono")
+       nil 'prepend)))
+
   (use-package nerd-icons
     :ensure t
-    :defer 0.5)
+    :defer 0.5
+    :custom
+    (nerd-icons-font-family "Symbols Nerd Font Mono"))
+
   (use-package nerd-icons-completion
     :ensure t
     :hook (after-init . nerd-icons-completion-mode))
+
   (use-package nerd-icons-dired
     :ensure t
     :hook (dired-mode . nerd-icons-dired-mode))
+
   (use-package nerd-icons-corfu
     :ensure t
     :vc ( :fetcher github :repo "LuigiPiucco/nerd-icons-corfu")
     :after (corfu nerd-icons)
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
   ;; リモートディレクトリでは nerd-icons-dired を無効化
   (add-hook 'dired-mode-hook
             (lambda ()
@@ -1946,6 +1955,11 @@ nodeJS
                    '((js-mode js-ts-mode typescript-mode typescript-ts-mode)
                      . ("typescript-language-server" "--stdio")))
 
+      ;; kotlin
+      (add-to-list 'eglot-server-programs
+                   '((kotlin-mode)
+                     . ("intellij-server.exe" "--stdio")))
+
       ;; Language Serverからの進捗を表示するか否か
       (setq eglot-report-progress nil)
 
@@ -1963,6 +1977,8 @@ nodeJS
     (add-hook 'c-mode-hook #'eglot-ensure)
     ;; java
     (add-hook 'java-ts-mode-hook #'eglot-java-mode)
+    ;; kotlin
+    (add-hook 'kotlin-mode-hook #'eglot-ensure)
     ;; Web
     (add-hook 'web-mode-hook #'eglot-ensure)
     (add-hook 'css-mode-hook #'eglot-ensure)
@@ -2688,9 +2704,8 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
     (set-face-attribute 'org-ellipsis nil :inherit 'default :box nil)
 
     ;; Choose some fonts
-    (set-face-attribute 'default nil :family "Iosevka NF")
-    (set-face-attribute 'variable-pitch nil :family "Iosevka NFP")
-    (set-face-attribute 'org-modern-symbol nil :family "Iosevka NF")
+    ;; org-modern の記号だけ Nerd Font を使う
+    (set-face-attribute 'org-modern-symbol nil :family "Symbols Nerd Font Mono")
 
     ;; Add frame borders and window dividers
     (modify-all-frames-parameters
