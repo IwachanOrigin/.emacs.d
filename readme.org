@@ -1883,13 +1883,35 @@ javaファイルはtsモードで開く
 eglotよりも先に読み込む必要があるっぽいです。
 eglot単体の場合、jdtlsをPATHから探します。
 eglot-javaが読み込まれていると上述処理を上書きし、jdtlsの最新バージョンをダウンロードしてくれます。
+
+eglot-javaのJDTLS起動処理では =eglot-java-eclipse-jdt-args= が
+破壊的に変更される場合があるため、起動時にリストをコピーして使用します。
+これを行わないとJDTLS更新後も古い =-jar= / =-configuration= / =-data=
+が残り、存在しないJARを起動しようとする場合があります。
+
 #+begin_src emacs-lisp
+  (defun my/eglot-java-preserve-jdt-args (orig-fun &rest args)
+    "Prevent eglot-java from destructively modifying JDTLS JVM arguments."
+    (let ((eglot-java-eclipse-jdt-args
+           (copy-sequence eglot-java-eclipse-jdt-args)))
+      (apply orig-fun args)))
+
   (use-package eglot-java
     :ensure t
     :demand t
     :config
+    ;; eglot-java--eclipse-jdt-contact 内の破壊的リスト変更を回避
+    (unless (advice-member-p
+             #'my/eglot-java-preserve-jdt-args
+             'eglot-java--eclipse-jdt-contact)
+      (advice-add
+       'eglot-java--eclipse-jdt-contact
+       :around
+       #'my/eglot-java-preserve-jdt-args))
+
     ;; java-ts-mode 用インデント
-    (setq-default java-ts-mode-indent-offset 2)
+    (setq-default java-ts-indent-offset 2)
+
     ;; 通常 java-mode 用インデント
     (setq-default c-basic-offset 2))
 #+end_src
@@ -1970,6 +1992,36 @@ nodeJS
 #+end_src
 
 #+begin_src emacs-lisp
+  ;; WindowsではLanguage Serverから返るパスと
+  ;; buffer-file-nameのドライブレター大小文字が異なる場合がある。
+  ;;
+  ;; 例:
+  ;;   Language Server: C:/Users/Owner/...
+  ;;   Emacs buffer:    c:/Users/Owner/...
+  ;;
+  ;; Eglotは通常case-sensitiveな文字列比較でmanaged bufferを探すため、
+  ;; Windowsに限りcase-insensitiveなfallbackを追加する。
+  (defun my/eglot-find-buffer-visiting-windows
+      (orig-fun server abspath)
+    "Find Eglot managed buffer case-insensitively on Windows."
+    (or
+     (funcall orig-fun server abspath)
+     (when IS-WINDOWS
+       (cl-loop
+        for buffer in (eglot--managed-buffers server)
+        when
+        (with-current-buffer buffer
+          (let ((cached
+                 (car-safe eglot--TextDocumentIdentifier-cache)))
+            (or
+             (and buffer-file-name
+                  (string-equal-ignore-case
+                   abspath buffer-file-name))
+             (and cached
+                  (string-equal-ignore-case
+                   abspath cached)))))
+        return buffer))))
+
   (progn
     (customize-set-variable 'eglot-autoshutdown t)
     (customize-set-variable 'eglot-extend-to-xref t)
@@ -1980,8 +2032,19 @@ nodeJS
                               ))
 
     (with-eval-after-load 'eglot
+      ;; Windowsでドライブレターの大小文字が異なるdiagnosticsを
+      ;; 現在のbufferへ正しく関連付ける
+      (when IS-WINDOWS
+        (unless (advice-member-p
+                 #'my/eglot-find-buffer-visiting-windows
+                 'eglot--find-buffer-visiting)
+          (advice-add
+           'eglot--find-buffer-visiting
+           :around
+           #'my/eglot-find-buffer-visiting-windows)))
+      
       ;; timeout
-      (setq eglot-connect-timeout 120)
+      (setq eglot-connect-timeout 60)
 
       ;; https://github.com/joaotavora/eglot/issues/68
       ;; LangServer起動を待たない。 起動はバックグラウンドで行う
