@@ -119,9 +119,9 @@ melpaはstableを優先する
 
     ;; set package-archives priority
     (setq package-archive-priorities
-          '(("melpa-stable" . 10)
-            ("melpa" . 5)
-            ("gnu" . 5)))
+          '(("gnu" . 20)
+            ("melpa" . 10)
+            ("melpa-stable" . 5)))
 
     ;; 組み込みパッケージの上書きアップグレードを無効化
     (setq package-install-upgrade-built-in nil)
@@ -156,37 +156,37 @@ emacs 30+を使っている場合、インストール不要で「:vc」を利�
 
 ** useful to IME
 #+begin_src emacs-lisp
-(when (eq window-system 'w32)
-  (use-package tr-ime
-    :ensure t
-    :defer 0.01
-    :init
-    ;; 診断用。まず負荷要因を切る。
-    ;;(setq tr-ime-debug-verbose-level 0)
-    ;;(setq tr-ime-workaround-inconsistent-p nil)
-    ;;(setq tr-ime-workaround-prefix-key-p nil)
+  (when (eq window-system 'w32)
+    (use-package tr-ime
+      :ensure t
+      :defer 0.01
+      :init
+      ;; 診断用。まず負荷要因を切る。
+      ;;(setq tr-ime-debug-verbose-level 0)
+      ;;(setq tr-ime-workaround-inconsistent-p nil)
+      ;;(setq tr-ime-workaround-prefix-key-p nil)
 
-    :config
-    (tr-ime-standard-install)
+      :config
+      (tr-ime-standard-install)
 
-    (setq default-input-method "W32-IME")
+      (setq default-input-method "W32-IME")
 
-    ;; IME のモードライン表示設定
-    (setq-default w32-ime-mode-line-state-indicator "[--]")
-    (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
+      ;; IME のモードライン表示設定
+      (setq-default w32-ime-mode-line-state-indicator "[--]")
+      (setq w32-ime-mode-line-state-indicator-list '("[--]" "[あ]" "[--]"))
 
-    ;; IME Init は 1 回だけ
-    (w32-ime-initialize)
+      ;; IME Init は 1 回だけ
+      (w32-ime-initialize)
 
-    ;; MELPA版では新しい関数名を使う方が明示的
-    (w32-ime-wrap-function-to-control-ime 'universal-argument)
-    (w32-ime-wrap-function-to-control-ime 'read-string)
-    (w32-ime-wrap-function-to-control-ime 'read-char)
-    (w32-ime-wrap-function-to-control-ime 'read-from-minibuffer)
-    (w32-ime-wrap-function-to-control-ime 'y-or-n-p)
-    (w32-ime-wrap-function-to-control-ime 'yes-or-no-p)
-    (w32-ime-wrap-function-to-control-ime 'map-y-or-n-p)
-    (w32-ime-wrap-function-to-control-ime 'register-read-with-preview)))
+      ;; MELPA版では新しい関数名を使う方が明示的
+      (w32-ime-wrap-function-to-control-ime 'universal-argument)
+      (w32-ime-wrap-function-to-control-ime 'read-string)
+      (w32-ime-wrap-function-to-control-ime 'read-char)
+      (w32-ime-wrap-function-to-control-ime 'read-from-minibuffer)
+      (w32-ime-wrap-function-to-control-ime 'y-or-n-p)
+      (w32-ime-wrap-function-to-control-ime 'yes-or-no-p)
+      (w32-ime-wrap-function-to-control-ime 'map-y-or-n-p)
+      (w32-ime-wrap-function-to-control-ime 'register-read-with-preview)))
 #+end_src
 
 ** so-long
@@ -413,9 +413,9 @@ from Centaur Emacs
     (advice-add 'newline-and-indent :before-until
                 (lambda (&rest _)
                   (interactive "*")
-                  (when-let (((nth 4 (syntax-ppss (point))))
-                             ((functionp comment-line-break-function))
-                             (fill-prefix " *"))
+                  (when-let* (((nth 4 (syntax-ppss (point))))
+                              ((functionp comment-line-break-function))
+                              (fill-prefix " *"))
                     (funcall comment-line-break-function nil)
                     t)))
     ;; 1単語削除の機能を追加
@@ -457,24 +457,24 @@ fontaineを使ってフォントを設定する。
     :defer 1
     :config
     (setq fontaine-presets
-      '((regular
-         :default-family "UDEV Gothic"
-         :default-height 110
-         :fixed-pitch-family "UDEV Gothic"
-         :variable-pitch-family "UDEV Gothic"
-         :italic-family "UDEV Gothic")
-        (large
-         :default-family "UDEV Gothic"
-         :default-height 130
-         :fixed-pitch-family "UDEV Gothic"
-         :variable-pitch-family "UDEV Gothic"
-         :italic-family "UDEV Gothic")))
+          '((regular
+             :default-family "UDEV Gothic"
+             :default-height 110
+             :fixed-pitch-family "UDEV Gothic"
+             :variable-pitch-family "UDEV Gothic"
+             :italic-family "UDEV Gothic")
+            (large
+             :default-family "UDEV Gothic"
+             :default-height 130
+             :fixed-pitch-family "UDEV Gothic"
+             :variable-pitch-family "UDEV Gothic"
+             :italic-family "UDEV Gothic")))
 
-  (fontaine-set-preset
-   (or (fontaine-restore-latest-preset) 'regular))
+    (fontaine-set-preset
+     (or (fontaine-restore-latest-preset) 'regular))
 
-  (add-hook 'kill-emacs-hook
-            #'fontaine-store-latest-preset))
+    (add-hook 'kill-emacs-hook
+              #'fontaine-store-latest-preset))
 #+end_src
 ** アイコン
 nerd-iconsを使用している
@@ -769,7 +769,6 @@ CMigemoへ入力した文章をconsult-lineへ渡し、migemo検索を行う関�
            ("C-c M-x" . consult-mode-command)
            ("C-c h" . consult-history)
            ("C-c k" . consult-kmacro)
-           ("C-c m" . consult-man)
            ("C-c i" . consult-info)
            ([remap Info-search] . consult-info)
            ;; C-x bindings in `ctl-x-map'
@@ -904,41 +903,34 @@ emacsからのgit操作を司る
     (diff-hl-flydiff-mode 1))
 #+end_src
 
-*** difftastic
-Emacsでdifftasticを使用できるようにする.
-通常のコマンドとしても使用でき、magitにも統合
-#+begin_src emacs-lisp
-  (use-package difftastic
-    :ensure t
-    :defer t
-    :commands (difftastic-buffer difftastic-region difftastic-dwim)
-    :bind (("C-c d b" . difftastic-buffer)
-           ("C-c d r" . difftastic-region)
-           ("C-c d d" . difftastic-dwim)))
-#+end_src
-
 ** which-key
 *** 本体
-キーバインドの可視化
+キーバインドの可視化。
+Emacs 31では標準搭載。
 #+begin_src emacs-lisp
   (use-package which-key
-    :ensure t
-    :defer 1
+    :ensure nil
+    :custom
+    (which-key-idle-delay 0.5)
     :config
-    (setq which-key-idle-delay 0.8)
     (which-key-mode 1))
 #+end_src
 
-*** which-key-postframe
-whick-keyの表示をウィンドウではなくポストフレーム(子フレーム)として表示する機能です.
+*** 自作コマンド
+自作した便利コマンドは C-c m 以下へまとめる。
+C-c m を押すと which-key で一覧を確認できる。
+
 #+begin_src emacs-lisp
-  (use-package which-key-posframe
-    :ensure t
-    :after which-key
-    :if (display-graphic-p)
-    :custom
-    (which-key-posframe-poshandler 'posframe-poshandler-frame-bottom-center)
-    (which-key-posframe-mode t))
+  (defvar-keymap my-command-map
+    :doc "My personal commands"
+    "d" '(menu-item "Side Dired" my/dired-side-toggle)
+    "e" '(menu-item "Open in Explorer" my/open-in-explorer)
+    "y" '(menu-item "Copy files to clipboard"
+                    my/dired-copy-files-to-clipboard)
+    "r" '(menu-item "Emacs resource status"
+                    my/emacs-resource-status))
+
+  (keymap-global-set "C-c m" my-command-map)
 #+end_src
 
 ** Window管理
@@ -1134,7 +1126,10 @@ hl-line-mode
 #+begin_src emacs-lisp
   (use-package autorevert
     :ensure nil
-    :hook (after-init . global-auto-revert-mode))
+    :custom
+    (auto-revert-use-notify nil)
+    :hook
+    (after-init . global-auto-revert-mode))
 #+end_src
 
 ** helpful
@@ -1186,16 +1181,8 @@ gitなどのプロジェクトを管理しやすくする
   (use-package project
     :ensure nil
     :custom
-    (project-vc-extra-root-markers
-     '(".project" ".dir-locals.el" "*.gemspec" "autogen.sh" "GTAGS" "TAGS"
-       "configure.ac" "configure.in" "cscope.out" "rebar.config" "project.clj"
-       "build.boot" "deps.edn" "SConstruct" "default.nix" "flake.nix" "pom.xml"
-       "build.sbt" "build.sc" "gradlew" "build.gradle" ".ensime" "Gemfile"
-       "requirements.txt" "setup.py" "tox.ini" "composer.json" "Cargo.toml"
-       "mix.exs" "stack.yaml" "dune-project" "info.rkt" "DESCRIPTION" "TAGS"
-       "GTAGS" "configure.in" "autoconf old styl" "configure.ac" "cscope.out"
-       "WORKSPACE" "debian/control"))
     (project-vc-ignores '(".elc" ".pyc" ".o" ".github"))
+    (project-switch-commands #'project-dired)
     :config
     ;; Better Project.el Menu
     (keymap-unset (current-global-map) "<menu-bar> <tools> <project>")
@@ -1332,87 +1319,241 @@ gitなどのプロジェクトを管理しやすくする
       'dashboard-open))  
 #+end_src
 
-** dirvish
+** dired
 #+begin_src emacs-lisp
-  ;; DIRED CONFIGURATIONS
-  (use-package dired-x
-    :ensure nil
-    :custom
-    (dired-mouse-drag-files t)
-    (dired-omit-files
-     (rx (or (seq bol (one-or-more "flycheck_"))
-             (seq bol (? ".") "#")
-             (seq bol "." eol)
-             (seq bol ".." eol)))))
-
-  (defun my/dired-setup ()
-    ;;(dired-omit-mode 1)
-    (setq-local truncate-lines t
-                mouse-1-click-follows-link 'double))
-
+  ;; ---------------------------------------------------------------------------
+  ;; Dired
+  ;; ---------------------------------------------------------------------------
   (use-package dired
-    :config
-    (setq dired-listing-switches
-          "-l --almost-all --human-readable --group-directories-first --no-group")
-    ;; this command is useful when you want to close the window of `dirvish-side'
-    ;; automatically when opening a file
-    (put 'dired-find-alternate-file 'disabled nil))
+    :ensure nil
 
-  ;; DIRVISH
-  (use-package dirvish
-    :ensure t
-    :init
-    (dirvish-override-dired-mode t)
+    :preface
+    (defun my/dired-side-window ()
+      "Return the current Dired side window."
+      (seq-find
+       (lambda (window)
+         (window-parameter window 'my-dired-side))
+       (window-list)))
+
+    (defun my/dired-side-target-window (side-window)
+      "Return the editing window associated with SIDE-WINDOW."
+      (let ((target
+             (window-parameter side-window 'my-dired-target-window)))
+        (if (and (window-live-p target)
+                 (not (eq target side-window)))
+            target
+          (seq-find
+           (lambda (window)
+             (not (window-parameter window 'my-dired-side)))
+           (window-list)))))
+
+    (defun my/dired-open ()
+      "Open the current Dired item.
+
+  Directories are opened in the same Dired buffer.
+  Files are opened normally, except from Side Dired where they are
+  opened in the associated editing window."
+      (interactive)
+      (let* ((window (selected-window))
+             (file (dired-get-file-for-visit))
+             (side-p (window-parameter window 'my-dired-side)))
+        (cond
+         ;; ディレクトリは常に同じDiredバッファで移動
+         ((file-directory-p file)
+          (dired-find-alternate-file))
+
+         ;; Side Diredでは右側の編集ウィンドウで開く
+         (side-p
+          (let ((target (my/dired-side-target-window window)))
+            (unless target
+              (user-error "No editing window available"))
+            (set-window-buffer target (find-file-noselect file))
+            (select-window target)))
+
+         ;; 通常Diredでは普通に開く
+         (t
+          (dired-find-file)))))
+
+    (defun my/dired-up-directory ()
+      "Go to parent directory in the same Dired buffer."
+      (interactive)
+      (find-alternate-file
+       (file-name-directory
+        (directory-file-name default-directory))))
+
+    (defun my/dired-mouse-open (event)
+      "Open clicked item like `my/dired-open'."
+      (interactive "e")
+      (posn-set-point (event-end event))
+      (my/dired-open))
+
+    (defun my/dired-setup ()
+      ;; 詳細情報を隠してシンプルな表示にする
+      (dired-hide-details-mode 1)
+
+      ;; 必要なら有効化
+      ;; (dired-omit-mode 1)
+
+      (setq-local truncate-lines t
+                  mouse-1-click-follows-link 'double))
+
+    (defun my/dired-side-toggle ()
+      "Toggle Dired as a left-side file browser."
+      (interactive)
+      (let ((side-window (my/dired-side-window)))
+        (if side-window
+            ;; 閉じる
+            (delete-window side-window)
+
+          ;; 開く
+          (let* ((source-window (selected-window))
+                 (file buffer-file-name)
+                 (dir (if file
+                          (file-name-directory file)
+                        default-directory))
+                 (buf (dired-noselect dir))
+                 (side-window
+                  (display-buffer-in-side-window
+                   buf
+                   '((side . left)
+                     (slot . 0)
+                     (window-width . 0.25)))))
+
+            ;; Side Diredを識別
+            (set-window-parameter
+             side-window 'my-dired-side t)
+
+            ;; ファイルを表示する編集ウィンドウを記憶
+            (set-window-parameter
+             side-window
+             'my-dired-target-window
+             source-window)
+
+            ;; ディレクトリ移動時にDiredバッファを置換可能にする
+            (set-window-dedicated-p side-window nil)
+
+            ;; 現在のファイルへカーソルを合わせる
+            (when file
+              (with-selected-window side-window
+                (dired-goto-file file)))))))
+
+    :bind
+    (:map dired-mode-map
+     ("RET"              . my/dired-open)
+     ("^"                . my/dired-up-directory)
+     ("<double-mouse-1>" . my/dired-mouse-open))
+
     :hook
-    (dired-mode . auto-revert-mode)
-    (dired-mode . my/dired-setup)
+    ((dired-mode . auto-revert-mode)
+     (dired-mode . my/dired-setup))
+
     :custom
     (delete-by-moving-to-trash t)
-    ;;(dirvish-subtree-always-show-state t)
-    (dirvish-side-follow-mode t)
-    (dirvish-side-width 31)
-    (dirvish-subtree-state-style 'nerd)
-    (dirvish-attributes
-     '(nerd-icons
-       ;;subtree-state
-       ;;git-msg
-       ;;vc-stat
-       file-time
-       ))
-    (dirvish-path-separators
-     (list (format " %s " (nerd-icons-codicon "nf-cod-home"))
-           (format " %s " (nerd-icons-codicon "nf-cod-root_folder"))
-           (format " %s " (nerd-icons-faicon "nf-fa-angle_right"))))
-    (dirvish-reuse-session nil)
-    (dirvish-use-mode-line nil)
-    (dirvish-preview-dispatchers nil)
-    :bind
-    (:map dirvish-mode-map
-          ("<remap> <kill-this-buffer>" . dirvish-quit)
-          ("TAB"       . dirvish-subtree-toggle)
-          ("<delete>"  . dired-do-delete)
-          ("<double-mouse-1>" . dirvish-subtree-toggle-or-open))
-    (:map dirvish-directory-view-mode-map
-          ("<remap> <kill-this-buffer>" . dirvish-quit)
-          ;;("<double-mouse-1>" . dired-find-file)
-          ;;("RET"              . dired-find-file)
-          ))
 
-  ;; vtermで開いているフォルダをdirvishで開き、UIで操作する
-  (defun my/vterm-open-pwd-in-dirvish ()
-    "Open vterm's current directory in full Dirvish."
+    (dired-listing-switches
+     "-l --almost-all --human-readable --group-directories-first --no-group")
+
+    :config
+    ;; 同じDiredバッファを使い回せるようにする
+    (put 'dired-find-alternate-file 'disabled nil))
+
+  (defun my/copy-file-path ()
+    "Copy current file or Dired directory path to clipboard."
+    (interactive)
+    (let ((path
+           (cond
+            ((derived-mode-p 'dired-mode)
+             (expand-file-name default-directory))
+            (buffer-file-name
+             (expand-file-name buffer-file-name))
+            (t
+             (user-error "No file or directory associated with this buffer")))))
+      (kill-new (convert-standard-filename path))
+      (message "Copied: %s" path)))
+
+  ;; Powershellを使用して現在のバッファをファイルとしてクリップボードへコピーする
+  (defun my/copy-file-to-clipboard ()
+    "Copy current file to Windows clipboard as a file."
+    (interactive)
+    (unless buffer-file-name
+      (user-error "Current buffer is not visiting a file"))
+    (let* ((file (convert-standard-filename
+                  (expand-file-name buffer-file-name)))
+           (ps-command
+            (format
+             (concat
+              "Add-Type -AssemblyName System.Windows.Forms; "
+              "$files = New-Object System.Collections.Specialized.StringCollection; "
+              "[void]$files.Add('%s'); "
+              "[System.Windows.Forms.Clipboard]::SetFileDropList($files)")
+             (replace-regexp-in-string "'" "''" file))))
+      (call-process
+       "powershell.exe" nil nil nil
+       "-NoProfile" "-STA" "-Command" ps-command)
+      (message "Copied file: %s" file)))
+
+  ;; Diredバッファ上で選択(m)したすべてのファイルをクリップボードへコピーする
+  (defun my/dired-copy-files-to-clipboard ()
+    "Copy marked Dired files to Windows clipboard as files."
+    (interactive)
+    (unless (derived-mode-p 'dired-mode)
+      (user-error "This command must be used from Dired"))
+
+    (let* ((files (dired-get-marked-files))
+           (ps-files
+            (mapconcat
+             (lambda (file)
+               (format
+                "[void]$files.Add('%s')"
+                (replace-regexp-in-string
+                 "'" "''"
+                 (convert-standard-filename
+                  (expand-file-name file)))))
+             files
+             "; "))
+           (command
+            (concat
+             "Add-Type -AssemblyName System.Windows.Forms; "
+             "$files = New-Object System.Collections.Specialized.StringCollection; "
+             ps-files
+             "; [System.Windows.Forms.Clipboard]::SetFileDropList($files)")))
+      (call-process
+       "powershell.exe" nil nil nil
+       "-NoProfile" "-STA" "-Command" command)
+
+      (message "Copied %d file(s) to clipboard" (length files))))
+
+  ;; ---------------------------------------------------------------------------
+  ;; Dired-x
+  ;; ---------------------------------------------------------------------------
+  (use-package dired-x
+    :ensure nil
+    :after dired
+
+    :custom
+    (dired-mouse-drag-files t)
+
+    (dired-omit-files
+     (rx (or
+          (seq bol (one-or-more "flycheck_"))
+          (seq bol (? ".") "#")
+          (seq bol "." eol)
+          (seq bol ".." eol)))))
+
+  ;; ---------------------------------------------------------------------------
+  ;; vterm -> Dired
+  ;; ---------------------------------------------------------------------------
+  (defun my/vterm-open-pwd-in-dired ()
+    "Open vterm's current directory in Dired."
     (interactive)
     (unless (derived-mode-p 'vterm-mode)
       (user-error "This command must be used from a vterm buffer"))
-    (let ((dir (file-name-as-directory default-directory)))
-      (unless (file-directory-p dir)
-        (user-error "Not a directory: %s" dir))
-      (dirvish dir)))
+    (dired default-directory))
 
   (with-eval-after-load 'vterm
     (define-key vterm-mode-map
                 (kbd "C-c C-o")
-                #'my/vterm-open-pwd-in-dirvish))
+                #'my/vterm-open-pwd-in-dired))
 #+end_src
 
 ** ランダムロゴ
@@ -1420,7 +1561,7 @@ gitなどのプロジェクトを管理しやすくする
   (defun my/dashboard-random-logo ()
     "Pick a random image from logo directory."
     (let* ((logo-dir (expand-file-name "logo/" user-emacs-directory))
-               (images (directory-files logo-dir t "\\.png$")))
+           (images (directory-files logo-dir t "\\.png$")))
       (when images
         (nth (random (length images)) images))))
 #+end_src
@@ -1428,118 +1569,116 @@ gitなどのプロジェクトを管理しやすくする
 emacs-dashboardを利用する
 最新バージョンを利用しないと、ボタンを画面下部に出すことが出来ない
 #+begin_src emacs-lisp
-    (defun my/dashboard-choose-random-banner ()
-      (setq dashboard-startup-banner
-                (my/dashboard-random-logo)))
+  (defun my/dashboard-choose-random-banner ()
+    (setq dashboard-startup-banner
+          (my/dashboard-random-logo)))
 
-    (use-package dashboard
-      :ensure t
-      :hook
-      ;(window-configuration-change
-      ; . (lambda ()
-      ;     "Quit treemacs window when in dashboard"
-      ;     (if (and (or (dirvish-side--session-visible-p)
-      ;                  (windowp (treemacs-get-local-window)))
-      ;                      (derived-mode-p 'dashboard-mode))
-      ;         (delete-window (treemacs-get-local-window)))))
-      ;; ランダムバナー関数を初期化する
-      (dashboard-before-initialize . my/dashboard-choose-random-banner)
-      (after-init . dashboard-setup-startup-hook)
-      ;; solaire-modeをインストールする必要がある
-      (dashboard-before-initialize . turn-on-solaire-mode)
-      (dashboard-mode . (lambda ()
-                          (setq-local left-fringe-width 0
-                                      right-fringe-width 0
-                                      left-margin-width 0
-                                      right-margin-width 0)
-                          (widget-forward 1)))
-      (dashboard-before-initialize . my/dashboard-choose-random-banner)
-      (after-init . dashboard-setup-startup-hook)
-      :bind
-      (:map dashboard-mode-map
-              ("<f5>" . dashboard-open)
-              ("<remap> <dashboard-previous-line>" . widget-backward)
-              ("<remap> <dashboard-next-line>" . widget-forward)
-              ("<remap> <previous-line>" . widget-backward)
-              ("<remap> <next-line>"  . widget-forward)
-              ("<remap> <right-char>" . widget-forward)
-              ("<remap> <left-char>"  . widget-backward))
+  (defun my/dashboard-project-dired (dir)
+    "Open dashboard project DIR in Dired."
+    (dired dir))
 
-      :custom-face
-      (dashboard-banner-logo-title ((t (:height 2.0 :weight ultra-heavy :inherit (variable-pitch)))))
-      :custom
-      (dashboard-banner-logo-title "EMACS KATSUDOU !")
-      (dashboard-footer-messages '("MIKURU's MIRACLE"))
-      (dashboard-startup-banner
-       `(,(or (my/dashboard-random-logo)  ; my/dashboard-random-logo is original function.
-                  (expand-file-name "logo/straylight_mark.png" user-emacs-directory))
-         . nil)) 
-      (dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
-      (dashboard-vertically-center-content nil)
-      (dashboard-center-content t)
-      (dashboard-display-icons-p t) ; display icons on both GUI and terminal
-      (dashboard-path-style 'truncate-middle)
-      (dashboard-path-max-length 50)
-      (dashboard-items '((projects . 7)
-        (recents  . 9)))
-      (dashboard-set-file-icons t)
-      (dashboard-set-heading-icons t)
-      (dashboard-heading-icons '((recents   . "nf-oct-history")
-   (bookmarks . "nf-oct-bookmark")
-   (agenda    . "nf-oct-calendar")
-   (projects  . "nf-oct-rocket")
-   (registers . "nf-oct-database")))
-      (dashboard-footer-icon `(,(nerd-icons-devicon "nf-dev-emacs" :height 1.2 :face 'nerd-icons-purple)
-       ,(nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :height 1.2 :face 'nerd-icons-blue)))
-      (dashboard-heading-shorcut-format (propertize " [%s]" 'face 'shadow))
-      (dashboard-startupify-list `(dashboard-insert-banner
-     dashboard-insert-banner-title
-     dashboard-insert-init-info
-     ,(dashboard-insert-newline 2)
-     dashboard-insert-footer
-     (lambda () (delete-char -1))
-     dashboard-insert-items
-     dashboard-insert-navigator
-     dashboard-insert-newline))
-      ;; nerd-icons が使えるようになってからボタンを作る
-      :config
-      (with-eval-after-load 'nerd-icons
-  (let ((l (nerd-icons-powerline "nf-ple-left_half_circle_thick"
-   :face 'dashboard-navigator :height 1.5))
-  (r (nerd-icons-powerline "nf-ple-right_half_circle_thick"
-   :face 'dashboard-navigator :height 1.5)))
-    (setq dashboard-navigator-buttons
-    `((;; line1
-       (,(nerd-icons-faicon "nf-fa-file_text_o")
-                      "Open File"
-                      "Open External File"
-                      (lambda (&rest _) (menu-find-file-existing))
-                      (:inverse-video t :inherit dashboard-navigator) ,l ,r)
-       (,(nerd-icons-octicon "nf-oct-rocket")
-                      "Projects"
-                      "Open Project"
-                      (lambda (&rest _)
-    (if project--list
-  (call-interactively #'project-switch-project)
-      (call-interactively #'project-remember-projects-under)))
-                      (:inverse-video t :inherit dashboard-navigator) ,l ,r)
-      (,(nerd-icons-octicon "nf-oct-code_square")
-                      " Edit init file"     ; Title
-                      "Open and Edit Emacs init file"   ; Description
-                      (lambda (&rest _) (find-file user-init-file))
-                      (:inverse-video t :inherit dashboard-navigator) ,l ,r)
-      )
-      (;; line2
-       (,(nerd-icons-mdicon "nf-md-package_variant")
-                      "Search Packages"
-                      "Search and install Emacs Packages"
-                      (lambda (&rest _) (list-packages))
-                      (:inverse-video t :inherit dashboard-navigator) ,l ,r)
-       (,(nerd-icons-octicon "nf-oct-gear")
-                      "Settings"
-                      "Open settings"
-                      (lambda (&rest _) (customize))
-                      (:inverse-video t :inherit dashboard-navigator) ,l ,r)))))))
+  (use-package dashboard
+    :ensure t
+    :hook
+    ;; ランダムバナー関数を初期化する
+    (dashboard-before-initialize . my/dashboard-choose-random-banner)
+    (after-init . dashboard-setup-startup-hook)
+    ;; solaire-modeをインストールする必要がある
+    (dashboard-before-initialize . turn-on-solaire-mode)
+    (dashboard-mode . (lambda ()
+                        (setq-local left-fringe-width 0
+                                    right-fringe-width 0
+                                    left-margin-width 0
+                                    right-margin-width 0)
+                        (widget-forward 1)))
+    (dashboard-before-initialize . my/dashboard-choose-random-banner)
+    (after-init . dashboard-setup-startup-hook)
+    :bind
+    (:map dashboard-mode-map
+          ("<f5>" . dashboard-open)
+          ("<remap> <dashboard-previous-line>" . widget-backward)
+          ("<remap> <dashboard-next-line>" . widget-forward)
+          ("<remap> <previous-line>" . widget-backward)
+          ("<remap> <next-line>"  . widget-forward)
+          ("<remap> <right-char>" . widget-forward)
+          ("<remap> <left-char>"  . widget-backward))
+
+    :custom-face
+    (dashboard-banner-logo-title ((t (:height 2.0 :weight ultra-heavy :inherit (variable-pitch)))))
+    :custom
+    (dashboard-projects-switch-function #'my/dashboard-project-dired)
+    (dashboard-banner-logo-title "EMACS KATSUDOU !")
+    (dashboard-footer-messages '("MIKURU's MIRACLE"))
+    (dashboard-startup-banner
+     `(,(or (my/dashboard-random-logo)  ; my/dashboard-random-logo is original function.
+            (expand-file-name "logo/straylight_mark.png" user-emacs-directory))
+       . nil)) 
+    (dashboard-icon-type 'nerd-icons) ; use `nerd-icons' package
+    (dashboard-vertically-center-content nil)
+    (dashboard-center-content t)
+    (dashboard-display-icons-p t) ; display icons on both GUI and terminal
+    (dashboard-path-style 'truncate-middle)
+    (dashboard-path-max-length 50)
+    (dashboard-items '((projects . 7)
+                       (recents  . 9)))
+    (dashboard-set-file-icons t)
+    (dashboard-set-heading-icons t)
+    (dashboard-heading-icons '((recents   . "nf-oct-history")
+                               (bookmarks . "nf-oct-bookmark")
+                               (agenda    . "nf-oct-calendar")
+                               (projects  . "nf-oct-rocket")
+                               (registers . "nf-oct-database")))
+    (dashboard-footer-icon `(,(nerd-icons-devicon "nf-dev-emacs" :height 1.2 :face 'nerd-icons-purple)
+                             ,(nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :height 1.2 :face 'nerd-icons-blue)))
+    (dashboard-heading-shorcut-format (propertize " [%s]" 'face 'shadow))
+    (dashboard-startupify-list `(dashboard-insert-banner
+                                 dashboard-insert-banner-title
+                                 dashboard-insert-init-info
+                                 ,(dashboard-insert-newline 2)
+                                 dashboard-insert-footer
+                                 (lambda () (delete-char -1))
+                                 dashboard-insert-items
+                                 dashboard-insert-navigator
+                                 dashboard-insert-newline))
+    ;; nerd-icons が使えるようになってからボタンを作る
+    :config
+    (with-eval-after-load 'nerd-icons
+      (let ((l (nerd-icons-powerline "nf-ple-left_half_circle_thick"
+                                     :face 'dashboard-navigator :height 1.5))
+            (r (nerd-icons-powerline "nf-ple-right_half_circle_thick"
+                                     :face 'dashboard-navigator :height 1.5)))
+        (setq dashboard-navigator-buttons
+              `((;; line1
+                 (,(nerd-icons-faicon "nf-fa-file_text_o")
+                  "Open File"
+                  "Open External File"
+                  (lambda (&rest _) (menu-find-file-existing))
+                  (:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 (,(nerd-icons-octicon "nf-oct-rocket")
+                  "Projects"
+                  "Open Project"
+                  (lambda (&rest _)
+                    (if project--list
+                        (call-interactively #'project-switch-project)
+                      (call-interactively #'project-remember-projects-under)))
+                  (:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 (,(nerd-icons-octicon "nf-oct-code_square")
+                  " Edit init file"     ; Title
+                  "Open and Edit Emacs init file"   ; Description
+                  (lambda (&rest _) (find-file user-init-file))
+                  (:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 )
+                (;; line2
+                 (,(nerd-icons-mdicon "nf-md-package_variant")
+                  "Search Packages"
+                  "Search and install Emacs Packages"
+                  (lambda (&rest _) (list-packages))
+                  (:inverse-video t :inherit dashboard-navigator) ,l ,r)
+                 (,(nerd-icons-octicon "nf-oct-gear")
+                  "Settings"
+                  "Open settings"
+                  (lambda (&rest _) (customize))
+                  (:inverse-video t :inherit dashboard-navigator) ,l ,r)))))))
 #+end_src
 
 ** mode line
@@ -1734,15 +1873,6 @@ visual-emacsから輸入しました
     :defer 1)
 #+end_src
 
-** Dart-mode
-#+begin_src emacs-lisp
-  (use-package dart-mode
-    :ensure t
-    :defer 1
-    :mode ("\\.dart?\\'")
-    )
-#+end_src
-
 ** Java
 *** Open java ts mode
 javaファイルはtsモードで開く
@@ -1828,63 +1958,6 @@ vcパラメータ等が上手く動かなかったのでダウンロードして
 #+end_src
 
 ** eglot config
-*** diff-hl の再起動
-eglogがdiff-hlの後に起動すると左マージンのgit差分が出ないので再起動する  
-またflymakeとのぶつかり合いも考え、こちらも再起動する
-#+begin_src emacs-lisp
-  (defun my/restart-diff-hl-buffer (buf)
-    "Restart diff-hl margin in BUF."
-    (when (buffer-live-p buf)
-      (with-current-buffer buf
-        (when (and (fboundp 'eglot-managed-p)
-                   (eglot-managed-p))
-          ;; margin が必要なら明示
-          (setq-local left-margin-width 2)
-
-          (when (fboundp 'diff-hl-mode)
-            (diff-hl-mode -1)
-            (diff-hl-mode 1))
-
-          (when (fboundp 'diff-hl-margin-mode)
-            (diff-hl-margin-mode -1)
-            (diff-hl-margin-mode 1))
-
-          (when (fboundp 'diff-hl-update)
-            (diff-hl-update))
-
-          ;; 表示中 window の margin を明示的に確保
-          (dolist (win (get-buffer-window-list buf nil t))
-            (set-window-margins win 2 0))
-
-          (force-window-update)
-          (redisplay t)))))
-
-  (defun my/restart-diff-hl-after-eglot-connect (_server)
-    "Restart diff-hl after Eglot server connection is established."
-    ;; Eglot/Flymake の初期反映が少し遅れる場合に備えて遅延
-    (run-at-time
-     0.5 nil
-     (lambda ()
-       (dolist (buf (buffer-list))
-         (with-current-buffer buf
-           (when (and (fboundp 'eglot-managed-p)
-                      (eglot-managed-p))
-             (my/restart-diff-hl-buffer buf)))))))
-
-  (defun my/restart-diff-hl-after-flymake ()
-    "Restart diff-hl after Flymake starts in Eglot buffers."
-    (when (and (fboundp 'eglot-managed-p)
-               (eglot-managed-p))
-      (let ((buf (current-buffer)))
-        (run-at-time
-         0.5 nil
-         (lambda ()
-           (my/restart-diff-hl-buffer buf))))))
-
-  (with-eval-after-load 'flymake
-    (add-hook 'flymake-mode-hook #'my/restart-diff-hl-after-flymake))
-#+end_src
-
 *** eglot
 language server のインストールが必要  
 web  
@@ -1963,8 +2036,7 @@ nodeJS
       ;; Language Serverからの進捗を表示するか否か
       (setq eglot-report-progress nil)
 
-      ;; Eglot 起動後に diff-hl の margin 表示を復元
-      (add-hook 'eglot-connect-hook #'my/restart-diff-hl-after-eglot-connect))
+      )
 
     (with-eval-after-load 'flymake
       (define-key flymake-mode-map (kbd "C-c ! n") nil)
@@ -1986,18 +2058,6 @@ nodeJS
     (add-hook 'js-ts-mode-hook #'eglot-ensure)
     (add-hook 'typescript-mode-hook #'eglot-ensure)
     (add-hook 'typescript-ts-mode-hook #'eglot-ensure))
-#+end_src
-
-*** flutter
-補助コマンドをemacsから使えるようにします
-#+begin_src emacs-lisp
-  (use-package flutter
-    :ensure t
-    :after dart-mode
-    :bind (:map dart-mode-map
-                ("C-c C-r" . flutter-run-or-hot-reload)
-                ("C-c C-a" . flutter-run)
-                ("C-c C-t" . flutter-test-current-file)))
 #+end_src
 
 *** consult-eglot
@@ -2551,28 +2611,28 @@ bashrcにも以下を定義すること
       (w32-focus-frame (selected-frame))))
 #+end_src
 
-** プライマリモニターの解像度の70%に設定し、emacsのウィンドウを中央に配置する関数
+** 診断関数
+emacs自体の挙動調査に利用するデバッグ関数
 #+begin_src emacs-lisp
-  (defun my-setup-frame-size-and-position ()
-    "プライマリモニターの解像度の70%に設定し、中央に配置します。"
-    (let* ((monitor-attrs (car (display-monitor-attributes-list)))  ; プライマリモニターの情報を取得
-           (geometry (alist-get 'geometry monitor-attrs))     ; モニターのジオメトリ（位置とサイズ）
-           (screen-width (nth 2 geometry))  ; ディスプレイの幅（ピクセル）
-           (screen-height (nth 3 geometry)) ; ディスプレイの高さ（ピクセル）
-           (char-width (frame-char-width))  ; 1文字の幅（ピクセル）
-           (char-height (frame-char-height)); 1文字の高さ（ピクセル）
-           (frame-width (round (/ (* 0.7 screen-width) char-width))) ; フレーム幅（文字単位）
-           (frame-height (round (/ (* 0.7 screen-height) char-height))) ; フレーム高さ（文字単位）
-           (frame-left (round (/ (- screen-width (* frame-width char-width)) 2))) ; 左端位置
-           (frame-top (round (/ (- screen-height (* frame-height char-height)) 2)))) ; 上端位置
-      ;; default-frame-alistに設定を追加
-      (add-to-list 'default-frame-alist `(width . ,frame-width))
-      (add-to-list 'default-frame-alist `(height . ,frame-height))
-      (add-to-list 'default-frame-alist `(left . ,frame-left))
-      (add-to-list 'default-frame-alist `(top . ,frame-top))))
-
-  ;; Adjusted config when run emacs
-  (my-setup-frame-size-and-position)
+  (defun my/emacs-resource-status ()
+    "Show current Emacs resource counts and processes."
+    (interactive)
+    (require 'filenotify nil t)
+    (let ((processes (process-list)))
+      (message
+       "buffers=%d processes=%d [%s] file-notify=%s"
+       (length (buffer-list))
+       (length processes)
+       (mapconcat
+        (lambda (proc)
+          (format "%s:%s"
+                  (process-name proc)
+                  (process-status proc)))
+        processes
+        ", ")
+       (if (boundp 'file-notify-descriptors)
+           (hash-table-count file-notify-descriptors)
+         "N/A"))))
 #+end_src
 
 * Enhance C-s settings
