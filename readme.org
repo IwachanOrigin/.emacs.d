@@ -112,6 +112,9 @@ melpaはstableを優先する
 #+begin_src emacs-lisp
   (eval-and-compile
     (require 'package)
+    ;; package-vcで導入したパッケージをproject.elへ登録しない
+    (setq package-vc-register-as-project nil)
+
     (package-initialize)
     (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -919,18 +922,26 @@ Emacs 31では標準搭載。
 *** 自作コマンド
 自作した便利コマンドは C-c m 以下へまとめる。
 C-c m を押すと which-key で一覧を確認できる。
-
 #+begin_src emacs-lisp
   (defvar-keymap my-command-map
     :doc "My personal commands"
     "d" '(menu-item "Side Dired" my/dired-side-toggle)
     "e" '(menu-item "Open in Explorer" my/open-in-explorer)
-    "y" '(menu-item "Copy files to clipboard"
-                    my/dired-copy-files-to-clipboard)
-    "r" '(menu-item "Emacs resource status"
-                    my/emacs-resource-status))
+    "y" '(menu-item "Copy files to clipboard" my/dired-copy-files-to-clipboard)
+    "r" '(menu-item "Emacs resource status" my/emacs-resource-status))
 
   (keymap-global-set "C-c m" my-command-map)
+#+end_src
+
+#+begin_src emacs-lisp
+  (defvar-keymap my-pandoc-command-map
+    :doc "My personal commands for pandoc"
+    "d" '(menu-item "org to docx file" my/pandoc-org-to-docx)
+    "m" '(menu-item "org to markdown file" my/pandoc-org-to-markdown)
+    "t" '(menu-item "ord to txt file" my/pandoc-org-to-txt)
+    "b" '(menu-item "currrent buffer of org to pdf file" my/pandoc-buffer-org-to-pdf))
+
+  (keymap-global-set "C-c e" my-pandoc-command-map)
 #+end_src
 
 ** Window管理
@@ -1580,9 +1591,6 @@ emacs-dashboardを利用する
   (use-package dashboard
     :ensure t
     :hook
-    ;; ランダムバナー関数を初期化する
-    (dashboard-before-initialize . my/dashboard-choose-random-banner)
-    (after-init . dashboard-setup-startup-hook)
     ;; solaire-modeをインストールする必要がある
     (dashboard-before-initialize . turn-on-solaire-mode)
     (dashboard-mode . (lambda ()
@@ -2331,35 +2339,6 @@ repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけ�
                   (note    ,(nerd-icons-faicon "nf-fa-circle_info") compilation-info))))))
 #+end_src
 
-** hl-todo
-#+begin_src emacs-lisp
-  (use-package hl-todo
-    :ensure t
-    :hook ((prog-mode text-mode) . hl-todo-mode)
-    :custom
-    (hl-todo-require-punctuation t)
-    (hl-todo-highlight-punctuation ":")
-    :config
-    ;; TODOコメントを Flymake の診断として出す
-    (add-hook 'flymake-diagnostic-functions #'hl-todo-flymake)
-
-    ;; 色分け
-    (let ((err (face-attribute 'error   :foreground))
-          (wrn (face-attribute 'warning :foreground))
-          (inf (face-attribute 'success :foreground))
-          ;; nerd-icons-blue が無い環境でも落ちないように保険
-          (msc (or (ignore-errors (face-attribute 'nerd-icons-blue :foreground))
-                   (face-attribute 'link :foreground))))
-      (dolist (k '("BUG" "DEFECT" "ISSUE" "FAIL" "FIXME"))
-        (add-to-list 'hl-todo-keyword-faces `(,k . ,err)))
-      (dolist (k '("WARNING"))
-        (add-to-list 'hl-todo-keyword-faces `(,k . ,wrn)))
-      (dolist (k '("WORKAROUND" "NOTE" "TRICK" "HACK"))
-        (add-to-list 'hl-todo-keyword-faces `(,k . ,inf)))
-      (dolist (k '("TODO" "DEBUG" "STUB"))
-        (add-to-list 'hl-todo-keyword-faces `(,k . ,msc)))))
-#+end_src
-
 ** tinker-bridge
 現在、個人で開発中のパッケージです。
 WSL2とTCP通信してファイル編集を高速化させることを目的にしています。
@@ -2384,7 +2363,6 @@ Markdownはox-mdではなくpandocで出力する。
 *** customize values
 pandocの実行コマンドや、PDF出力時に使うエンジン・フォント・余白などを設定する。
 環境に応じて値を差し替えたい場合は、まずここを修正する。
-
 #+begin_src emacs-lisp
   (defgroup my/pandoc nil
     "Pandoc helpers for Org-centric export workflow."
@@ -2434,7 +2412,6 @@ pandocの実行コマンドや、PDF出力時に使うエンジン・フォン�
 *** internal helper functions
 各出力関数が共通で使う内部関数。
 pandoc実行、出力ファイル名の生成、PDF専用引数の組み立て、出力後にファイルを開く処理をまとめている。
-
 #+begin_src emacs-lisp
   ;; pandocを実行する共通関数
   ;; 失敗した場合はpandocの標準出力・標準エラーをそのまま表示して原因を追えるようにする
@@ -2609,23 +2586,11 @@ pandoc実行、出力ファイル名の生成、PDF専用引数の組み立て�
       out-pdf))
 #+end_src
 
-*** key bindings
-普段よく使う出力操作にショートカットを割り当てる。
-e = export のつもりでまとめている。
-
-#+begin_src emacs-lisp
-  (global-set-key (kbd "C-c e p") #'my/pandoc-org-to-pdf)
-  (global-set-key (kbd "C-c e d") #'my/pandoc-org-to-docx)
-  (global-set-key (kbd "C-c e m") #'my/pandoc-org-to-markdown)
-  (global-set-key (kbd "C-c e t") #'my/pandoc-org-to-txt)
-  (global-set-key (kbd "C-c e b") #'my/pandoc-buffer-org-to-pdf)
-#+end_src
-
 *** emacsコマンドからvtermでディレクトリを開く
 bashrcにも以下を定義すること
 #+begin_src shell
   # Setup emacsclient path
-  export EMACSCLIENT_PATH="/ucrt64/bin/emacsclientw.exe"
+  export EMACSCLIENT_PATH="/ucrt64/local/bin/emacsclientw.exe"
   emacs-vterm() {
       local dir="${1:-$PWD}"
 
