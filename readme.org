@@ -605,6 +605,7 @@ emacs備忘録(2024)より
 #+end_src
 
 ** cape
+*** 本体
 [[https://github.com/minad/cape]]
 capeはEmacsの組み込み補完機能を拡張するパッケージ.
 corfuで利用されている
@@ -613,7 +614,10 @@ corfuで利用されている
     :ensure t
     :defer 1
     :config
-    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+    ;; Eglot の補完領域・textEdit と衝突する可能性があるため使用しない
+    ;; (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+
+    ;; Eglot に候補がなければ他の CAPF も利用できるようにする
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive)
 
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
