@@ -1921,7 +1921,14 @@ eglot-javaのJDTLS起動処理では =eglot-java-eclipse-jdt-args= が
     (setq-default java-ts-indent-offset 2)
 
     ;; 通常 java-mode 用インデント
-    (setq-default c-basic-offset 2))
+    (setq-default c-basic-offset 2)
+
+    ;; Java var の推論型を Inlay Hint で表示
+    (setq-default eglot-workspace-configuration
+                  '(:java
+                    (:inlayHints
+                     (:variableTypes
+                      (:enabled t))))))
 #+end_src
 
 *** eglot-java-lombok 
@@ -2069,14 +2076,6 @@ nodeJS
                         "--pch-storage=disk"
                         "--header-insertion=never"
                         "--header-insertion-decorators=0")))
-      ;; Java
-      ;; project.elはemacs標準のvc.elを使ってgitを検索している
-      ;; (locate-dominating-file default-directory ".git")
-      ;; 上述のS式をjavaファイルなどを開いているバッファで実行(M-:)すると、ルートディレクトリが分かる
-      ;; Gradle/Maven の自動 import を止め、初期化を軽量化します。
-      ;;(setq eglot-java-jdtls-settings
-      ;;      '((java.import.gradle.enabled . :json-false)
-      ;;        (java.import.maven.enabled  . :json-false)))
 
       ;; Dart
       (add-to-list 'eglot-server-programs
