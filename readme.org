@@ -2042,10 +2042,10 @@ nodeJS
         return buffer))))
 
   (progn
-    (customize-set-variable 'eglot-autoshutdown t)
+    (customize-set-variable 'eglot-autoshutdown nil)
     (customize-set-variable 'eglot-extend-to-xref t)
     (customize-set-variable 'eglot-ignored-server-capabilities   ; 以下の設定は無効にすることを明言する
-                            '(:documentFormattingProvider  ; LSPによる全体フォーマットを行う設定
+                            '(:documentFormattingProvider        ; LSPによる全体フォーマットを行う設定
                               :documentRangeFormattingProvider   ; LSPによる選択範囲フォーマットを行う設定
                               :documentOnTypeFormattingProvider  ; LSPによる入力に反応してフォーマットを行う設定(ex. Enterして{}の位置を変更するetc...)
                               ))
@@ -2148,13 +2148,11 @@ consultとeglotを統合するパッケージ。シンボルの検索が行え�
 *** jsonrpc
 jsonを扱うEmacsの標準パッケージ
 標準パッケージなのでensure nilして、パッケージを取得しないようにしている
-デフォルトのタイムアウト時間が短いため、タイムアウトしないように時間を延ばしている
-また、ログを無視するように設定し、パフォーマンスを向上させている。
+ログを無視するように設定し、パフォーマンスを向上させている。
 #+begin_src emacs-lisp
   (use-package jsonrpc
     :ensure nil
     :config
-    (setq jsonrpc-default-request-timeout 3000)
     (fset #'jsonrpc--log-event #'ignore))
 #+end_src
 
