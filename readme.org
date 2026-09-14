@@ -449,10 +449,11 @@ from Centaur Emacs
 #+end_src
 ** フォントの設定
 *** fontaineを使ったフォント設定
-[[https://github.com/ryanoasis/nerd-fonts]]
+[[https://github.com/protesilaos/fontaine]]
 #+begin_quote
 fontaineを使ってフォントを設定する。
-「CommitMono Nerd Font Mono/Italic」を使用している。
+「UDEV Gothic」を使用している。
+半角:全角の比率が1:2となるフォントなので、表示が綺麗になる
 #+end_quote
 #+begin_src emacs-lisp
   (use-package fontaine
@@ -479,6 +480,50 @@ fontaineを使ってフォントを設定する。
     (add-hook 'kill-emacs-hook
               #'fontaine-store-latest-preset))
 #+end_src
+
+*** 絵文字・Unicodeフォールバックフォント
+#+begin_quote
+絵文字や顔文字など、UDEV Gothic で表示できない文字に
+フォールバックフォントを設定する。
+
+Windows の絵文字には Segoe UI Emoji、
+Unicode の補助記号には Noto Sans を使用する。
+
+以下の絵文字と顔文字を表示出来るようにする。
+😋 🙏 🤗 🌹 😂 ✨ ( ˊ̱˂˃ˋ̱ )
+#+end_quote
+
+#+begin_src emacs-lisp
+  (when (display-graphic-p)
+    ;; default font だけで symbol/emoji を描画しようとせず、
+    ;; fontset のフォールバックを使用する
+    (setq use-default-font-for-symbols nil)
+
+    ;; Windows の絵文字
+    (when (and (eq system-type 'windows-nt)
+               (find-font (font-spec :family "Segoe UI Emoji")))
+      (set-fontset-font
+       t 'emoji
+       (font-spec :family "Segoe UI Emoji")
+       nil 'prepend))
+
+    ;; 顔文字などで使用される Unicode 記号
+    (when (find-font (font-spec :family "Noto Sans"))
+      ;; Spacing Modifier Letters
+      ;; 例: ˊ ˂ ˃ ˋ
+      (set-fontset-font
+       t '(#x02B0 . #x02FF)
+       (font-spec :family "Noto Sans")
+       nil 'prepend)
+
+      ;; Combining Diacritical Marks
+      ;; 例: ̱
+      (set-fontset-font
+       t '(#x0300 . #x036F)
+       (font-spec :family "Noto Sans")
+       nil 'prepend)))
+#+end_src
+
 ** アイコン
 nerd-iconsを使用している
 [[https://github.com/rainstormstudio/nerd-icons.el]]
