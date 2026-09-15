@@ -450,16 +450,81 @@ from Centaur Emacs
 ** フォントの設定
 *** fontaineを使ったフォント設定
 [[https://github.com/protesilaos/fontaine]]
+
 #+begin_quote
-fontaineを使ってフォントを設定する。
+fontaineを使って基本フォントを設定する。
 「UDEV Gothic」を使用している。
-半角:全角の比率が1:2となるフォントなので、表示が綺麗になる
+半角:全角の比率が1:2となるフォントなので、表示が綺麗になる。
+
+Windowsでは通常文字の描画にUniscribeを優先する。
+カラー絵文字を表示するためHarfBuzzも併用する。
+
+通常文字:
+UDEV Gothic + Uniscribe
+
+カラー絵文字:
+Segoe UI Emoji + HarfBuzz
+
+Unicode補助文字:
+Noto Sans
+
+カラー絵文字はUDEV Gothicとは実際の描画幅が異なるため、
+Orgの表内に絵文字を含めると列位置が僅かにずれる場合がある。
 #+end_quote
+
 #+begin_src emacs-lisp
   (use-package fontaine
     :ensure t
     :defer 1
+    :preface
+    (defun my/fontset-setup ()
+      "Setup fallback fonts for emoji and Unicode symbols."
+      (when (display-graphic-p)
+        ;; default fontだけでsymbol/emojiを描画せず、
+        ;; fontsetのフォールバックを使用する
+        (setq use-default-font-for-symbols nil)
+
+        ;; Windowsのカラー絵文字
+        ;; HarfBuzzを明示してカラー表示する
+        (when (eq system-type 'windows-nt)
+          (let ((emoji-font
+                 (font-spec :family "Segoe UI Emoji"
+                            :type 'harfbuzz)))
+            (when (find-font emoji-font)
+              (set-fontset-font
+               t 'emoji
+               emoji-font
+               nil 'prepend))))
+
+        ;; 顔文字などで使用されるUnicode記号
+        (let ((noto-font
+               (font-spec :family "Noto Sans")))
+          (when (find-font noto-font)
+            ;; Spacing Modifier Letters
+            ;; 例: ˊ ˂ ˃ ˋ
+            (set-fontset-font
+             t '(#x02B0 . #x02FF)
+             noto-font
+             nil 'prepend)
+
+            ;; Combining Diacritical Marks
+            ;; 例: ̱
+            (set-fontset-font
+             t '(#x0300 . #x036F)
+             noto-font
+             nil 'prepend)))))
+
     :config
+    ;; Windowsでは通常文字にUniscribeを優先し、
+    ;; カラー絵文字用としてHarfBuzzも利用可能にする。
+    ;;
+    ;; font-backendを変更するとUDEV Gothicの設定が外れて
+    ;; Courier New等へ戻ることがあるため、
+    ;; Fontaineのpreset適用より先に実行する。
+    (when (eq system-type 'windows-nt)
+      (modify-all-frames-parameters
+       '((font-backend . (uniscribe harfbuzz)))))
+
     (setq fontaine-presets
           '((regular
              :default-family "UDEV Gothic"
@@ -474,55 +539,65 @@ fontaineを使ってフォントを設定する。
              :variable-pitch-family "UDEV Gothic"
              :italic-family "UDEV Gothic")))
 
+    ;; font-backend変更後にUDEV Gothicを設定し直す
     (fontaine-set-preset
      (or (fontaine-restore-latest-preset) 'regular))
+
+    ;; Emoji / Unicode fallbackを設定
+    (my/fontset-setup)
+
+    ;; 後からpresetを変更した場合もfallbackを再設定する
+    (add-hook 'fontaine-set-preset-hook
+              #'my/fontset-setup)
 
     (add-hook 'kill-emacs-hook
               #'fontaine-store-latest-preset))
 #+end_src
 
-*** 絵文字・Unicodeフォールバックフォント
+*** フォント表示確認
 #+begin_quote
-絵文字や顔文字など、UDEV Gothic で表示できない文字に
-フォールバックフォントを設定する。
+以下の絵文字と顔文字を表示出来ることを確認する。
 
-Windows の絵文字には Segoe UI Emoji、
-Unicode の補助記号には Noto Sans を使用する。
-
-以下の絵文字と顔文字を表示出来るようにする。
 😋 🙏 🤗 🌹 😂 ✨ ( ˊ̱˂˃ˋ̱ )
+
+Windowsでは以下の構成になっていること。
+
+- 通常文字: UDEV Gothic + Uniscribe
+- カラー絵文字: Segoe UI Emoji + HarfBuzz
+- Unicode補助文字: Noto Sans
+
+カラー絵文字はUDEV Gothicとは実際の描画幅が異なるため、
+Orgの表内に絵文字を含めた場合は僅かに列位置がずれることがある。
 #+end_quote
 
-#+begin_src emacs-lisp
-  (when (display-graphic-p)
-    ;; default font だけで symbol/emoji を描画しようとせず、
-    ;; fontset のフォールバックを使用する
-    (setq use-default-font-for-symbols nil)
+**** font backend確認
 
-    ;; Windows の絵文字
-    (when (and (eq system-type 'windows-nt)
-               (find-font (font-spec :family "Segoe UI Emoji")))
-      (set-fontset-font
-       t 'emoji
-       (font-spec :family "Segoe UI Emoji")
-       nil 'prepend))
-
-    ;; 顔文字などで使用される Unicode 記号
-    (when (find-font (font-spec :family "Noto Sans"))
-      ;; Spacing Modifier Letters
-      ;; 例: ˊ ˂ ˃ ˋ
-      (set-fontset-font
-       t '(#x02B0 . #x02FF)
-       (font-spec :family "Noto Sans")
-       nil 'prepend)
-
-      ;; Combining Diacritical Marks
-      ;; 例: ̱
-      (set-fontset-font
-       t '(#x0300 . #x036F)
-       (font-spec :family "Noto Sans")
-       nil 'prepend)))
+以下を手動で評価し、font backendを確認する。
+#+begin_src emacs-lisp :tangle no
+  (frame-parameter nil 'font-backend)
 #+end_src
+
+以下になること。
+#+begin_example
+(uniscribe harfbuzz)
+#+end_example
+
+**** Org table表示確認
+
+以下の表が概ね正しく整列することを確認する。
+
+| 名前       | 数量 | 説明               |
+|------------+------+--------------------|
+| 日本語     |   10 | テスト             |
+| abcdefghij |  100 | ASCII text         |
+| 絵文字😋  |    5 | カラー絵文字の確認 |
+| 全角ＡＢＣ |   20 | 幅の確認           |
+
+表内で =C-c C-c= または =M-x org-table-align= を実行する。
+
+通常文字だけの行が正しく揃っていることを確認する。
+絵文字を含む行については、Segoe UI Emojiの実描画幅の違いにより
+僅かなずれは許容する。
 
 ** アイコン
 nerd-iconsを使用している
