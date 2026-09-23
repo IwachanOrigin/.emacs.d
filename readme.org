@@ -147,16 +147,6 @@ melpaはstableを優先する
     (require 'use-package))
 #+end_src
 
-** vc-use-package
-[[https://github.com/slotThe/vc-use-package]]  
-2023-05-16にEmacsのマスターへ取り込まれている  
-emacs 30+を使っている場合、インストール不要で「:vc」を利用できる  
-#+begin_src emacs-lisp
-  (unless (package-installed-p 'vc-use-package)
-    (package-vc-install "https://github.com/slotThe/vc-use-package"))
-  (require 'vc-use-package)
-#+end_src
-
 ** useful to IME
 #+begin_src emacs-lisp
   (when (eq window-system 'w32)
@@ -381,6 +371,11 @@ from Centaur Emacs
     ;;  ---  行番号  --- 
     (display-line-numbers-type 'absolute)  ; 絶対行番号で表示する
     (display-line-numbers-width-start t)   ; 行番号の幅を最初から確保する
+    ;; Minions代替の標準機能。メニューを一つのアイコンにまとめる
+    ;; [...]にする為にMinionsを使っていたので代わりになるはず
+    ;; Emacs 31.1から標準機能
+    (mode-line-collapse-minor-modes t)
+    
     :config
     ;; --- y-or-n-p ---
     (defalias 'yes-or-no-p 'y-or-n-p)
@@ -445,7 +440,18 @@ from Centaur Emacs
     (global-display-line-numbers-mode 1)
 
     :hook
-    (prog-mode . subword-mode))
+    ((prog-mode . subword-mode)
+
+     ((treemacs-mode
+       eshell-mode shell-mode term-mode vterm-mode
+       embark-collect-mode
+       woman-mode
+       dap-ui-breakpoints-ui-list-mode
+       flymake-diagnostics-buffer-mode
+       flymake-project-diagnostics-mode
+       emacs-lisp-compilation-mode flycheck-error-list-mode
+       dashboard-mode Custom-mode pdf-annot-list-mode)
+      . mode-line-invisible-mode)))
 #+end_src
 ** フォントの設定
 *** fontaineを使ったフォント設定
@@ -629,7 +635,7 @@ nerd-iconsを使用している
 
   (use-package nerd-icons-corfu
     :ensure t
-    :vc ( :fetcher github :repo "LuigiPiucco/nerd-icons-corfu")
+    :vc (:url "https://github.com/LuigiPiucco/nerd-icons-corfu" :rev :newest)
     :after (corfu nerd-icons)
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
@@ -1113,14 +1119,6 @@ visual-emacsから輸入しました。
 #+end_src
 
 ** undo
-*** undo-fua
-Emacsのundoとredoを強化するパッケージです
-#+begin_src emacs-lisp
-  (use-package undo-fu
-    :ensure t
-    :defer 2)
-#+end_src
-
 *** undo-fu-session
 undo情報をEmacs終了後も保持してくれるようになる
 #+begin_src emacs-lisp
@@ -1234,7 +1232,7 @@ hl-line-mode
 #+begin_src emacs-lisp
   (use-package breadcrumb
     :ensure t
-    :vc (:fetcher github :repo "joaotavora/breadcrumb")
+    :vc (:url "https://github.com/joaotavora/breadcrumb" :rev :newest)
     :config
     (breadcrumb-mode 1))
 #+end_src
@@ -1814,28 +1812,6 @@ emacs-dashboardを利用する
 #+end_src
 
 ** mode line
-*** hide-mode-line
-#+begin_src emacs-lisp
-  (use-package minions
-    :ensure t
-    :custom
-    (minions-mode-line-lighter "…")
-    :hook (doom-modeline-mode . minions-mode))
-
-  (use-package hide-mode-line
-    :ensure t
-    :hook (((treemacs-mode
-             eshell-mode shell-mode term-mode vterm-mode
-             embark-collect-mode
-             woman-mode
-             dap-ui-breakpoints-ui-list-mode
-             flymake-diagnostics-buffer-mode
-             flymake-project-diagnostics-mode
-             emacs-lisp-compilation-mode flycheck-error-list-mode
-             dashboard-mode Custom-mode pdf-annot-list-mode)
-            . hide-mode-line-mode)))
-#+end_src
-
 *** doom-modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
@@ -1997,14 +1973,17 @@ visual-emacsから輸入しました
             "pandoc -s --standalone --metadata pagetitle=markdown -t html5 -c https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.css"))
     (setq markdown-fontify-code-blocks-natively t))
 #+end_src
-
-** cmake-mode
+** CMake
 #+begin_src emacs-lisp
-  (use-package cmake-mode
-    :ensure t
-    :defer 1)
+  (use-package cmake-ts-mode
+    :ensure nil
+    :defer t
+    :mode
+    (("CMakeLists\\.txt\\'" . cmake-ts-mode)
+     ("\\.cmake\\'" . cmake-ts-mode))
+    :custom
+    (cmake-ts-indent-offset 2))
 #+end_src
-
 ** Java
 *** Open java ts mode
 javaファイルはtsモードで開く
@@ -2281,7 +2260,7 @@ eglotでサポートされる機能が増える
 #+begin_src emacs-lisp
   (use-package eglot-x
     :ensure t
-    :vc ( :fetcher github :repo "nemethf/eglot-x")
+    :vc (:url "https://github.com/nemethf/eglot-x" :rev :newest)
     :after eglot
     :config
     (eglot-x-setup))
@@ -2352,7 +2331,7 @@ lldb-dapを用いてデバッグを行う
 emacsからCMakeを用いたビルドをサポートするツール  
 #+begin_src emacs-lisp
   (use-package cmake-build
-    :vc (:fetcher github :repo IwachanOrigin/cmake-build)
+    :vc (:url "https://github.com/IwachanOrigin/cmake-build" :rev :newest)
     :defer 1)
 #+end_src
 
@@ -2361,29 +2340,31 @@ emacsからCMakeを用いたビルドをサポートするツール
 ビルドした実行ファイルをdapeで比較的簡単にデバッグ実行できるようにするツール  
 #+begin_src emacs-lisp
   (use-package dape-cmake
-    :vc (:fetcher github :repo IwachanOrigin/dape-cmake))
+    :vc (:url "https://github.com/IwachanOrigin/dape-cmake" :rev :newest))
 #+end_src
 
 *** repeat
 dape-modeを使う場合、repeat-modeを有効にするとエルゴノミクス的な視点で便利  
 dapeはデフォルトでC-x C-a を起点としてステップイン・ステップオーバーなどを定義している  
-repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけで進めることが出来る  
+repeat-modeを使えば、C-x C-a n を何度も実行しなくても n だけで進めることが出来る
+Emacs 28から標準機能
 #+begin_src emacs-lisp
   (use-package repeat
-    :ensure t
+    :ensure nil
     :after dape
     :config
     (repeat-mode))
 #+end_src
 
 ** rst
+Emacs 31.1から標準機能
 #+begin_src emacs-lisp
   (use-package rst
+    :ensure nil
     :defer 2
-    :load-path "~/.emacs.d/external/rst"
     :config
-    (add-to-list 'auto-mode-alist '("\.rst$" . rst-mode))
-    (add-to-list 'auto-mode-alist '("\.rest$" . rst-mode))
+    (add-to-list 'auto-mode-alist '("\\.rst\\'" . rst-mode))
+    (add-to-list 'auto-mode-alist '("\\.rest\\'" . rst-mode))
     (setq frame-background-mode 'dark)
     (add-hook 'rst-mode-hook #'(lambda() (setq indent-tabs-mode nil))))
 #+end_src
@@ -2934,7 +2915,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
 #+begin_src emacs-lisp
   (use-package org-modern-indent
     :ensure t
-    :vc ( :fetcher github :repo "jdtsmith/org-modern-indent")
+    :vc (:url "https://github.com/jdtsmith/org-modern-indent" :rev :newest)
     :after org-modern
     :config
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
@@ -2952,7 +2933,7 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
   (use-package vterm
     :ensure t
     :defer t
-    :vc ( :fetcher github :repo "IwachanOrigin/emacs-libvterm"))
+    :vc (:url "https://github.com/IwachanOrigin/emacs-libvterm" :rev :newest))
 
   (with-eval-after-load 'vterm
     (add-hook 'vterm-mode-hook
