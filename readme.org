@@ -2941,6 +2941,31 @@ ensure nilしてパッケージをmelpaなどから取得しないようにし�
                 (display-fill-column-indicator-mode -1))))
 #+end_src
 
+* frame-overlay
+現在、個人で開発中のパッケージです。
+Frameエリアに透過PNGを配置し、背景として使用できます。
+#+begin_src emacs-lisp
+  (use-package frame-overlay
+  :vc (:url "https://github.com/IwachanOrigin/emacs_frame_overlay.git"
+       :rev :newest
+       :lisp-dir "src/main/emacs")
+  :demand t
+
+  :custom
+  (frame-overlay-position 'center)
+  (frame-overlay-image-alpha 64)
+  (frame-overlay-auto-sync t)
+  (frame-overlay-sync-interval 0.05)
+
+  (frame-overlay-playlist-interval 1800.0)
+  (frame-overlay-playlist-loop t)
+  (frame-overlay-playlist-recursive nil)
+
+  :config
+  (frame-overlay-ensure-module)
+  (frame-overlay-playlist-start-directory "~/.emacs.d/bg-images/"))
+#+end_src
+
 * Others
 ** keycast
 [[https://github.com/tarsius/keycast]]  
