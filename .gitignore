@@ -15,16 +15,20 @@ undo-fu-session/
 data/
 url/
 
-recentf
 *.elc
 .dap-breakpoints
 projectile-bookmarks.eld
-readme.el
 .org-id-locations
-bookmarks
-history
-projects
-tramp
-lombok.jar
-fontaine-latest-state.eld
+
+/readme.el
+/readme.elc
+/custom.el
+/lombok.jar
+/bookmarks
+/fontaine-latest-state.eld
+/recentf
+/history
+/projects
+/tramp
+/network-security.data
 

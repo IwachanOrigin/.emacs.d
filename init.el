@@ -2,20 +2,14 @@
 ;;; Commentary:
 ;;; Code:
 
-(org-babel-load-file (concat user-emacs-directory "readme.org"))
+;; Keep Customize-generated settings out of init.el.
+(setq custom-file
+      (expand-file-name "custom.el" user-emacs-directory))
+
+(org-babel-load-file
+ (expand-file-name "readme.org" user-emacs-directory))
+
+;; Load machine-local Customize settings if present.
+(load custom-file 'noerror 'nomessage)
 
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-vc-selected-packages
-   '((vterm :vc-backend Git :url
-            "https://github.com/IwachanOrigin/emacs-libvterm"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
