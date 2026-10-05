@@ -2952,6 +2952,8 @@ Frameエリアに透過PNGを配置し、背景として使用できます。
   :demand t
 
   :custom
+  (frame-overlay-size-mode 'fit)
+  (frame-overlay-frame-ratio 0.90)
   (frame-overlay-position 'center)
   (frame-overlay-image-alpha 64)
   (frame-overlay-auto-sync t)
