@@ -729,6 +729,17 @@ emacs備忘録(2024)より
     (define-key corfu-map (kbd "DEL") corfu-magic-cancel-or-backspace)
     (define-key corfu-map (kbd "<backspace") corfu-magic-cancel-or-backspace))
 #+end_src
+** dabbrev
+*** dabbrev
+GNU Emacs に標準搭載されている機能で Dynamic Abbreviation Expansion（動的略語展開） と呼ばれる。
+入力途中の文字列を、バッファ内に存在する単語を使って補完してくれる。capeで利用しているcape-dabbrevのために設定。
+#+begin_src emacs-lisp
+  (use-package dabbrev
+    :ensure nil
+    :init
+    (setq dabbrev-case-fold-search t   ; 検索文字列の大文字・小文字を区別する
+          dabbrev-case-replace nil))   ; 補完結果の大文字・小文字を入力文字列に合わせて変更しない
+#+end_src
 
 ** cape
 *** 本体
@@ -739,6 +750,7 @@ corfuで利用されている
   (use-package cape
     :ensure t
     :defer 1
+    :init
     :config
     ;; Eglot の補完領域・textEdit と衝突する可能性があるため使用しない
     ;; (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
