@@ -2153,7 +2153,7 @@ nodeJS
         return buffer))))
 
   (progn
-    (customize-set-variable 'eglot-autoshutdown nil)
+    (customize-set-variable 'eglot-autoshutdown t)
     (customize-set-variable 'eglot-extend-to-xref t)
     (customize-set-variable 'eglot-ignored-server-capabilities   ; 以下の設定は無効にすることを明言する
                             '(:documentFormattingProvider        ; LSPによる全体フォーマットを行う設定
@@ -2180,6 +2180,13 @@ nodeJS
       ;; LangServer起動を待たない。 起動はバックグラウンドで行う
       (setq eglot-sync-connect nil)
 
+      ;; ファイル監視を無効化する
+      ;; eglotの起動時、リポジトリ内のファイルを監視する仕組みがある
+      ;; ファイルの監視登録を行うことでemacs自体のUIが停止してしまう
+      ;; eglotの終了時、すべてのファイル登録を解除するのだが、それもemacs自体のUIを停止する
+      ;; 外部ツールでファイルを更新した場合に検知できなくなるが、UIが止まるよりマシです
+      (setq eglot-max-file-watches 0)
+
       ;; c/c++
       (add-to-list 'eglot-server-programs
                    '((c-mode c++-mode)
@@ -2191,14 +2198,7 @@ nodeJS
                         "--pch-storage=disk"
                         "--header-insertion=never"
                         "--header-insertion-decorators=0")))
-
-      ;; Dart
-      (add-to-list 'eglot-server-programs
-                   '(dart-mode . ("dart"
-                                  "language-server"
-                                  "--client-id=emacs.eglot"
-                                  "--client-version=1.0")))
-
+      
       ;; Web
       ;; HTML / template files handled by web-mode
       (add-to-list 'eglot-server-programs
@@ -2463,6 +2463,34 @@ WSL2とTCP通信してファイル編集を高速化させることを目的に�
       (require 'tinker)
       (tinker-global-mode 1)
       (tinker-start-notify-server)))
+#+end_src
+
+** PowerShell
+
+#+begin_src emacs-lisp
+  (defun my-powershell-eglot ()
+    "Start PowerShell Editor Services using Windows PowerShell 5.1."
+    (require 'eglot)
+
+    (setf (alist-get 'powershell-mode eglot-server-programs)
+          '("C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+            "-NoLogo"
+            "-NoProfile"
+            "-NonInteractive"
+            "-ExecutionPolicy"
+            "Bypass"
+            "-File"
+            "C:/software/PSES/PowerShellEditorServices/Start-EditorServices.ps1"
+            "-Stdio"
+            "-LogLevel"
+            "Error"))
+
+    (eglot-ensure))
+
+  (use-package powershell
+    :ensure t
+    :mode ("\\.ps1\\'" . powershell-mode)
+    :hook (powershell-mode . my-powershell-eglot))
 #+end_src
 
 * Custom functions
