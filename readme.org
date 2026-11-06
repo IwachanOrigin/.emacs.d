@@ -2187,6 +2187,13 @@ nodeJS
       ;; 外部ツールでファイルを更新した場合に検知できなくなるが、UIが止まるよりマシです
       (setq eglot-max-file-watches 0)
 
+      ;; パフォーマンスへの影響を避けるため、通常運用ではJSON-RPC通信ログを記録しない
+      ;; 必要な時は以下のようなデバッグ用コードを実行する。最大20万文字までログを記録する
+      ;; (setq eglot-events-buffer-config
+      ;;      '(:size 200000 :format full))
+      (setq eglot-events-buffer-config
+            '(:size 0 :format full))
+
       ;; c/c++
       (add-to-list 'eglot-server-programs
                    '((c-mode c++-mode)
@@ -2259,12 +2266,9 @@ consultとeglotを統合するパッケージ。シンボルの検索が行え�
 *** jsonrpc
 jsonを扱うEmacsの標準パッケージ
 標準パッケージなのでensure nilして、パッケージを取得しないようにしている
-ログを無視するように設定し、パフォーマンスを向上させている。
 #+begin_src emacs-lisp
   (use-package jsonrpc
-    :ensure nil
-    :config
-    (fset #'jsonrpc--log-event #'ignore))
+    :ensure nil)
 #+end_src
 
 *** eglot-x
