@@ -2013,11 +2013,83 @@ eglot-javaのJDTLS起動処理では =eglot-java-eclipse-jdt-args= が
 が残り、存在しないJARを起動しようとする場合があります。
 
 #+begin_src emacs-lisp
-  (defun my/eglot-java-preserve-jdt-args (orig-fun &rest args)
-    "Prevent eglot-java from destructively modifying JDTLS JVM arguments."
-    (let ((eglot-java-eclipse-jdt-args
-           (copy-sequence eglot-java-eclipse-jdt-args)))
-      (apply orig-fun args)))
+  ;; lexical-binding が有効なため、動的束縛する変数を宣言
+  (defvar eglot-java-java-program)
+  (defvar eglot-java-eclipse-jdt-args)
+
+  ;; JDT LS 1.63.0 以降で使用するJDK
+  ;; 1.63.0はJava21で動くはずなのだが、Java25が無いと動かない
+  (defvar my/eglot-java-jdk-25-home
+    "C:/software/jdk-25/"
+    "JDK 25 installation directory for JDT LS.")
+
+  (defun my/eglot-java-installed-version ()
+    "Return the installed JDT LS version."
+    (let* ((plugins-directory
+            (expand-file-name
+             "plugins" eglot-java-server-install-dir))
+           (server-jars
+            (when (file-directory-p plugins-directory)
+              (directory-files
+               plugins-directory nil
+               "\\`org\\.eclipse\\.jdt\\.ls\\.core_[0-9]+\\.[0-9]+\\.[0-9]+\\(?:\\.[0-9]+\\)?\\.jar\\'"))))
+      (unless (= (length server-jars) 1)
+        (user-error
+         "Cannot determine JDT LS version: found %d core JARs in %s"
+         (length server-jars) plugins-directory))
+
+      (let ((server-jar (car server-jars)))
+        (string-match
+         "org\\.eclipse\\.jdt\\.ls\\.core_\\([0-9]+\\.[0-9]+\\.[0-9]+\\)"
+         server-jar)
+        (match-string 1 server-jar))))
+
+  (defun my/eglot-java-required-java-program (server-version)
+    "Return the required Java executable for SERVER-VERSION.
+  Return nil when the default Java executable can be used."
+    (when (version<= "1.63.0" server-version)
+      (let ((java-program
+             (expand-file-name
+              "bin/java.exe" my/eglot-java-jdk-25-home)))
+
+        (unless (file-executable-p java-program)
+          (user-error
+           "JDK LS %s requires JDK 25 or later. Install Temurin 25 at %s"
+           server-version my/eglot-java-jdk-25-home))
+
+        ;; 指定先が本当にJDK 25以上か確認する
+        (with-temp-buffer
+          (let ((exit-status
+                 (call-process java-program nil t nil "--version")))
+            (unless (equal exit-status 0)
+              (user-error "Failed to execute Java: %s" java-program))
+
+            (goto-char (point-min))
+            (unless (looking-at
+                     "\\(?:openjdk\\|java\\) \\([0-9]+\\)")
+              (user-error
+               "Cannot determine Java version: %s" java-program))
+
+            (let ((java-major-version
+                   (string-to-number (match-string 1))))
+              (when (< java-major-version 25)
+                (user-error
+                 "JDT LS %s requires Java 25+, but %s is Java %d"
+                 server-version java-program java-major-version)))))
+        java-program)))
+
+  (defun my/eglot-java-preserve-jdt-args (original-function &rest args)
+    "Preserve JVM arguments and select Java for JDT LS."
+    (let* ((server-version
+            (my/eglot-java-installed-version))
+           (required-java-program
+            (my/eglot-java-required-java-program server-version))
+           (eglot-java-eclipse-jdt-args
+            (copy-sequence eglot-java-eclipse-jdt-args))
+           (eglot-java-java-program
+            (or required-java-program eglot-java-java-program)))
+      
+      (apply original-function args)))
 
   (use-package eglot-java
     :ensure t
@@ -2042,7 +2114,9 @@ eglot-javaのJDTLS起動処理では =eglot-java-eclipse-jdt-args= が
     (setq-default eglot-workspace-configuration
                   '(:java
                     (:inlayHints
-                     (:variableTypes
+                     (:parameterNames
+                      (:enabled "all")
+                      :variableTypes
                       (:enabled t))))))
 #+end_src
 
